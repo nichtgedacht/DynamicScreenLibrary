@@ -1,0 +1,371 @@
+--[[
+	---------------------------------------------------------
+	Geierwallys dynamic telemetry screen library for DC/DS 24 transmitters
+	Makes flexible display adjustments possible. Users can create her own screenfiles
+	2 telemetry pages adjustable by user over data files provided.
+	---------------------------------------------------------
+	V1.1.1 Initial state prepares all functionalities of the app template except telemetry 
+	       Telemetry is simulated for first function tests
+	---------------------------------------------------------
+--]]
+--Configuration
+-- Local variables
+local globVar = {} --global variables for application and screen library
+local aTimeRunning = 0 --alert delay is running
+local aDelay = 0  --voltage alert delay
+local aPrepare = false -- alert in preparation
+local sensLabelList = {} -- all window labels
+local labelListBox = nil -- ID of the label list box
+local labelListIndex = 1 -- index of label list box
+local sensorListBox = nil -- ID of the sensor list box
+local sensListIndex = 1 -- index of sensor list box
+local mainWin_Lib = nil  -- main window
+local lib_Path = nil     -- path to last loaded main win library
+
+
+-------------------------------------------------------------------- 
+-- Init function
+-------------------------------------------------------------------- 
+local function loadmainWindow()
+	if(mainWin_Lib ~= nil)then
+		package.loaded[lib_Path]=nil
+		_G[lib_Path]=nil
+		mainWin_Lib = nil
+		lib_Path = nil
+		collectgarbage('collect')
+	end	
+	if(globVar.windows[1][1][1]==1) then -- electro
+		lib_Path = "AppTempl/Tasks/winEl"..globVar.screenLib24..""
+	elseif(globVar.windows[1][1][1]==2) then -- stroke
+		lib_Path = "AppTempl/Tasks/winNit"..globVar.screenLib24..""
+	elseif(globVar.windows[1][1][1]==3) then -- glider
+	end
+	mainWin_Lib = require(lib_Path)
+	if(mainWin_Lib~=nil)then
+		local func = mainWin_Lib[1]  --init() 
+		func(globVar) -- execute init of main window
+	end
+end
+
+local function init(globVar_)
+	globVar = globVar_
+	loadmainWindow()
+	local bgr,bgg,bgb = lcd.getBgColor() -- set frame and text color depending on back ground color
+	if (bgr+bgg+bgb)/3 >128 then
+		globVar.txtColor = {0,0,0} 
+	else
+		globVar.txtColor = {255,255,255}
+	end
+	globVar.initDone = true
+end
+
+-------------------------------------------------------------------- 
+-- limit checks
+-------------------------------------------------------------------- 
+local function checkLimit(window,mainIndex)
+	local compareLogic = false
+	if((window[4]==30)or(window[6]==window[5]))then
+		return --no check tel val is text or alert is switched off
+	end
+	if(window[6]>window[5])then
+		compareLogic = true
+	end
+	if((window[1] == 2)and(mainIndex >1))then -- calculate and set min max values
+		if((window[8]<window[10])or (window[10] == 0))then
+			window[10]= window[8]
+		end
+		if(window[8]>window[11])then
+			window[11]= window[8]
+		end
+	end
+	if ((((window[8] <= window[5])and compareLogic == true)or((window[8] >= window[5])and compareLogic == false)) and(window[9]==0)) then --value <= compare value and no alert
+		aPrepare = true
+		if(aTimeRunning == 0) then
+			aDelay = globVar.currentTime + 2000
+			aTimeRunning = 1
+		else
+			if(aDelay <= globVar.currentTime)then -- set alert after 4 sec
+				window[9]=1 --set alert active
+				if (system.isPlayback () == false) then
+					system.vibration (true,2)
+					--system.playBeep(1,4000,500) 	todo for 1416lib
+					system.playNumber (window[8], 2,window[3]) --audio output of value and unit
+				end	
+			end
+		end
+	else
+		if(window[9]==1) then-- alert is active 
+			if(((window[8] >= window[6])and (compareLogic==true))or ((window[8] <= window[6])and (compareLogic==false))) then --value in range , reset alert
+				window[9] = 0
+			end	
+		end	
+	end
+end
+
+-------------------------------------------------------------------- 
+-- Draw the telemetry windows
+-------------------------------------------------------------------- 
+local function drawWindow(winNr)
+	local nextYoffs = 2      -- calculating Y offsets for window draw
+	local nextXoffs = 2     -- calculating X offsets for window draw
+	local win45Xoffs = 0	-- X offset for window type 4 and 5  (two values in one line)
+	local win457Yoffs = 0   -- Y offset for windwo type 4, 5 and 7 (more lines in one window)
+	local prepNextYoffs = 2
+	local labelXoffs = 2
+	local labelYoffs = 2
+	local txtyoffs = {{57,2,16,FONT_MAXI},{57,2,16,FONT_BIG,39},{28,13,3,FONT_BIG},{41,2,16,FONT_BOLD,0},{41,6,2,FONT_BOLD,19},{156,6,2,FONT_BOLD,20},{57}} --{hight y for summary |start label text y|start value text y|Font| start text min max oder offsetText}
+	if(mainWin_Lib~=nil)then
+		local func = mainWin_Lib[2]  --draw main window 
+		func() 
+	end
+	for i in ipairs(globVar.windows[winNr]) do --draw all configured telemetry windows
+		local window = globVar.windows[winNr][i]
+		if(((window[1]>3)and(window[10]==1))or(window[1]<=3)or (window[1]==7))then -- draw frame
+			nextYoffs = prepNextYoffs
+			if(160 - nextYoffs < txtyoffs[window[1]][1] ) then --not enough place for configured window
+				if(nextXoffs ==2)then
+					nextXoffs = 188
+					nextYoffs = 2
+				else
+					system.messageBox ("Data file format failure",10)
+					return
+				end	
+			end
+			labelXoffs = 2
+			lcd.drawRectangle(nextXoffs, nextYoffs, 130, txtyoffs[window[1]][1],6) 
+			if((window[9]==1)and(globVar.secClock == true))then --failure display red
+				lcd.setColor(200,0,0) -- failure red rectangle color
+				if(window[1]<4)then
+					lcd.drawFilledRectangle(nextXoffs+1, nextYoffs+1, 128, txtyoffs[window[1]][1]-2)
+					lcd.setColor(255,255,255) -- failure white font color
+				end	
+	        end
+			prepNextYoffs = nextYoffs+txtyoffs[window[1]][1]+1 --calculate next y offset
+			win457Yoffs = 0
+			win45Xoffs = 0
+		end	
+		if(window[1]==7)then
+		-- todo draw image here
+		else
+			labelYoffs = txtyoffs[window[1]][3] + lcd.getTextHeight(txtyoffs[window[1]][4])-lcd.getTextHeight(FONT_MINI) 
+			local valTxt =nil
+			if(window[4]==30)then
+				valTxt = window[11]
+			else
+				valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
+			end
+			
+			labelXoffs = lcd.getTextWidth(txtyoffs[window[1]][4],valTxt)+2 -- add x width of value
+			labelXoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[3])+2-- add x width of unit
+			if(window[1]<3)then 
+			    --draw center label for window types 1,2 
+				lcd.drawText(nextXoffs+63 - lcd.getTextWidth(FONT_MINI,window[2])/2,nextYoffs + txtyoffs[window[1]][2],window[2],FONT_MINI)
+				labelXoffs =63 - labelXoffs/2				
+			else
+				if(window[1]>4) then -- calculate next Y text position for window types 4,5 and 6
+					if(window[1]==5)then
+						if(window[10]>2)then
+							win457Yoffs = txtyoffs[window[1]][5]
+						else
+							win457Yoffs = 0	
+						end
+					else
+						win457Yoffs = (window[10]-1) * txtyoffs[window[1]][5]
+					end	
+				end
+				if((window[1] == 4)or(window[1]==5))then -- add x width of label 2 for window types 4 and 5
+					labelXoffs = 2*(labelXoffs + lcd.getTextWidth(FONT_MINI,window[11]))+2 -- add x width of label 2 for left label and multiply with 2 for 2 values in x
+				end
+				--draw center label for window 4
+				if(window[1]==4)then 
+					lcd.drawText(nextXoffs+63 - lcd.getTextWidth(FONT_MINI,window[2])/2,nextYoffs + txtyoffs[window[1]][2],window[2],FONT_MINI)
+				else
+					labelXoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[2])+2 -- add x width of label 1 for left label
+				end	
+
+				labelXoffs =63 - labelXoffs/2									  -- calculate center	
+				--draw left label 1 
+				if(window[1]~=4)then
+					if(window[1]==6)then --only window type 6, draw label left
+						lcd.drawText(nextXoffs+2,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
+					else
+						lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
+					end	
+					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[2])+2
+				end	
+				if((window[9]==1)and(window[1]>3))then --failure display red
+					if(globVar.secClock == true)then
+						lcd.setColor(200,0,0) -- failure red font color blinking
+					else
+						local bgr,bgg,bgb = lcd.getBgColor()
+						lcd.setColor(bgr,bgg,bgb) -- back ground color as font color blinking
+					end
+				end	
+				if((window[1] == 4)or(window[1]==5))then 
+					if(window[10]%2 ==0) then
+						labelXoffs = win45Xoffs
+					end	
+				--draw label 2 for window type 4 and 5		
+					lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[11] ,FONT_MINI) 
+					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[11])+2
+				end
+			end
+			--draw value
+			lcd.drawText(nextXoffs + labelXoffs,nextYoffs + txtyoffs[window[1]][3]+ win457Yoffs,valTxt,txtyoffs[window[1]][4])
+			labelXoffs = labelXoffs + lcd.getTextWidth(txtyoffs[window[1]][4],valTxt)+2
+			--draw unit
+			lcd.drawText(nextXoffs + labelXoffs,nextYoffs + labelYoffs+ win457Yoffs,window[3],FONT_MINI)
+			if((window[1] == 4)or(window[1]==5))then 
+				if(window[10]%2 > 0) then
+					win45Xoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[3])+2 -- store x offset for next values in same line for window type 5 and 6
+				end	
+			end		
+			if(window[1]== 2) then
+			--draw min max values
+				local minMaxTxt = string.format("min:%."..math.modf(window[7]).."f max:%."..math.modf(window[7]).."f",window[10],window[11])
+				lcd.drawText(nextXoffs + 63 - lcd.getTextWidth(FONT_MINI,minMaxTxt)/2,nextYoffs + txtyoffs[window[1]][5],minMaxTxt,FONT_MINI)
+			end
+		end	
+		lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
+	end	
+end
+
+
+local function printTelemetry() 
+	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
+	drawWindow(2) --draw first telemetry window
+end		
+
+local function printTelemetry2() 
+	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
+	drawWindow(3) --draw second telemetry window
+end	
+
+-------------------------------------------------------------------- 
+-- screen lib config key eventhandler
+--------------------------------------------------------------------
+local function keyPressed(key)
+    if(key==KEY_5 or key==KEY_ESC) then
+      form.preventDefault()
+      form.reinit(globVar.templateAppID)
+	  sensLabelList = {}
+    end
+end 
+-------------------------------------------------------------------- 
+-- screen library configbutton handler
+--------------------------------------------------------------------
+local function calcWinIdx(idx)
+	local calc = 0
+	
+	for i in ipairs(globVar.windows) do
+		for j in ipairs(globVar.windows[i]) do
+			calc = calc +1
+			if(calc == idx)then
+				return i,j
+			end
+		end
+	end
+end
+
+local function sensLabelChanged()
+  labelListIndex = form.getValue(labelListBox)
+  form.reinit(globVar.screenlibID)
+end
+
+local function sensorChanged()
+	sensListIndex = form.getValue(sensorListBox)
+	local i,j = calcWinIdx(labelListIndex)
+	globVar.sensors[i][j] = sensListIndex -- set sensorid to corresponding window 
+	system.pSave("sensors"..i.."",globVar.sensors[i])
+end
+-------------------------------------------------------------------- 
+-- screen lib config page
+--------------------------------------------------------------------
+local function screenLibConfig()
+	local i,j = calcWinIdx(labelListIndex)
+	if(globVar.sensors[i][j]>0)then
+		sensListIndex = globVar.sensors[i][j]
+	end
+  
+	form.setTitle(globVar.trans.screenLib)
+	form.addRow(1)
+	form.addLabel({label=globVar.trans.config,font=FONT_BOLD})
+
+	form.addRow(1)
+	form.addLabel({label=globVar.trans.bindSens,font=FONT_BOLD})
+
+	if( globVar.sensorLalist[1] ~= "...") then
+		sensLabelList = {}
+		sensWindowList = {}
+		for i in ipairs(globVar.windows[1]) do
+			table.insert(sensLabelList,globVar.windows[1][i][2])	
+		end		
+		for i in ipairs(globVar.windows[2]) do
+			table.insert(sensLabelList,globVar.windows[2][i][2])	
+		end	
+		if(#globVar.windows == 3) then
+			for i in ipairs(globVar.windows[3]) do
+				table.insert(sensLabelList,globVar.windows[3][i][2])	
+			end	
+		end
+		form.addRow(2)   
+		form.addLabel({label="Label",width=150})
+		labelListBox = form.addSelectbox(sensLabelList,labelListIndex,true,sensLabelChanged)
+
+		form.addRow(2)
+		form.addLabel({label="Sensor",width=150})
+		sensorListBox = form.addSelectbox(globVar.sensorLalist,sensListIndex,true,sensorChanged)
+	end	
+	-- version
+	form.addRow(1)
+	form.addLabel({label="Powered by Geierwally - "..globVar.version.."  Mem max: "..globVar.mem.."K",font=FONT_MINI, alignRight=true})
+	form.setFocusedRow (3)
+end 
+
+--------------------------------------------------------------------
+-- main Loop function
+--------------------------------------------------------------------
+local function loop()
+	--todo register 2. telemetry page
+	if(globVar.initDone == true) then
+		system.registerTelemetry(1," "..globVar.model.." Scr1",4,printTelemetry)
+		if(#globVar.windows == 3)then
+			system.registerTelemetry(2," "..globVar.model.." Scr2",4,printTelemetry2)
+		end
+		aPrepare = false
+		local sensor = nil
+		for j in ipairs(globVar.windows)do
+			for i in ipairs(globVar.windows[j]) do --check limits of main window
+				if(globVar.windows[j][i][4]>0) then 
+					if(globVar.windows[j][i][4]==30)then -- value is text
+						if(globVar.sensorIdlist[1]~="...")then
+							sensor = system.getSensorByID(globVar.sensorIdlist[globVar.sensors[j][i]],globVar.sensorPalist[globVar.sensors[j][i]]) -- read sensor
+						end
+						if(sensor and sensor.valid) then
+							globVar.windows[j][i][11] = nil
+							globVar.windows[j][i][11] = sensor.value --set sensor value
+						end
+					elseif(globVar.windows[j][i][4]==31)then -- value is timer
+					else                                 -- value from application
+						globVar.windows[j][i][8] = globVar.appValues[globVar.windows[j][i][4]] --set app value 
+					end	
+				else				-- value from telemetry sensor
+					if(globVar.sensorIdlist[1]~="...")then
+						sensor = system.getSensorByID(globVar.sensorIdlist[globVar.sensors[j][i]],globVar.sensorPalist[globVar.sensors[j][i]]) -- read sensor
+					end
+					if(sensor and sensor.valid) then
+						globVar.windows[j][i][8] = sensor.value --set sensor value
+					end
+				end
+				checkLimit(globVar.windows[j][i],j)
+			end
+		end
+		if(aPrepare == false)then
+			aTimeRunning = 0 --no alert in preparation, reset running alert delay
+		end
+	end	
+end
+--------------------------------------------------------------------
+local ScreenLib = {init,loop,keyPressed,screenLibConfig,loadmainWindow}
+return ScreenLib
+

@@ -1,0 +1,13 @@
+{
+    "appName":"App Template",
+	"config":"Konfiguration",
+	"screenLib":"Anzeigen Bibliothek",
+	"bindSens":"Zuweisung Sensoren",
+    "CapSensor":"Sensor für Kapazität",
+    "VSensor":"Sensor für Spannung",
+    "nCell":"Anzahl Lipozellen",
+	"capInc":"Zählwert Kapazität",
+	"full":"V",
+	"empty":"L",
+	"capa":"Kapazität"
+}
