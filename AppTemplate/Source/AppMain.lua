@@ -27,7 +27,7 @@ local fileIndex = 1
 
 local function loadDataFile()
 	datafiles = {}
-	for name in dir("Apps/AppTempl/data/") do
+	for name in dir("Apps/AppTempl/data") do
 		if(#name >3) then
 		table.insert(datafiles,name)
 		end
