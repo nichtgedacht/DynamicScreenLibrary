@@ -83,14 +83,21 @@ local function checkLimit(window,mainIndex)
 				window[9]=1 --set alert active
 				if (system.isPlayback () == false) then
 					system.playBeep(1,4000,500)
-					system.playNumber (window[8], 2,window[3]) --audio output of value and unit
+					system.playNumber (window[8], 2,window[3], window[2]) --audio output of value and unit
+					window[9]=2 --alert audio played
 				end	
 			end
 		end
 	else
-		if(window[9]==1) then-- alert is active 
+		if(window[9]>0) then-- alert is active 
 			if(((window[8] >= window[6])and (compareLogic==true))or ((window[8] <= window[6])and (compareLogic==false))) then --value in range , reset alert
 				window[9] = 0
+			else
+				if ((system.isPlayback () == false)and(window[9]==1)) then
+					--system.playBeep(1,4000,500)  --todo comment in for release
+					system.playNumber (window[8], 2,window[3],window[2]) --audio output of value, unit and label
+					window[9]=2 --alert audio played
+				end	
 			end	
 		end	
 	end
@@ -127,7 +134,7 @@ local function drawWindow(winNr)
 			end
 			labelXoffs = 2
 			lcd.drawRectangle(nextXoffs, nextYoffs, 130, txtyoffs[window[1]][1],6) 
-			if((window[9]==1)and(globVar.secClock == true))then --failure display red
+			if((window[9]>0)and(globVar.secClock == true))then --failure display red
 				if(window[1]<4)then
 					lcd.drawFilledRectangle(nextXoffs+1, nextYoffs+1, 128, txtyoffs[window[1]][1]-2,125)
 					lcd.setColor(255,255,255) -- failure white font color
@@ -141,7 +148,8 @@ local function drawWindow(winNr)
 		if(window[1]==7)then
 		-- nothing to do  (image for the 24 transmitters)
 		else
-			labelYoffs = txtyoffs[window[1]][3] + lcd.getTextHeight(txtyoffs[window[1]][4])-lcd.getTextHeight(FONT_MINI) 
+			local corVal = lcd.getTextHeight(txtyoffs[window[1]][4]) * 0.1
+			labelYoffs = txtyoffs[window[1]][3] + lcd.getTextHeight(txtyoffs[window[1]][4])-lcd.getTextHeight(FONT_MINI) - corVal
 			local valTxt =nil
 			if(window[4]==30)then
 				valTxt = window[11]
@@ -187,7 +195,7 @@ local function drawWindow(winNr)
 					end	
 					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[2])+2
 				end	
-				if((window[9]==1)and(window[1]>3))then --failure display red
+				if((window[9]>0)and(window[1]>3))then --failure display red
 					if(globVar.secClock == true)then
 						lcd.setColor(0,0,0) -- failure black font color blinking
 					else

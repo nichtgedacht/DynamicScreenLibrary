@@ -25,7 +25,7 @@ local function drawFuel()
 	--percentage display
 	lcd.drawRectangle(134, 2, 52, 28, 6)
 	--lcd.drawRectangle(135, 3, 50, 26, 5)
-	if(globVar.windows[1][1][9] == 1) then -- fuel cap alert
+	if(globVar.windows[1][1][9] > 0) then -- fuel cap alert
 		if(globVar.secClock == true) then -- blink every second
 			lcd.drawText(textwithCap,4, textCap, FONT_BIG)
 		end

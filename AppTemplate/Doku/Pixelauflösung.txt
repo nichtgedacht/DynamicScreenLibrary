@@ -57,7 +57,7 @@ R.volume, R.volumeP, Flow, Pressure
 Main:
 [1] 1 									[1] 1    (1 Elektro  2 Verbrenner 3 Segler) 
 [2] "Capacity"							[2] "LowestCell"  (label)
-[3] "mAh" (Einheit ist mAh) 			[3] "V"  (Einheit ist Volt)
+[3] "%" (Einheit ist %) 			    [3] "V"  (Einheit ist Volt)
 [4] 1    (app wert 1 Kapazität)			[4] 2    (app wert 2 berechnete Zellspannung)
 [5] 30   (30% min)						[5] 3.28 (3.28 Volt niedrigste Zellspannung)
 [6] 100  (100% Fehler gelöscht)			[6] 3.9  (3.9 Volt Fehler gelöscht , Akku gewechselt)
@@ -65,7 +65,7 @@ Main:
 [8] 0									[8] 0	 (von Screenlib gesetzt aktueller Wert)
 [9] 0									[9] 0	 (von Screenlib gesetzt wenn 1 Alarm aktiv)
 Beispiel nach obiger Beschreibung:
-[1,"Capacity","mAh",1,30,100,0,0,0],
+[1,"Capacity","%",1,30,100,0,0,0],
 [1,"LowestCell","V",2,3.28,3.9,0,0,0]
 
 

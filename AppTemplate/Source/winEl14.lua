@@ -27,11 +27,11 @@ local function drawBattery()
 		-- Percentage Display
 	lcd.drawRectangle(134, 2, 52, 28, 6)
 	--lcd.drawRectangle(135, 3, 50, 26, 5)
-	if((globVar.windows[1][1][9] == 1)or(globVar.windows[1][2][9] == 1)) then -- cap alert or voltage alert
+	if((globVar.windows[1][1][9] > 0)or(globVar.windows[1][2][9] > 0)) then -- cap alert or voltage alert
 		if(globVar.secClock == true) then -- blink every second
 			lcd.drawText(textwithCap,4, textCap, FONT_BIG)
 		else
-			if(globVar.windows[1][2][9] == 1)then -- voltage alert
+			if(globVar.windows[1][2][9] >0)then -- voltage alert
 				lcd.drawText(textwithVolt,4,textVolt,FONT_BIG)
 			end	
 		end
@@ -45,7 +45,7 @@ local function drawBattery()
 	-- Level of Battery
 	chgH = 114 * telCapVal/100*1.02
 	chgY = 158-chgH
-	if((globVar.windows[1][1][9] == 1)or(globVar.windows[1][2][9] == 1)) then -- cap alert or voltage alert
+	if((globVar.windows[1][1][9] >0)or(globVar.windows[1][2][9] >0)) then -- cap alert or voltage alert
 		lcd.drawFilledRectangle(135, chgY, 50, chgH,125)
 	else
 		lcd.drawFilledRectangle(135, chgY, 50, chgH)
