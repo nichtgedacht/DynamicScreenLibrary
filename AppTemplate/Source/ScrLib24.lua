@@ -351,7 +351,7 @@ local function loop()
 							globVar.windows[j][i][11] = nil
 							globVar.windows[j][i][11] = sensor.value --set sensor value
 						end
-					elseif(globVar.windows[j][i][4]==31)then -- value is timer
+					elseif(globVar.windows[j][i][4]==31)then -- todo value is timer
 					else                                 -- value from application
 						globVar.windows[j][i][8] = globVar.appValues[globVar.windows[j][i][4]] --set app value 
 					end	
