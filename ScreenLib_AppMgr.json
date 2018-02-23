@@ -1,0 +1,45 @@
+{
+"Battery Checker": {
+    "author": "Geierwally",
+    "version": "V1.1.1",
+    "previewImg": "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/img/Geierwally.jpg",
+    "description": "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/README.md",
+    "sourceFile": [
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTempl.lc",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/Tasks/AppMain.lua",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/Tasks/ScrLib14.lua",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/Tasks/ScrLib24.lua",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/Tasks/winEl14.lua",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/Tasks/winEl24.lua",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/Tasks/winNit14.lua",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/Tasks/winNit24.lua",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/data/electro.jsn",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/data/stroke.jsn",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/lang/cz/locale.jsn",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/lang/de/locale.jsn",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/lang/en/locale.jsn",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/lang/es/locale.jsn",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/lang/fr/locale.jsn",
+      "https://raw.githubusercontent.com/Geierwally-xD/DynamicScreenLibrary/master/AppTemplate/Apps/AppTemplate/lang/it/locale.jsn"
+    ],
+    "destinationPath": [
+      "/Apps",
+      "/Apps/AppTemplate/Tasks",		  
+      "/Apps/AppTemplate/Tasks",		  
+      "/Apps/AppTemplate/Tasks",		  
+      "/Apps/AppTemplate/Tasks",		  
+      "/Apps/AppTemplate/Tasks",		  
+      "/Apps/AppTemplate/Tasks",		  
+      "/Apps/AppTemplate/Tasks",		  
+      "/Apps/AppTemplate/data",		  
+      "/Apps/AppTemplate/data",		  
+      "/Apps/AppTemplate/lang/cz",		  
+      "/Apps/AppTemplate/lang/de",		  
+      "/Apps/AppTemplate/lang/en",		  
+      "/Apps/AppTemplate/lang/es",		  
+      "/Apps/AppTemplate/lang/fr",		  
+      "/Apps/AppTemplate/lang/it"		  
+	 ]
+	}
+}
+ 
