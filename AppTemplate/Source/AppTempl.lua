@@ -42,13 +42,15 @@ local globVar ={--                          main version | version of screenlib 
 -- Initialization
 --------------------------------------------------------------------
 local function init(code)
-	if(initDelay == 0)then
-		initDelay = system.getTimeCounter()
+	if(code ==1)then
+		if(initDelay == 0)then
+			initDelay = system.getTimeCounter()
+		end	
+		if(main_lib ~= nil) then
+			local func = main_lib[1]
+			func(0,globVar) --init(0)
+		end
 	end	
-	if(main_lib ~= nil) then
-		local func = main_lib[1]
-		func(0,globVar) --init(0)
-	end
 end
 
 --------------------------------------------------------------------
@@ -58,7 +60,7 @@ local function loop()
 	globVar.currentTime = system.getTimeCounter()
 	 -- load current task
     if(main_lib == nil)then
-		init(0)
+		init(1)
 		if((globVar.currentTime - initDelay > 5000)and(initDelay ~=0)) then
 			if(appLoaded == false)then
 				local memTxt = "max: "..globVar.mem.."K act: "..globVar.debugmem.."K"
@@ -66,7 +68,7 @@ local function loop()
 				main_lib = require("AppTempl/Tasks/AppMain")
 				if(main_lib ~= nil)then
 					appLoaded = true
-					init(0)
+					init(1)
 					initDelay = 0
 				end
 				collectgarbage()

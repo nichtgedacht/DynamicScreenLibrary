@@ -60,14 +60,16 @@ local function init(code,globVar_)
 			table.insert(globVar.sensorPalist, string.format("%s", sensor.param))
 		end
 	end
-	-- todo only for simulation 
-	globVar.sensorLalist = {}
-	globVar.sensorIdlist = {}
-	globVar.sensorPalist = {}
-	globVar.sensorLalist = {"Sens1","Sens2","Sens3","Sens4","Sens5","Sens6","Sens7","Sens8"}
-	globVar.sensorIdlist = {121,122,123,124,125,126,127,128}
-	globVar.sensorPalist = {221,222,223,224,225,226,227,228}
-	-- todo only for simulation sensors
+	if(sensorIdlist == nil)then
+		-- only for simulation 
+		globVar.sensorLalist = {}
+		globVar.sensorIdlist = {}
+		globVar.sensorPalist = {}
+		globVar.sensorLalist = {"Sens1","Sens2","Sens3","Sens4","Sens5","Sens6","Sens7","Sens8"}
+		globVar.sensorIdlist = {121,122,123,124,125,126,127,128}
+		globVar.sensorPalist = {221,222,223,224,225,226,227,228}
+		-- only for simulation sensors
+	end
 	-- read device type for loading corresponding screen library
 	local deviceType = system.getDeviceType()
 	if(( deviceType == "JETI DC-24")or(deviceTypeF3K == "JETI DS-24"))then

@@ -189,7 +189,7 @@ local function drawWindow(winNr)
 				--draw left label 1 
 				if(window[1]~=4)then
 					if(window[1]==6)then --only window type 6, draw label left
-						lcd.drawText(nextXoffs+2,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
+						lcd.drawText(nextXoffs+3,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
 					else
 						lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
 					end	
