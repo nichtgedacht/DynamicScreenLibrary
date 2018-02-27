@@ -45,31 +45,12 @@ end
 local function init(code,globVar_)
 	globVar = globVar_
 	-- Read available sensors for user to select
-	globVar.sensors[1] = system.pLoad("sensors1", {1,1})-- list of all binded sensors main
-	globVar.sensors[2] = system.pLoad("sensors2", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 1
-	globVar.sensors[3] = system.pLoad("sensors3", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 2
+	globVar.scrSens[1] = system.pLoad("sensors1", {1,1})-- list of all binded sensors main
+	globVar.scrSens[2] = system.pLoad("sensors2", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 1
+	globVar.scrSens[3] = system.pLoad("sensors3", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 2
 	globVar.appValues = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- calculated application values
 
 	loadDataFile() -- load all screen data
-
-	local sensors = system.getSensors()
-	for i,sensor in ipairs(sensors) do
-		if (sensor.label ~= "") then
-			table.insert(globVar.sensorLalist, string.format("%s", sensor.label))
-			table.insert(globVar.sensorIdlist, string.format("%s", sensor.id))
-			table.insert(globVar.sensorPalist, string.format("%s", sensor.param))
-		end
-	end
-	if(sensorIdlist == nil)then
-		-- only for simulation 
-		globVar.sensorLalist = {}
-		globVar.sensorIdlist = {}
-		globVar.sensorPalist = {}
-		globVar.sensorLalist = {"Sens1","Sens2","Sens3","Sens4","Sens5","Sens6","Sens7","Sens8"}
-		globVar.sensorIdlist = {121,122,123,124,125,126,127,128}
-		globVar.sensorPalist = {221,222,223,224,225,226,227,228}
-		-- only for simulation sensors
-	end
 	-- read device type for loading corresponding screen library
 	local deviceType = system.getDeviceType()
 	if(( deviceType == "JETI DC-24")or(deviceTypeF3K == "JETI DS-24"))then
@@ -190,43 +171,45 @@ local function appConfig()
 
 	form.addRow(2)
     form.addLabel({label="DataFile",width=100})
-	fileBoxIndex = form.addSelectbox(datafiles,fileIndex,true,dataFileChanged,{width=220})
+	fileBoxIndex = form.addSelectbox(datafiles,fileIndex,true,dataFileChanged,{width=170})
 	
 	if(globVar.windows[1][1][1] < 3) then 
 	    if(globVar.windows[1][1][1] == 1) then --electro model 
 			form.addRow(2)
-			form.addLabel({label=globVar.trans.nCell,width=220})
+			form.addLabel({label=globVar.trans.nCell,width=170})
 			form.addIntbox(nCell,1,24,3,0,1,numberOfCellsChanged)
 		end		
 
 		form.addRow(2)
-		form.addLabel({label=string.format("%s (%s)",globVar.trans.capa, globVar.windows[1][1][3]),width=180})
+		form.addLabel({label=string.format("%s (%s)",globVar.trans.capa, globVar.windows[1][1][3]),width=170})
 		form.addIntbox(capa,0,32767,2400,0,capIncrease,capaChanged)
 			
 		form.addRow(2)
-		form.addLabel({label=globVar.trans.capInc,width=220})
+		form.addLabel({label=globVar.trans.capInc,width=170})
 		form.addIntbox(capIncrease,10,100,100,0,10,capIncreaseChanged)
 	end
 
     --***********************************************************---
 	--*******add your own app specific configuration here********---
-	form.addRow(1)
-	form.addLabel({label="SensorSimulation",font=FONT_BOLD})
+	if(#globVar.sensors ==0)then
+		form.addRow(1)
+		form.addLabel({label="SensorSimulation",font=FONT_BOLD})
 	
-	if(globVar.windows[1][1][1] == 1) then --electro model
+		if(globVar.windows[1][1][1] == 1) then --electro model
+		------only for simulation without connected telemetry
+			form.addRow(2)
+			form.addLabel({label="simCellVoltage"})
+			form.addInputbox(SimVolt,true,SimVoltChanged)
+		end
 		------only for simulation without connected telemetry
 		form.addRow(2)
-		form.addLabel({label="simCellVoltage"})
-		form.addInputbox(SimVolt,true,SimVoltChanged)
+		form.addLabel({label="simCapacity"})
+		form.addInputbox(SimCap,true,SimCapChanged)
+		------only for simulation without connected telemetry
+		form.addRow(2)
+		form.addLabel({label="simRPM"})
+		form.addInputbox(SimRPM,true,SimRPMChanged)
 	end
-	------only for simulation without connected telemetry
-	form.addRow(2)
-	form.addLabel({label="simCapacity"})
-	form.addInputbox(SimCap,true,SimCapChanged)
-	------only for simulation without connected telemetry
-	form.addRow(2)
-	form.addLabel({label="simRPM"})
-	form.addInputbox(SimRPM,true,SimRPMChanged)
     --***********************************************************---
 	-- version
 	form.addRow(1)
@@ -254,52 +237,68 @@ end
 -- main Loop function
 --------------------------------------------------------------------
 local function loop()
+	local sensor1 = {}
+	local sensor2 = {}
  	if((screen_lib ~= nil)and (globVar.initDone == true))then
+		globVar.sensors = {}
+		globVar.sensors = system.getSensors() -- read in all sensor data
 		-- register config page of the app template 
 		system.registerForm(1,MENU_MAIN,globVar.trans.appName,initTempl,keyPressedTempl,printForm);
-		if(globVar.sensorIdlist[1] ~= "...") then
-			local sensor1 = system.getSensorByID(globVar.sensorIdlist[globVar.sensors[1][1]],globVar.sensorPalist[globVar.sensors[1][1]]) -- read sensor
-			local sensor2 = system.getSensorByID(globVar.sensorIdlist[globVar.sensors[1][2]],globVar.sensorPalist[globVar.sensors[1][2]]) -- read sensor
+		local txTel = system.getTxTelemetry()
+		globVar.appValues[3]= txTel.rx1Voltage
+		globVar.appValues[4]= txTel.rx2Voltage
+		globVar.appValues[5]= txTel.rx1Percent
+		globVar.appValues[6]= txTel.rx2Percent
+		globVar.appValues[7]= txTel.RSSI[1]
+		globVar.appValues[8]= txTel.RSSI[2]
+		globVar.appValues[9]= txTel.RSSI[3]
+		globVar.appValues[10]= txTel.RSSI[4]
+
+		if(#globVar.sensors >0) then
+			sensor1 = globVar.sensors[globVar.scrSens[1][1]]  -- read sensor
+			sensor2 = globVar.sensors[globVar.scrSens[1][2]]  -- read sensor
+		else
+	------only for simulation without connected telemetry
+			sensor1 = {}
+			sensor2  = {}
+			local CapSimVal = system.getInputsVal(SimCap)
+			if(CapSimVal ~= nil)then
+				sensor1["valid"] = true
+				sensor1["value"] = 0
+				CapSimVal = math.modf(CapSimVal*100) 
+				CapSimVal = capa*CapSimVal/100
+				sensor1.value = CapSimVal
+			else
+				sensor1["valid"] = false
+				sensor1["value"] = 0
+			end
+		
+			if(globVar.windows[1][1][1] == 1) then -- electro model
+				local VoltSimVal = system.getInputsVal(SimVolt)
+				if(VoltSimVal ~= nil)then
+					sensor2["valid"] = true
+					sensor2["value"] = 0
+					VoltSimVal = math.modf(VoltSimVal*100) 
+					VoltSimVal = 1 * VoltSimVal/100 + 3.2
+					sensor2.value = VoltSimVal
+				else
+					sensor2["valid"] = false
+					sensor2["value"] = 0
+				end
+			end
+		
+			local RPM_SimVal = system.getInputsVal(SimRPM)
+			if(RPM_SimVal ~=nil)then
+			globVar.appValues[3] = RPM_SimVal * 25000
+			end
+	------only for simulation without connected telemetry
+		
 		end
 		if( system.getTime() % 2 == 0 ) then -- blink every second
 			globVar.secClock = true
 		else
 			globVar.secClock = false
 		end
-	------only for simulation without connected telemetry
-		local sensor1 = {}
-		local sensor2  = {}
-		local CapSimVal = system.getInputsVal(SimCap)
-		if(CapSimVal ~= nil)then
-			sensor1["valid"] = true
-			sensor1["value"] = 0
-			CapSimVal = math.modf(CapSimVal*100) 
-			CapSimVal = capa*CapSimVal/100
-			sensor1.value = CapSimVal
-		else
-			sensor1["valid"] = false
-			sensor1["value"] = 0
-		end
-		
-		if(globVar.windows[1][1][1] == 1) then -- electro model
-			local VoltSimVal = system.getInputsVal(SimVolt)
-			if(VoltSimVal ~= nil)then
-				sensor2["valid"] = true
-				sensor2["value"] = 0
-				VoltSimVal = math.modf(VoltSimVal*100) 
-				VoltSimVal = 1 * VoltSimVal/100 + 3.2
-				sensor2.value = VoltSimVal
-			else
-				sensor2["valid"] = false
-				sensor2["value"] = 0
-			end
-		end
-		
-		local RPM_SimVal = system.getInputsVal(SimRPM)
-		if(RPM_SimVal ~=nil)then
-		globVar.appValues[3] = RPM_SimVal * 25000
-		end
-	------only for simulation without connected telemetry
 		if(sensor1 and sensor1.valid) then
 			globVar.appValues[1] = (((capa - sensor1.value) * 100) / capa) --calculate capacity
 			if (globVar.appValues[1] < 0) then
@@ -309,9 +308,13 @@ local function loop()
 					globVar.appValues[1] = 100
 				end
 			end
+		else
+			globVar.appValues[1]=0
 		end	
 		if(sensor2 and sensor2.valid) then
 			globVar.appValues[2] = (sensor2.value / nCell) --calculate cell voltage
+		else
+			globVar.appValues[2] = 0
 		end	
 		
 		local func = screen_lib[2] --

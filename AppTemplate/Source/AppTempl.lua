@@ -21,21 +21,19 @@ local globVar ={--                          main version | version of screenlib 
 				templateAppID = 1,--        id of template app config page
 				screenlibID = 2, --         id of screenlib config page
 				currentForm = nil,  --      last loaded display
-				sensorLalist = {},--   list of all telemetry sensor labels  
-                sensorIdlist = {},--   list of all telemetry sensor id's
-                sensorPalist = {},--   list of all sensor parameters
 				currentTime  = nil,--       current timestamp in milliseconds usefull for making own software timers
 				currentDate  = nil,--       current date 
 				screenLib24  = 14,--        if 24 the screen library of ds / dc 24 is loaded otherwise screen lib of the DC / DS 14 / 16
 				trans = {},--               translations depending on set language
-				sensors = {},--             list of all sensors for each screen area 2 sensors possible
+				scrSens = {},--             list of all sensors for each screen area 2 sensors possible
 				appValues = {},--           calculated values of application
 				modelType = 2,--          	stroke or electro
 				model = nil, --             Model Name
 				windows	= {}, --		    all telemetry windows	
 				txtColor = {},--            text and frame color
-				initDone = false, --         initialization of library done
-				secClock = false --         second clock for blinking text on failure
+				initDone = false, --        initialization of library done
+				secClock = false, --        second clock for blinking text on failure
+				sensors = {} --				all sensor data 
 			   }
 
 -------------------------------------------------------------------- 

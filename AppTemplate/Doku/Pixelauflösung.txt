@@ -128,7 +128,7 @@ Abschlussfenster 2 Werte es sind zwei Zeilen zu konfigurieren, welche sich nur i
 [1] 4 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
 [2] "Empfängerspannung"   				(label Empfängerspannung)
 [3] "V" 					 			(Einheit ist V)
-[4] 0                                   (Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App)
+[4] 3                                   (Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App für Empfängerspannung sind die Daten über index 3,4,5,6 fix eingestellt)
 [5] 4.2                                 (Alarmwert wenn kleiner als 4,2 Volt)
 [6] 4.8                                 (bei 4,8 Volt  wird der Fehler gelöscht)
 [7] 2                        			(Anzahl der Nachkommastellen)
@@ -138,15 +138,15 @@ Abschlussfenster 2 Werte es sind zwei Zeilen zu konfigurieren, welche sich nur i
 [11]"RxU1"								(Label 2)
 
 Beispiel nach obiger Beschreibung:
-[4,"Empfängerspannung","V",0,4.2,4.8,2,0,0,1,"RxU1"],
-[4,"Empfängerspannung","V",0,4.2,4.8,2,0,0,2,"RxU2"],
+[4,"Empfängerspannung","V",3,4.2,4.8,2,0,0,1,"RxU1"],
+[4,"Empfängerspannung","V",4,4.2,4.8,2,0,0,2,"RxU2"],
 
 
 Abschlussfenster 4 Werte es sind vier Zeilen zu konfigurieren, welche sich nur im Fensterwert unterscheiden
 [1] 5 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
 [2] "RX1"   				   			(label Empfänger 1)
 [3] "%" 					 			(Einheit ist V)
-[4] 0                                   (Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App)
+[4] 0                                   (Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App, für Empfangsquallität sind index 7,8,9,10 von der App fix eingerichtet)
 [5] 60                                  (Alarmwert wenn kleiner als 60%)
 [6] 90                                  (bei 90 %  wird der Fehler gelöscht)
 [7] 0                        			(Anzahl der Nachkommastellen)
@@ -156,10 +156,10 @@ Abschlussfenster 4 Werte es sind vier Zeilen zu konfigurieren, welche sich nur i
 [11]"Ant1"								(Label 2  Antenne 1)
 
 Beispiel nach obiger Beschreibung:
-[5,"RX1","%",0,60,90,0,0,0,1,"A1:"],
-[5,"RX1","%",0,60,90,0,0,0,2,"A2:"],
-[5,"RX2","%",0,60,90,0,0,0,3,"A1:"],
-[5,"RX2","%",0,60,90,0,0,0,4,"A2:"],
+[5,"RX1","%",7,60,90,0,0,0,1,"A1:"],
+[5,"RX1","%",8,60,90,0,0,0,2,"A2:"],
+[5,"RX2","%",9,60,90,0,0,0,3,"A1:"],
+[5,"RX2","%",10,60,90,0,0,0,4,"A2:"],
 
 
 Abschlussfenster 4 Werte es sind 8 Zeilen zu konfigurieren, welche sich in Fensterwert Label etc. unterscheiden
