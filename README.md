@@ -9,6 +9,7 @@ Limit alerts for each sensor with acoustic and visual output.
 Pls. read pdf files in doku folder before installation and install the App over AppTemplate_Setup.bat or App Manager on your transmitter.
 On Installation over App Manager you can download the full installation package including user documentation and lua source scripts here:
 https://github.com/Geierwally-xD/DynamicScreenLibrary
+
 Geierwally's Lua Applikations - Template mit dynamischer Anzeigenbibliothek für Jeti 14, 16 und 24 Sender
 Eigene Telemetrie - Displayseiten ohne Lua Programmierung erstellen. 
 Bis zwei full screen Telemetrieseiten sind einstellbar. Hauptseite für Verbrenner und Elektromodelle.

@@ -14,14 +14,14 @@ local globVar = {} --global variables for application and screen library
 local aTimeRunning = 0 --alert delay is running
 local aDelay = 0  --voltage alert delay
 local aPrepare = false -- alert in preparation
-local sensLabelList = {} -- all window labels
-local labelListBox = nil -- ID of the label list box
-local labelListIndex = 1 -- index of label list box
+local winList = {} -- all windows
+local sensList = {} -- all sensors
+local winListBox = nil -- ID of the windows label list box
+local winListIdx = 1 -- index of label list box
 local sensorListBox = nil -- ID of the sensor list box
-local sensListIndex = 1 -- index of sensor list box
+local sensListIdx = 1 -- index of sensor list box
 local mainWin_Lib = nil  -- main window
 local lib_Path = nil     -- path to last loaded main win library
-
 
 -------------------------------------------------------------------- 
 -- Init function
@@ -70,14 +70,7 @@ local function checkLimit(window,mainIndex)
 	if(window[6]>window[5])then
 		compareLogic = true
 	end
-	if((window[1] == 2)and(mainIndex >1))then -- calculate and set min max values
-		if((window[8]<window[10])or (window[10] == 0))then
-			window[10]= window[8]
-		end
-		if(window[8]>window[11])then
-			window[11]= window[8]
-		end
-	end
+
 	if ((((window[8] <= window[5])and compareLogic == true)or((window[8] >= window[5])and compareLogic == false)) and(window[9]==0)) then --value <= compare value and no alert
 		aPrepare = true
 		if(aTimeRunning == 0) then
@@ -99,7 +92,7 @@ local function checkLimit(window,mainIndex)
 				window[9] = 0
 			else
 				if ((system.isPlayback () == false)and(window[9]==1)) then
-					--system.vibration (true,2)  --todo comment in for release
+					system.vibration (true,2)
 					system.playNumber (window[8], 2,window[3],window[2]) --audio output of value, unit and label
 					window[9]=2 --alert audio played
 				end	
@@ -194,7 +187,7 @@ local function drawWindow(winNr)
 				--draw left label 1 
 				if(window[1]~=4)then
 					if(window[1]==6)then --only window type 6, draw label left
-						lcd.drawText(nextXoffs+2,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
+						lcd.drawText(nextXoffs+3,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
 					else
 						lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
 					end	
@@ -255,7 +248,7 @@ local function keyPressed(key)
     if(key==KEY_5 or key==KEY_ESC) then
       form.preventDefault()
       form.reinit(globVar.templateAppID)
-	  sensLabelList = {}
+	  winList = {}
     end
 end 
 -------------------------------------------------------------------- 
@@ -274,24 +267,24 @@ local function calcWinIdx(idx)
 	end
 end
 
-local function sensLabelChanged()
-  labelListIndex = form.getValue(labelListBox)
+local function windowChanged()
+  winListIdx = form.getValue(winListBox)
   form.reinit(globVar.screenlibID)
 end
 
 local function sensorChanged()
-	sensListIndex = form.getValue(sensorListBox)
-	local i,j = calcWinIdx(labelListIndex)
-	globVar.sensors[i][j] = sensListIndex -- set sensorid to corresponding window 
-	system.pSave("sensors"..i.."",globVar.sensors[i])
+	sensListIdx = form.getValue(sensorListBox)
+	local i,j = calcWinIdx(winListIdx)
+	globVar.scrSens[i][j] = sensListIdx -- set sensorid to corresponding window 
+	system.pSave("sensors"..i.."",globVar.scrSens[i])
 end
 -------------------------------------------------------------------- 
 -- screen lib config page
 --------------------------------------------------------------------
 local function screenLibConfig()
-	local i,j = calcWinIdx(labelListIndex)
-	if(globVar.sensors[i][j]>0)then
-		sensListIndex = globVar.sensors[i][j]
+	local i,j = calcWinIdx(winListIdx)
+	if(globVar.scrSens[i][j]>0)then
+		sensListIdx = globVar.scrSens[i][j]
 	end
   
 	form.setTitle(globVar.trans.screenLib)
@@ -301,27 +294,32 @@ local function screenLibConfig()
 	form.addRow(1)
 	form.addLabel({label=globVar.trans.bindSens,font=FONT_BOLD})
 
-	if( globVar.sensorLalist[1] ~= "...") then
-		sensLabelList = {}
-		sensWindowList = {}
+	sensList = {}
+	globVar.sensorIdx = {}
+	for idx,sensor in ipairs(globVar.sensors) do 
+		table.insert(sensList, string.format("%s", sensor.label))
+	end
+
+	if( sensList[1] ~= "...") then
+		winList = {}
 		for i in ipairs(globVar.windows[1]) do
-			table.insert(sensLabelList,globVar.windows[1][i][2])	
+			table.insert(winList,globVar.windows[1][i][2])	
 		end		
 		for i in ipairs(globVar.windows[2]) do
-			table.insert(sensLabelList,globVar.windows[2][i][2])	
+			table.insert(winList,globVar.windows[2][i][2])	
 		end	
 		if(#globVar.windows == 3) then
 			for i in ipairs(globVar.windows[3]) do
-				table.insert(sensLabelList,globVar.windows[3][i][2])	
+				table.insert(winList,globVar.windows[3][i][2])	
 			end	
 		end
 		form.addRow(2)   
-		form.addLabel({label="Label",width=150})
-		labelListBox = form.addSelectbox(sensLabelList,labelListIndex,true,sensLabelChanged)
+		form.addLabel({label="Label",width=170})
+		winListBox = form.addSelectbox(winList,winListIdx,true,windowChanged)
 
 		form.addRow(2)
-		form.addLabel({label="Sensor",width=150})
-		sensorListBox = form.addSelectbox(globVar.sensorLalist,sensListIndex,true,sensorChanged)
+		form.addLabel({label="Sensor",width=170})
+		sensorListBox = form.addSelectbox(sensList,sensListIdx,true,sensorChanged)
 	end	
 	-- version
 	form.addRow(1)
@@ -339,31 +337,50 @@ local function loop()
 			system.registerTelemetry(2," "..globVar.model.." Scr2",4,printTelemetry2)
 		end
 		aPrepare = false
-		local sensor = nil
+		local sensor = {}
 		for j in ipairs(globVar.windows)do
 			for i in ipairs(globVar.windows[j]) do --check limits of main window
+				globVar.windows[j][i][8] = 0 -- reset screen value
+				if(globVar.windows[j][i][1]==2)then -- reset screen min max values
+					globVar.windows[j][i][10]=0 
+					globVar.windows[j][i][11]=0
+				end					
 				if(globVar.windows[j][i][4]>0) then 
-					if(globVar.windows[j][i][4]==30)then -- value is text
-						if(globVar.sensorIdlist[1]~="...")then
-							sensor = system.getSensorByID(globVar.sensorIdlist[globVar.sensors[j][i]],globVar.sensorPalist[globVar.sensors[j][i]]) -- read sensor
-						end
-						if(sensor and sensor.valid) then
-							globVar.windows[j][i][11] = nil
-							globVar.windows[j][i][11] = sensor.value --set sensor value
+					if(globVar.windows[j][i][4]==30)then -- value is GPS Coordinate
+						sensor = {}
+						if(#globVar.sensors >0)then
+							sensor = globVar.sensors[globVar.scrSens[j][i]]-- read sensor
+							if(sensor and sensor.valid and sensor.type ==9) then
+								local nesw = {"N", "E", "S", "W"}
+								globVar.windows[j][i][3] = nil
+								globVar.windows[j][i][11] = nil
+								globVar.windows[j][i][3] = nesw[sensor.decimals+1]
+								globVar.windows[j][i][8] = sensor.valGPS --set sensor GPSvalue
+								local minutes = (sensor.valGPS & 0xFFFF) * 0.001
+								local degs = (sensor.valGPS >> 16) & 0xFF
+								globVar.windows[j][i][11] = string.format("%d° %f'", sensor.label,degs,minutes)
+							end
 						end
 					elseif(globVar.windows[j][i][4]==31)then -- todo value is timer
 					else                                 -- value from application
 						globVar.windows[j][i][8] = globVar.appValues[globVar.windows[j][i][4]] --set app value 
 					end	
 				else				-- value from telemetry sensor
-					if(globVar.sensorIdlist[1]~="...")then
-						sensor = system.getSensorByID(globVar.sensorIdlist[globVar.sensors[j][i]],globVar.sensorPalist[globVar.sensors[j][i]]) -- read sensor
+					sensor = {}
+					if(#globVar.sensors >0)then
+						sensor = globVar.sensors[globVar.scrSens[j][i]]-- read sensor
 					end
 					if(sensor and sensor.valid) then
 						globVar.windows[j][i][8] = sensor.value --set sensor value
+						if(globVar.windows[j][i][1]==2)then -- store min max values
+							globVar.windows[j][i][10]=sensor.min
+							globVar.windows[j][i][11]=sensor.max
+						end
 					end
 				end
-				checkLimit(globVar.windows[j][i],j)
+				if(sensor and sensor.valid) then
+					checkLimit(globVar.windows[j][i],j)
+				end	
 			end
 		end
 		if(aPrepare == false)then

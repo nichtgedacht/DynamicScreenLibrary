@@ -18,13 +18,13 @@ end
 -------------------------------------------------------------------- 
 -- draw fuel 
 -------------------------------------------------------------------- 
+-- Draw Fuelgauge and percentage display
 local function drawFuel()
 	local telCapVal = string.format("%.1f", globVar.windows[1][1][8])
 	local textCap = string.format("%.0f%%",telCapVal)
 	local textwithCap = 160 - lcd.getTextWidth(FONT_BIG, textCap) / 2
 	--percentage display
-	lcd.drawRectangle(134, 2, 52, 28, 6)
-	--lcd.drawRectangle(135, 3, 50, 26, 5)
+
 	if(globVar.windows[1][1][9] > 0) then -- fuel cap alert
 		if(globVar.secClock == true) then -- blink every second
 			lcd.setColor(200,0,0)
@@ -34,25 +34,29 @@ local function drawFuel()
 		lcd.drawText(textwithCap,4, textCap, FONT_BIG)
 	end
 	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
-	-- fuel
-	lcd.drawRectangle(134, 33, 26, 126)
-	-- level of fuel
+	--fuel
 	if(globVar.windows[1][1][9] > 0) then -- fuel cap alert
 		lcd.setColor(200,0,0) 
 	else
 		lcd.setColor(0,196,0)
 	end
-	chgH = 122 * telCapVal/100*1.02
-	chgY = 159-chgH
-	lcd.drawFilledRectangle(135, chgY, 24, chgH)
+	chgY = 30
+	--fuel bar 
+	--calc bar chart values
+	local nSolidBar = math.floor( telCapVal / 20)
+	local nFracBar = (telCapVal - nSolidBar * 20) / 20  -- 0.0 ... 1.0 for fractional bar
+	local i
+	--solid bars
+	for i=0, nSolidBar - 1, 1 do 
+		lcd.drawFilledRectangle (135,105-i*26+chgY,26,24) 
+	end  
+	-- fractional bar
+	local y = math.floor( 105-nSolidBar*26+(1-nFracBar)*24 + 0.5)
+	lcd.drawFilledRectangle (135,y+chgY,26,24*nFracBar) 	
 	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])	
-	lcd.drawLine(135, 58, 159, 58)
-	lcd.drawLine(135, 83, 159, 83)
-	lcd.drawLine(135, 108, 159, 108)
-	lcd.drawLine(135, 133, 159, 133)
 	lcd.drawText(169,35,globVar.trans.full, FONT_BIG) 
 	lcd.drawText(169,137,globVar.trans.empty, FONT_BIG) 
-	
+
 	--draw gas pump
 	local xO = 168
 	local yO = 89
@@ -74,9 +78,14 @@ local function drawFuel()
 	lcd.drawPoint(xO + 11,yO+4)
 	lcd.drawPoint(xO + 10,yO+8)
 	lcd.drawPoint(xO + 12,yO+13)
+	--draw frames
+	lcd.drawRectangle (135,105+chgY,26,24)	-- lowest bar segment frame
+	lcd.drawRectangle (135,79+chgY,26,24)  
+	lcd.drawRectangle (135,53+chgY,26,24)  
+	lcd.drawRectangle (135,27+chgY,26,24)  
+	lcd.drawRectangle (135,1+chgY,26,24)   -- uppermost bar segment frame
 	
-	
-	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])	
+	lcd.drawRectangle(134, 2, 52, 28, 6) --frame of percentage text
     collectgarbage()
 end
 

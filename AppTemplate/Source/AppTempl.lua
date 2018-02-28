@@ -21,34 +21,34 @@ local globVar ={--                          main version | version of screenlib 
 				templateAppID = 1,--        id of template app config page
 				screenlibID = 2, --         id of screenlib config page
 				currentForm = nil,  --      last loaded display
-				sensorLalist = {},--   list of all telemetry sensor labels  
-                sensorIdlist = {},--   list of all telemetry sensor id's
-                sensorPalist = {},--   list of all sensor parameters
 				currentTime  = nil,--       current timestamp in milliseconds usefull for making own software timers
 				currentDate  = nil,--       current date 
 				screenLib24  = 14,--        if 24 the screen library of ds / dc 24 is loaded otherwise screen lib of the DC / DS 14 / 16
 				trans = {},--               translations depending on set language
-				sensors = {},--             list of all sensors for each screen area 2 sensors possible
+				scrSens = {},--             list of all sensors for each screen area 2 sensors possible
 				appValues = {},--           calculated values of application
 				modelType = 2,--          	stroke or electro
 				model = nil, --             Model Name
 				windows	= {}, --		    all telemetry windows	
 				txtColor = {},--            text and frame color
-				initDone = false, --         initialization of library done
-				secClock = false --         second clock for blinking text on failure
+				initDone = false, --        initialization of library done
+				secClock = false, --        second clock for blinking text on failure
+				sensors = {} --				all sensor data 
 			   }
 
 -------------------------------------------------------------------- 
 -- Initialization
 --------------------------------------------------------------------
 local function init(code)
-	if(initDelay == 0)then
-		initDelay = system.getTimeCounter()
+	if(code ==1)then
+		if(initDelay == 0)then
+			initDelay = system.getTimeCounter()
+		end	
+		if(main_lib ~= nil) then
+			local func = main_lib[1]
+			func(0,globVar) --init(0)
+		end
 	end	
-	if(main_lib ~= nil) then
-		local func = main_lib[1]
-		func(0,globVar) --init(0)
-	end
 end
 
 --------------------------------------------------------------------
@@ -58,7 +58,7 @@ local function loop()
 	globVar.currentTime = system.getTimeCounter()
 	 -- load current task
     if(main_lib == nil)then
-		init(0)
+		init(1)
 		if((globVar.currentTime - initDelay > 5000)and(initDelay ~=0)) then
 			if(appLoaded == false)then
 				local memTxt = "max: "..globVar.mem.."K act: "..globVar.debugmem.."K"
@@ -66,7 +66,7 @@ local function loop()
 				main_lib = require("AppTempl/Tasks/AppMain")
 				if(main_lib ~= nil)then
 					appLoaded = true
-					init(0)
+					init(1)
 					initDelay = 0
 				end
 				collectgarbage()
