@@ -92,7 +92,7 @@ local function checkLimit(window,mainIndex)
 				window[9] = 0
 			else
 				if ((system.isPlayback () == false)and(window[9]==1)) then
-					--system.vibration (true,2)  --todo comment in for release
+					system.vibration (true,2)
 					system.playNumber (window[8], 2,window[3],window[2]) --audio output of value, unit and label
 					window[9]=2 --alert audio played
 				end	
@@ -340,17 +340,26 @@ local function loop()
 		local sensor = {}
 		for j in ipairs(globVar.windows)do
 			for i in ipairs(globVar.windows[j]) do --check limits of main window
+				globVar.windows[j][i][8] = 0 -- reset screen value
+				if(globVar.windows[j][i][1]==2)then -- reset screen min max values
+					globVar.windows[j][i][10]=0 
+					globVar.windows[j][i][11]=0
+				end					
 				if(globVar.windows[j][i][4]>0) then 
-					if(globVar.windows[j][i][4]==30)then -- value is text
+					if(globVar.windows[j][i][4]==30)then -- value is GPS Coordinate
 						sensor = {}
 						if(#globVar.sensors >0)then
 							sensor = globVar.sensors[globVar.scrSens[j][i]]-- read sensor
-						end
-						globVar.windows[j][i][11] = nil
-						if(sensor and sensor.valid) then
-							globVar.windows[j][i][11] = sensor.value --set sensor value
-						else
-							globVar.windows[j][i][11] = "..."
+							if(sensor and sensor.valid and sensor.type ==9) then
+								local nesw = {"N", "E", "S", "W"}
+								globVar.windows[j][i][3] = nil
+								globVar.windows[j][i][11] = nil
+								globVar.windows[j][i][3] = nesw[sensor.decimals+1]
+								globVar.windows[j][i][8] = sensor.valGPS --set sensor GPSvalue
+								local minutes = (sensor.valGPS & 0xFFFF) * 0.001
+								local degs = (sensor.valGPS >> 16) & 0xFF
+								globVar.windows[j][i][11] = string.format("%d° %f'", sensor.label,degs,minutes)
+							end
 						end
 					elseif(globVar.windows[j][i][4]==31)then -- value is timer
 					else                                 -- value from application
@@ -367,14 +376,11 @@ local function loop()
 							globVar.windows[j][i][10]=sensor.min
 							globVar.windows[j][i][11]=sensor.max
 						end
-					else
-						globVar.windows[j][i][8] = 0
-						if(globVar.windows[j][i][1]==2)then -- store min max values
-							globVar.windows[j][i][10]=0
-							globVar.windows[j][i][11]=0
-						end					end
+					end
 				end
-				checkLimit(globVar.windows[j][i],j)
+				if(sensor and sensor.valid) then
+					checkLimit(globVar.windows[j][i],j)
+				end	
 			end
 		end
 		if(aPrepare == false)then

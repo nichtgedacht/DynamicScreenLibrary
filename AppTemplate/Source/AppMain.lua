@@ -75,12 +75,12 @@ local function init(code,globVar_)
 	nCell = system.pLoad("nCell",3)
 	capIncrease = system.pLoad("capIncrease",100)
 	capa = system.pLoad("capa",2400)
-	----only for simulation without connected telemetry
-	SimCap = system.pLoad("SimCap")
-	----only for simulation without connected telemetry
-	SimVolt = system.pLoad("SimVolt")
-	----only for simulation without connected telemetry
-	SimRPM = system.pLoad("SimRPM")
+	-- ----only for simulation without connected telemetry
+	-- SimCap = system.pLoad("SimCap")
+	-- ----only for simulation without connected telemetry
+	-- SimVolt = system.pLoad("SimVolt")
+	-- ----only for simulation without connected telemetry
+	-- SimRPM = system.pLoad("SimRPM")
 end
 
 --------------------------------------------------------------------
@@ -140,21 +140,21 @@ local function dataFileChanged()
 	end
     form.reinit(globVar.templateAppID)
 end
-------only for simulation without connected telemetry
-local function SimCapChanged(value)
-	SimCap = value
-	system.pSave("SimCap",value)
-end
-------only for simulation without connected telemetry
-local function SimVoltChanged(value)
-	SimVolt = value
-	system.pSave("SimVolt",value)
-end
-------only for simulation without connected telemetry
-local function SimRPMChanged(value)
-	SimRPM = value
-	system.pSave("SimRPM",value)
-end
+-- ------only for simulation without connected telemetry
+-- local function SimCapChanged(value)
+	-- SimCap = value
+	-- system.pSave("SimCap",value)
+-- end
+-- ------only for simulation without connected telemetry
+-- local function SimVoltChanged(value)
+	-- SimVolt = value
+	-- system.pSave("SimVolt",value)
+-- end
+-- ------only for simulation without connected telemetry
+-- local function SimRPMChanged(value)
+	-- SimRPM = value
+	-- system.pSave("SimRPM",value)
+-- end
 
 
 --***********************************************************---
@@ -191,25 +191,25 @@ local function appConfig()
 
     --***********************************************************---
 	--*******add your own app specific configuration here********---
-	if(#globVar.sensors ==0)then
-		form.addRow(1)
-		form.addLabel({label="SensorSimulation",font=FONT_BOLD})
+	-- if(#globVar.sensors ==0)then
+		-- form.addRow(1)
+		-- form.addLabel({label="SensorSimulation",font=FONT_BOLD})
 	
-		if(globVar.windows[1][1][1] == 1) then --electro model
-		------only for simulation without connected telemetry
-			form.addRow(2)
-			form.addLabel({label="simCellVoltage"})
-			form.addInputbox(SimVolt,true,SimVoltChanged)
-		end
-		------only for simulation without connected telemetry
-		form.addRow(2)
-		form.addLabel({label="simCapacity"})
-		form.addInputbox(SimCap,true,SimCapChanged)
-		------only for simulation without connected telemetry
-		form.addRow(2)
-		form.addLabel({label="simRPM"})
-		form.addInputbox(SimRPM,true,SimRPMChanged)
-	end
+		-- if(globVar.windows[1][1][1] == 1) then --electro model
+		-- ------only for simulation without connected telemetry
+			-- form.addRow(2)
+			-- form.addLabel({label="simCellVoltage"})
+			-- form.addInputbox(SimVolt,true,SimVoltChanged)
+		-- end
+		-- ------only for simulation without connected telemetry
+		-- form.addRow(2)
+		-- form.addLabel({label="simCapacity"})
+		-- form.addInputbox(SimCap,true,SimCapChanged)
+		-- ------only for simulation without connected telemetry
+		-- form.addRow(2)
+		-- form.addLabel({label="simRPM"})
+		-- form.addInputbox(SimRPM,true,SimRPMChanged)
+	-- end
     --***********************************************************---
 	-- version
 	form.addRow(1)
@@ -257,42 +257,41 @@ local function loop()
 		if(#globVar.sensors >0) then
 			sensor1 = globVar.sensors[globVar.scrSens[1][1]]  -- read sensor
 			sensor2 = globVar.sensors[globVar.scrSens[1][2]]  -- read sensor
-		else
-	------only for simulation without connected telemetry
-			sensor1 = {}
-			sensor2  = {}
-			local CapSimVal = system.getInputsVal(SimCap)
-			if(CapSimVal ~= nil)then
-				sensor1["valid"] = true
-				sensor1["value"] = 0
-				CapSimVal = math.modf(CapSimVal*100) 
-				CapSimVal = capa*CapSimVal/100
-				sensor1.value = CapSimVal
-			else
-				sensor1["valid"] = false
-				sensor1["value"] = 0
-			end
+		-- else
+	-- ------only for simulation without connected telemetry
+			-- sensor1 = {}
+			-- sensor2  = {}
+			-- local CapSimVal = system.getInputsVal(SimCap)
+			-- if(CapSimVal ~= nil)then
+				-- sensor1["valid"] = true
+				-- sensor1["value"] = 0
+				-- CapSimVal = math.modf(CapSimVal*100) 
+				-- CapSimVal = capa*CapSimVal/100
+				-- sensor1.value = CapSimVal
+			-- else
+				-- sensor1["valid"] = false
+				-- sensor1["value"] = 0
+			-- end
 		
-			if(globVar.windows[1][1][1] == 1) then -- electro model
-				local VoltSimVal = system.getInputsVal(SimVolt)
-				if(VoltSimVal ~= nil)then
-					sensor2["valid"] = true
-					sensor2["value"] = 0
-					VoltSimVal = math.modf(VoltSimVal*100) 
-					VoltSimVal = 1 * VoltSimVal/100 + 3.2
-					sensor2.value = VoltSimVal
-				else
-					sensor2["valid"] = false
-					sensor2["value"] = 0
-				end
-			end
+			-- if(globVar.windows[1][1][1] == 1) then -- electro model
+				-- local VoltSimVal = system.getInputsVal(SimVolt)
+				-- if(VoltSimVal ~= nil)then
+					-- sensor2["valid"] = true
+					-- sensor2["value"] = 0
+					-- VoltSimVal = math.modf(VoltSimVal*100) 
+					-- VoltSimVal = 1 * VoltSimVal/100 + 3.2
+					-- sensor2.value = VoltSimVal
+				-- else
+					-- sensor2["valid"] = false
+					-- sensor2["value"] = 0
+				-- end
+			-- end
 		
-			local RPM_SimVal = system.getInputsVal(SimRPM)
-			if(RPM_SimVal ~=nil)then
-			globVar.appValues[3] = RPM_SimVal * 25000
-			end
-	------only for simulation without connected telemetry
-		
+			-- local RPM_SimVal = system.getInputsVal(SimRPM)
+			-- if(RPM_SimVal ~=nil)then
+			-- globVar.appValues[3] = RPM_SimVal * 25000
+			-- end
+	-- ------only for simulation without connected telemetry
 		end
 		if( system.getTime() % 2 == 0 ) then -- blink every second
 			globVar.secClock = true

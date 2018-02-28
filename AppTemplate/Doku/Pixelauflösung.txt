@@ -135,11 +135,11 @@ Abschlussfenster 2 Werte es sind zwei Zeilen zu konfigurieren, welche sich nur i
 [8] 0									(von Screenlib gesetzt aktueller Sensorwert)
 [9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
 [10]1									(Fensterwert 1)
-[11]"RxU1"								(Label 2)
+[11]"U1"								(Label 2)
 
 Beispiel nach obiger Beschreibung:
-[4,"Empfängerspannung","V",3,4.2,4.8,2,0,0,1,"RxU1"],
-[4,"Empfängerspannung","V",4,4.2,4.8,2,0,0,2,"RxU2"],
+[4,"Empfängerspannung","V",3,4.2,4.8,2,0,0,1,"U1"],
+[4,"Empfängerspannung","V",4,4.2,4.8,2,0,0,2,"U2"],
 
 
 Abschlussfenster 4 Werte es sind vier Zeilen zu konfigurieren, welche sich nur im Fensterwert unterscheiden
@@ -153,7 +153,7 @@ Abschlussfenster 4 Werte es sind vier Zeilen zu konfigurieren, welche sich nur i
 [8] 0									(von Screenlib gesetzt aktueller Sensorwert)
 [9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
 [10]1                        			(Fensterwert 1)
-[11]"Ant1"								(Label 2  Antenne 1)
+[11]"A1"								(Label 2  Antenne 1)
 
 Beispiel nach obiger Beschreibung:
 [5,"RX1","%",7,60,90,0,0,0,1,"A1:"],
@@ -170,19 +170,18 @@ Abschlussfenster 4 Werte es sind 8 Zeilen zu konfigurieren, welche sich in Fenst
 [5] 0                                   (Alarmwert kein Alarm)
 [6] 0                                   (kein Alarm löschen)
 [7] 2                        			(Anzahl der Nachkommastellen)
-[8] 255.25								(von Screenlib gesetzt aktueller Sensorwert)
+[8] 0.0								    (von Screenlib gesetzt aktueller Sensorwert)
 [9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
 [10]1                        			(Fensterwert 1)
 
 Beispiel nach obiger Beschreibung:
-[6,"FlDir:","°",0,0,0,2,255.25,0,1],
-[6,"Pos:","°",0,0,0,2,125.25,0,2],
-[6,"Entf:","m",0,0,0,0,1250,0,3],
+[6,"FlDir:","°",0,0,0,2,0.0,0,1],
+[6,"Pos:","°",0,0,0,2,0.0,0,2],
+[6,"Entf:","m",0,0,0,0,0,0,3],
 [6,"B:","N",30,0,0,0,0,0,4,"0° 0.000000'"],
 [6,"L:","E",30,0,0,0,0,0,5,"0° 0.000000'"],
-[6,"Strecke:","m",0,0,0,0,1250,0,6],
-[6,"Vario:","m/s",0,0,0,2,0.75,0,7],
-[6,"Höhe:","m",0,0,0,1,1500.5,0,7]
+[6,"Strecke:","m",0,0,0,0,0,0,6],
+[6,"Vario:","m/s",0,0,0,2,0.0,0,7]
 
 
 
