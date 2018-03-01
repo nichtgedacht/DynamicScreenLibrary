@@ -33,6 +33,9 @@ local function loadDataFile()
 		end
 	end
 	fileIndex = system.pLoad("fileIndex",1)
+	if(fileIndex > #datafiles)then
+		fileIndex = 1
+	end
 	local file = io.readall("Apps/AppTempl/data/"..datafiles[fileIndex].." ")
 	if(file)then
 	    globVar.windows = {}
@@ -49,6 +52,7 @@ local function init(code,globVar_)
 	globVar.scrSens[2] = system.pLoad("sensors2", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 1
 	globVar.scrSens[3] = system.pLoad("sensors3", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 2
 	globVar.appValues = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- calculated application values
+	globVar.timers = {{0,0},{0,0},{0,0},{0,0}}-- list window index of all software timers
 
 	loadDataFile() -- load all screen data
 	-- read device type for loading corresponding screen library

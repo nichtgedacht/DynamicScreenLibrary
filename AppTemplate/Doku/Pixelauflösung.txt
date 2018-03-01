@@ -162,7 +162,7 @@ Beispiel nach obiger Beschreibung:
 [5,"RX2","%",10,60,90,0,0,0,4,"A2:"],
 
 
-Abschlussfenster 4 Werte es sind 8 Zeilen zu konfigurieren, welche sich in Fensterwert Label etc. unterscheiden
+Abschlussfenster 4 Werte es sind 7 Zeilen zu konfigurieren, welche sich in Fensterwert Label etc. unterscheiden
 [1] 6 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
 [2] "Flugrichtung"   				   	(label Flugrichtung)
 [3] "°" 					 			(Einheit ist Grad)
@@ -183,6 +183,31 @@ Beispiel nach obiger Beschreibung:
 [6,"Strecke:","m",0,0,0,0,0,0,6],
 [6,"Vario:","m/s",0,0,0,2,0.0,0,7]
 
+Timerfenster normal 
+[1] 1 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
+[2] "Flugzeit"							(label Flugzeit)
+[3] 1					 			    (1 count up min , 2 count down min, 3 count up sec, 4 count down sec)
+[4] 31                                  (Wert 31 - 34 Timer 1 - Timer 4)
+[5] 0                                   (Startwert 0 Minuten)
+[6] 9                                	(Endwert Limit 9 Minuten wenn 0 kein Limit)
+[7] 0                       			(von App gesetzt wenn 1 ist Timer aktiv)
+[8] 0									(Timerwert in ms)
+[9] 0									()
+Beispiel nach obiger Beschreibung:
+[1,"Flugzeit",1,31,0,9,0,0,0],
+
+Timerfenster geteilt count down 
+[1] 3 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
+[2] "Motorzeit"							(label Motorzeit)
+[3] 4					 			    (1 count up min , 2 count down min, 3 count up sec, 4 count down sec)
+[4] 32                                  (Wert 31 - 34 Timer 1 - Timer 4)
+[5] 420                                 (Startwert 420 Sekunden)
+[6] 0                                	(Endwert Limit 0 Sekunden wenn Startwert = Endwert bei Countdown kein Limit)
+[7] 0                       			(von App gesetzt wenn 1 ist Timer aktiv)
+[8] 0									(Timerwert in ms)
+[9] 0									()
+Beispiel nach obiger Beschreibung:
+[3,"Flugzeit",1,31,0,9,0,0,0],
 
 
 

@@ -33,7 +33,8 @@ local globVar ={--                          main version | version of screenlib 
 				txtColor = {},--            text and frame color
 				initDone = false, --        initialization of library done
 				secClock = false, --        second clock for blinking text on failure
-				sensors = {} --				all sensor data 
+				sensors = {}, --			all sensor data 
+				timers = {}-- 				list of all software timers
 			   }
 
 -------------------------------------------------------------------- 
