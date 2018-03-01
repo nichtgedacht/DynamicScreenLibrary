@@ -20,8 +20,11 @@ local winListBox = nil -- ID of the windows label list box
 local winListIdx = 1 -- index of label list box
 local sensorListBox = nil -- ID of the sensor list box
 local sensListIdx = 1 -- index of sensor list box
+local timListBox = nil -- ID of timer list box
+local timListIdx = 1 -- index of timer list box
 local mainWin_Lib = nil  -- main window
 local lib_Path = nil     -- path to last loaded main win library
+local switches = {{nil,nil,nil,nil},{nil,nil,nil,nil},{nil,nil,nil,nil}} -- start, stopp, reset switches for timers 1 - 4
 
 -------------------------------------------------------------------- 
 -- Init function
@@ -47,10 +50,39 @@ local function loadmainWindow()
 	end
 end
 
+local function setTx_Tim(j,i)
+	if(((globVar.windows[j][i][4]>0)and(globVar.windows[j][i][4]<11))or((globVar.windows[j][i][4]>30) and (globVar.windows[j][i][4]<35)))then -- returnes true if window is TxTelemetry or Timer and preset window timer
+		if(globVar.windows[j][i][4]>30) then
+			local timerID = globVar.windows[j][i][4]-30
+			globVar.timers[timerID][1]=j -- timer window screen 1
+			globVar.timers[timerID][2]=i -- timer window number
+			globVar.windows[j][i][8]= system.pLoad("timer"..timerID.."",0) -- preset timer value of window
+		end
+		return(true)
+	else
+		return(false)
+	end
+end
+
 local function init(globVar_)
 	globVar = globVar_
 	loadmainWindow()
 	globVar.txtColor = {0,0,0} --set black color
+	for i in ipairs(globVar.windows[2]) do
+		setTx_Tim(2,i) -- preset Timerindex of window
+	end	
+	if(#globVar.windows == 3) then
+		for i in ipairs(globVar.windows[3]) do
+			setTx_Tim(3,i)-- preset Timerindex of window
+		end	
+	end
+	local  i = 1
+	while i<5 do
+		switches[1][i] = system.pLoad("timStart"..i.."",nil)
+		switches[2][i] = system.pLoad("timStopp"..i.."",nil)
+		switches[3][i] = system.pLoad("timReset"..i.."",nil)
+		i=i+1
+	end
 	globVar.initDone = true
 end
 
@@ -145,12 +177,17 @@ local function drawWindow(winNr)
 			local valTxt =nil
 			if(window[4]==30)then
 				valTxt = window[11]
+			elseif((window[4]>30)and(window[4]<35))then
+				--todo generate timer window text
+				valTxt = "00:00:00"
 			else
 				valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
 			end
 			
 			labelXoffs = lcd.getTextWidth(txtyoffs[window[1]][4],valTxt)+2 -- add x width of value
-			labelXoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[3])+2-- add x width of unit
+			if(window[4]<31)then
+				labelXoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[3])+2-- add x width of unit except timer window
+			end	
 			if(window[1]<3)then 
 			    --draw center label for window types 1,2 
 				lcd.drawText(nextXoffs+63 - lcd.getTextWidth(FONT_MINI,window[2])/2,nextYoffs + txtyoffs[window[1]][2],window[2],FONT_MINI)
@@ -207,8 +244,10 @@ local function drawWindow(winNr)
 			--draw value
 			lcd.drawText(nextXoffs + labelXoffs,nextYoffs + txtyoffs[window[1]][3]+ win457Yoffs,valTxt,txtyoffs[window[1]][4])
 			labelXoffs = labelXoffs + lcd.getTextWidth(txtyoffs[window[1]][4],valTxt)+2
-			--draw unit
-			lcd.drawText(nextXoffs + labelXoffs,nextYoffs + labelYoffs+ win457Yoffs,window[3],FONT_MINI)
+			--draw unit except timer window
+			if(window[4]<31)then
+				lcd.drawText(nextXoffs + labelXoffs,nextYoffs + labelYoffs+ win457Yoffs,window[3],FONT_MINI)
+			end	
 			if((window[1] == 4)or(window[1]==5))then 
 				if(window[10]%2 > 0) then
 					win45Xoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[3])+2 -- store x offset for next values in same line for window type 5 and 6
@@ -272,6 +311,27 @@ local function sensorChanged()
 	globVar.scrSens[i][j] = sensListIdx -- set sensorid to corresponding window 
 	system.pSave("sensors"..i.."",globVar.scrSens[i])
 end
+
+local function timerChanged()
+	timListIdx = form.getValue(timListBox)
+	form.reinit(globVar.screenlibID)
+end
+
+local function startSwitchChanged(value)
+	switches[1][timListIdx] = value
+	system.pSave("timStart"..timListIdx.."",value)
+end
+
+local function stoppSwitchChanged(value)
+	switches[2][timListIdx] = value
+	system.pSave("timStopp"..timListIdx.."",value)
+end
+
+local function resetSwitchChanged(value)
+	switches[3][timListIdx] = value
+	system.pSave("timReset"..timListIdx.."",value)
+end
+
 -------------------------------------------------------------------- 
 -- screen lib config page
 --------------------------------------------------------------------
@@ -300,11 +360,19 @@ local function screenLibConfig()
 			table.insert(winList,globVar.windows[1][i][2])	
 		end		
 		for i in ipairs(globVar.windows[2]) do
-			table.insert(winList,globVar.windows[2][i][2])	
+			if(setTx_Tim(2,i)==true)then -- exclude txTelemetry and timer windows
+				table.insert(winList,"***"..globVar.windows[2][i][2].."***")
+			else
+				table.insert(winList,globVar.windows[2][i][2])
+			end			
 		end	
 		if(#globVar.windows == 3) then
 			for i in ipairs(globVar.windows[3]) do
-				table.insert(winList,globVar.windows[3][i][2])	
+				if(setTx_Tim(3,i)==true)then  -- exclude txTelemetry and timer windows
+					table.insert(winList,"***"..globVar.windows[3][i][2].."***")
+				else
+					table.insert(winList,globVar.windows[3][i][2])
+				end			
 			end	
 		end
 		form.addRow(2)   
@@ -315,6 +383,18 @@ local function screenLibConfig()
 		form.addLabel({label="Sensor",width=170})
 		sensorListBox = form.addSelectbox(sensList,sensListIdx,true,sensorChanged)
 	end	
+	form.addRow(2)   
+	form.addLabel({label="Timer Setup",width=170})
+	timListBox = form.addSelectbox({"Timer 1","Timer 2","Timer 3","Timer 4"},timListIdx,true,timerChanged)
+	form.addRow(2)
+	form.addLabel({label="Start "..timListIdx..""})
+    form.addInputbox(switches[1][timListIdx],true,startSwitchChanged)
+	form.addRow(2)
+	form.addLabel({label="Stopp "..timListIdx..""})
+	form.addInputbox(switches[2][timListIdx],true,stoppSwitchChanged)
+	form.addRow(2)
+	form.addLabel({label="Reset "..timListIdx..""})
+	form.addInputbox(switches[3][timListIdx],true,resetSwitchChanged)
 	-- version
 	form.addRow(1)
 	form.addLabel({label="Powered by Geierwally - "..globVar.version.."  Mem max: "..globVar.mem.."K",font=FONT_MINI, alignRight=true})
@@ -355,7 +435,7 @@ local function loop()
 								globVar.windows[j][i][11] = string.format("%d° %f'", sensor.label,degs,minutes)
 							end
 						end
-					elseif(globVar.windows[j][i][4]==31)then -- value is timer
+					elseif(globVar.windows[j][i][4]==31)then -- todo value is timer
 					else                                 -- value from application
 						globVar.windows[j][i][8] = globVar.appValues[globVar.windows[j][i][4]] --set app value 
 					end	
