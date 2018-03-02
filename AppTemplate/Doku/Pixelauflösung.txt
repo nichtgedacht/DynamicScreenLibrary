@@ -57,7 +57,7 @@ R.volume, R.volumeP, Flow, Pressure
 Main:
 [1] 1 									[1] 1    (1 Elektro  2 Verbrenner 3 Segler) 
 [2] "Capacity"							[2] "LowestCell"  (label)
-[3] "%" (Einheit ist %) 			    [3] "V"  (Einheit ist Volt)
+[3] "%"  (Einheit ist %) 			    [3] "V"  (Einheit ist Volt)
 [4] 1    (app wert 1 Kapazität)			[4] 2    (app wert 2 berechnete Zellspannung)
 [5] 30   (30% min)						[5] 3.28 (3.28 Volt niedrigste Zellspannung)
 [6] 100  (100% Fehler gelöscht)			[6] 3.9  (3.9 Volt Fehler gelöscht , Akku gewechselt)
@@ -90,7 +90,7 @@ Min Max Fenster
 [4] 0                                   (Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App)
 [5] 20130                               (Alarmwert wenn mehr als 20130 U/min)
 [6] 19000                               (Bei 19000 U/min wird der Fehler gelöscht)
-[7] 0                        		    (Anzahl der Nachkommastellen)
+[7] 0                        			(Anzahl der Nachkommastellen)
 [8] 0									(von Screenlib gesetzt aktueller Sensorwert)
 [9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
 [10]0									(von Screenlib gesetzt min Wert)
@@ -183,16 +183,17 @@ Beispiel nach obiger Beschreibung:
 [6,"Strecke:","m",0,0,0,0,0,0,6],
 [6,"Vario:","m/s",0,0,0,2,0.0,0,7]
 
+
 Timerfenster normal 
 [1] 1 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
 [2] "Flugzeit"							(label Flugzeit)
 [3] 1					 			    (1 count up min , 2 count down min, 3 count up sec, 4 count down sec)
 [4] 31                                  (Wert 31 - 34 Timer 1 - Timer 4)
-[5] 0                                   (Startwert 0 Minuten)
-[6] 9                                	(Endwert Limit 9 Minuten wenn 0 kein Limit)
+[5] 9                                   (Limit 9 Minuten count up , wenn Wert = 0, kein Limit)
+[6] 0                                	(von App gesetzt Startwert Timer in ms)
 [7] 0                       			(von App gesetzt wenn 1 ist Timer aktiv)
-[8] 0									(Timerwert in ms)
-[9] 0									()
+[8] 0									(von App gesetzt Timerwert in ms)
+[9] "00:00:00"							(von App gesettz Timerwert als Text)
 Beispiel nach obiger Beschreibung:
 [1,"Flugzeit",1,31,0,9,0,0,0],
 
@@ -201,14 +202,11 @@ Timerfenster geteilt count down
 [2] "Motorzeit"							(label Motorzeit)
 [3] 4					 			    (1 count up min , 2 count down min, 3 count up sec, 4 count down sec)
 [4] 32                                  (Wert 31 - 34 Timer 1 - Timer 4)
-[5] 420                                 (Startwert 420 Sekunden)
-[6] 0                                	(Endwert Limit 0 Sekunden wenn Startwert = Endwert bei Countdown kein Limit)
+[5] 420                                 (Startwert 420 Sekunden countdown)
+[6] 0                                	(von App gesetzt Startwert Timer in ms)
 [7] 0                       			(von App gesetzt wenn 1 ist Timer aktiv)
 [8] 0									(Timerwert in ms)
-[9] 0									()
+[9] "00:00:00"							(von App gesettz Timerwert als Text)
 Beispiel nach obiger Beschreibung:
 [3,"Flugzeit",1,31,0,9,0,0,0],
-
-
-
 
