@@ -99,7 +99,9 @@ local function handleTimers(j,i,reset)
 		temp = temp *60
 		timeMin,temp = math.modf(temp)	
 		temp = temp *60
-		timesec = math.modf(temp)	
+		timesec = math.modf(temp)
+								local mem = math.modf(collectgarbage('count'))
+								print("format Zeile 104 ",mem)		
 		globVar.windows[j][i][11] = string.format( "%02d:%02d:%02d",timeHour,timeMin,timesec ) 
 	else									--min:sec:sec/10
 		timeMin,temp = math.modf(globVar.windows[j][i][8]/60000)
@@ -107,6 +109,8 @@ local function handleTimers(j,i,reset)
 		timesec, temp = math.modf(temp)
 		temp = temp * 100
 		timeMs = math.modf(temp) 
+								local mem = math.modf(collectgarbage('count'))
+								print("format Zeile 114 ",mem)		
 		globVar.windows[j][i][11] = string.format( "%02d:%02d:%02d", timeMin,timesec,timeMs ) 
 	end	
 end
@@ -264,6 +268,8 @@ local function drawWindow(winNr)
 			if(window[4]>29)then
 				valTxt = window[11] -- draw text
 			else
+								local mem = math.modf(collectgarbage('count'))
+								print("format Zeile 273 ",mem)		
 				valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
 			end
 			
@@ -338,6 +344,8 @@ local function drawWindow(winNr)
 			end		
 			if(window[1]== 2) then
 			--draw min max values
+								local mem = math.modf(collectgarbage('count'))
+								print("format Zeile 345 ",mem)		
 				local minMaxTxt = string.format("min:%."..math.modf(window[7]).."f max:%."..math.modf(window[7]).."f",window[10],window[11])
 				lcd.drawText(nextXoffs + 63 - lcd.getTextWidth(FONT_MINI,minMaxTxt)/2,nextYoffs + txtyoffs[window[1]][5],minMaxTxt,FONT_MINI)
 			end
@@ -435,6 +443,8 @@ local function screenLibConfig()
 	sensList = {}
 	globVar.sensorIdx = {}
 	for idx,sensor in ipairs(globVar.sensors) do 
+								local mem = math.modf(collectgarbage('count'))
+								print("format Zeile 447 ",mem)		
 		table.insert(sensList, string.format("%s", sensor.label))
 	end
 
@@ -517,7 +527,11 @@ local function loop()
 								globVar.windows[j][i][8] = sensor.valGPS --set sensor GPSvalue
 								local minutes = (sensor.valGPS & 0xFFFF) * 0.001
 								local degs = (sensor.valGPS >> 16) & 0xFF
-								globVar.windows[j][i][11] = string.format("%d° %f'", sensor.label,degs,minutes)
+								
+								local mem = math.modf(collectgarbage('count'))
+								print("format Zeile 532 ",mem)		
+
+								globVar.windows[j][i][11] = string.format("%s %d° %f'", sensor.label,degs,minutes)
 							end
 						end
 					elseif(globVar.windows[j][i][4]>30)then -- value is one of the timers
