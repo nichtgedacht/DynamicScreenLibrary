@@ -99,7 +99,7 @@ local function handleTimers(j,i,reset)
 		temp = temp *60
 		timeMin,temp = math.modf(temp)	
 		temp = temp *60
-		timesec = math.modf(temp)	
+		timesec = math.modf(temp)
 		globVar.windows[j][i][11] = string.format( "%02d:%02d:%02d",timeHour,timeMin,timesec ) 
 	else									--min:sec:sec/10
 		timeMin,temp = math.modf(globVar.windows[j][i][8]/60000)
@@ -524,7 +524,7 @@ local function loop()
 								globVar.windows[j][i][8] = sensor.valGPS --set sensor GPSvalue
 								local minutes = (sensor.valGPS & 0xFFFF) * 0.001
 								local degs = (sensor.valGPS >> 16) & 0xFF
-								globVar.windows[j][i][11] = string.format("%d° %f'", sensor.label,degs,minutes)
+								globVar.windows[j][i][11] = string.format("%s %d° %f'", sensor.label,degs,minutes)
 							end
 						end
 					elseif(globVar.windows[j][i][4]>30)then -- value is one of the timers
