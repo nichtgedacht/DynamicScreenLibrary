@@ -45,19 +45,22 @@ local function handleTimers(j,i,reset)
 	local temp = 0
 
 	if(1==system.getInputsVal(reset)or (reset==1))then
-		globVar.windows[j][i][7] = 0 --switch timer off
-		globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] --preset start value in ms
-		system.pSave("timer"..timerID.."",globVar.windows[j][i][8]) -- save timer value on reset
-	end	
-	if((1==system.getInputsVal(start))and (globVar.windows[j][i][7] == 0))then
-		if (globVar.windows[j][i][3] %2 ==0)then --count down timer
-			globVar.windows[j][i][6] =  globVar.currentTime - (preStart[globVar.windows[j][i][3]] - globVar.windows[j][i][8])--preset start time
-		else
-			globVar.windows[j][i][6] = globVar.currentTime - globVar.windows[j][i][8]--preset start time
+		if(globVar.windows[j][i][7] ==0)then
+			globVar.windows[j][i][7] = 0 --switch timer off
+			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] --preset start value in ms
+			system.pSave("timer"..timerID.."",globVar.windows[j][i][8]) -- save timer value on reset
 		end	
-		globVar.windows[j][i][7] = 1 --switch timer active
-		timeDif =0
-	end	
+	else	
+		if((1==system.getInputsVal(start))and (globVar.windows[j][i][7] == 0))then
+			if (globVar.windows[j][i][3] %2 ==0)then --count down timer
+				globVar.windows[j][i][6] =  globVar.currentTime - (preStart[globVar.windows[j][i][3]] - globVar.windows[j][i][8])--preset start time
+			else
+				globVar.windows[j][i][6] = globVar.currentTime - globVar.windows[j][i][8]--preset start time
+			end	
+			globVar.windows[j][i][7] = 1 --switch timer active
+			timeDif =0
+		end
+	end
 	if(1==system.getInputsVal(stopp))then
 		system.pSave("timer"..timerID.."",globVar.windows[j][i][8]) -- save timer value on stopp
 		globVar.windows[j][i][7] = 0 --switch timer off
@@ -71,7 +74,7 @@ local function handleTimers(j,i,reset)
 			if (globVar.windows[j][i][8] < 0)then
 				globVar.windows[j][i][8] = 0
 			end
-			countDownTime = math.modf(globVar.windows[j][i][8]/1000)
+			countDownTime = math.modf(globVar.windows[j][i][8]/1000)+1
 		else									 --count up timer
 			globVar.windows[j][i][8] = timeDif
 			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][8])/1000)+1
@@ -85,9 +88,9 @@ local function handleTimers(j,i,reset)
 				prevCountDownTime = countDownTime
 				--print(countDownTime)
 			end			
-		else
-			system.playBeep(1,4000,500) -- timer elapsedplay beep
-			prevCountDownTime = countDownTime
+		else		 
+				system.playBeep(1,4000,500) -- timer elapsedplay beep
+				prevCountDownTime = countDownTime
 		end
 	end	
 	
@@ -100,8 +103,6 @@ local function handleTimers(j,i,reset)
 		timeMin,temp = math.modf(temp)	
 		temp = temp *60
 		timesec = math.modf(temp)
-								local mem = math.modf(collectgarbage('count'))
-								print("format Zeile 104 ",mem)		
 		globVar.windows[j][i][11] = string.format( "%02d:%02d:%02d",timeHour,timeMin,timesec ) 
 	else									--min:sec:sec/10
 		timeMin,temp = math.modf(globVar.windows[j][i][8]/60000)
@@ -109,8 +110,6 @@ local function handleTimers(j,i,reset)
 		timesec, temp = math.modf(temp)
 		temp = temp * 100
 		timeMs = math.modf(temp) 
-								local mem = math.modf(collectgarbage('count'))
-								print("format Zeile 114 ",mem)		
 		globVar.windows[j][i][11] = string.format( "%02d:%02d:%02d", timeMin,timesec,timeMs ) 
 	end	
 end
@@ -268,8 +267,6 @@ local function drawWindow(winNr)
 			if(window[4]>29)then
 				valTxt = window[11] -- draw text
 			else
-								local mem = math.modf(collectgarbage('count'))
-								print("format Zeile 273 ",mem)		
 				valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
 			end
 			
@@ -344,8 +341,6 @@ local function drawWindow(winNr)
 			end		
 			if(window[1]== 2) then
 			--draw min max values
-								local mem = math.modf(collectgarbage('count'))
-								print("format Zeile 345 ",mem)		
 				local minMaxTxt = string.format("min:%."..math.modf(window[7]).."f max:%."..math.modf(window[7]).."f",window[10],window[11])
 				lcd.drawText(nextXoffs + 63 - lcd.getTextWidth(FONT_MINI,minMaxTxt)/2,nextYoffs + txtyoffs[window[1]][5],minMaxTxt,FONT_MINI)
 			end
@@ -443,8 +438,6 @@ local function screenLibConfig()
 	sensList = {}
 	globVar.sensorIdx = {}
 	for idx,sensor in ipairs(globVar.sensors) do 
-								local mem = math.modf(collectgarbage('count'))
-								print("format Zeile 447 ",mem)		
 		table.insert(sensList, string.format("%s", sensor.label))
 	end
 
@@ -527,10 +520,6 @@ local function loop()
 								globVar.windows[j][i][8] = sensor.valGPS --set sensor GPSvalue
 								local minutes = (sensor.valGPS & 0xFFFF) * 0.001
 								local degs = (sensor.valGPS >> 16) & 0xFF
-								
-								local mem = math.modf(collectgarbage('count'))
-								print("format Zeile 532 ",mem)		
-
 								globVar.windows[j][i][11] = string.format("%s %d° %f'", sensor.label,degs,minutes)
 							end
 						end

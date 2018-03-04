@@ -45,19 +45,22 @@ local function handleTimers(j,i,reset)
 	local temp = 0
 
 	if(1==system.getInputsVal(reset)or (reset==1))then
-		globVar.windows[j][i][7] = 0 --switch timer off
-		globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] --preset start value in ms
-		system.pSave("timer"..timerID.."",globVar.windows[j][i][8]) -- save timer value on reset
-	end	
-	if((1==system.getInputsVal(start))and (globVar.windows[j][i][7] == 0))then
-		if (globVar.windows[j][i][3] %2 ==0)then --count down timer
-			globVar.windows[j][i][6] =  globVar.currentTime - (preStart[globVar.windows[j][i][3]] - globVar.windows[j][i][8])--preset start time
-		else
-			globVar.windows[j][i][6] = globVar.currentTime - globVar.windows[j][i][8]--preset start time
+		if(globVar.windows[j][i][7] ==0)then
+			globVar.windows[j][i][7] = 0 --switch timer off
+			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] --preset start value in ms
+			system.pSave("timer"..timerID.."",globVar.windows[j][i][8]) -- save timer value on reset
 		end	
-		globVar.windows[j][i][7] = 1 --switch timer active
-		timeDif =0
-	end	
+	else	
+		if((1==system.getInputsVal(start))and (globVar.windows[j][i][7] == 0))then
+			if (globVar.windows[j][i][3] %2 ==0)then --count down timer
+				globVar.windows[j][i][6] =  globVar.currentTime - (preStart[globVar.windows[j][i][3]] - globVar.windows[j][i][8])--preset start time
+			else
+				globVar.windows[j][i][6] = globVar.currentTime - globVar.windows[j][i][8]--preset start time
+			end	
+			globVar.windows[j][i][7] = 1 --switch timer active
+			timeDif =0
+		end
+	end
 	if(1==system.getInputsVal(stopp))then
 		system.pSave("timer"..timerID.."",globVar.windows[j][i][8]) -- save timer value on stopp
 		globVar.windows[j][i][7] = 0 --switch timer off
@@ -71,7 +74,7 @@ local function handleTimers(j,i,reset)
 			if (globVar.windows[j][i][8] < 0)then
 				globVar.windows[j][i][8] = 0
 			end
-			countDownTime = math.modf(globVar.windows[j][i][8]/1000)
+			countDownTime = math.modf(globVar.windows[j][i][8]/1000)+1
 		else									 --count up timer
 			globVar.windows[j][i][8] = timeDif
 			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][8])/1000)+1
@@ -99,7 +102,7 @@ local function handleTimers(j,i,reset)
 		temp = temp *60
 		timeMin,temp = math.modf(temp)	
 		temp = temp *60
-		timesec = math.modf(temp)	
+		timesec = math.modf(temp)
 		globVar.windows[j][i][11] = string.format( "%02d:%02d:%02d",timeHour,timeMin,timesec ) 
 	else									--min:sec:sec/10
 		timeMin,temp = math.modf(globVar.windows[j][i][8]/60000)
@@ -180,7 +183,6 @@ end
 -------------------------------------------------------------------- 
 -- limit checks
 -------------------------------------------------------------------- 
-
 local function checkLimit(window,mainIndex)
 	local compareLogic = false
 	if((window[4]==30)or(window[6]==window[5]))then
@@ -524,7 +526,7 @@ local function loop()
 								globVar.windows[j][i][8] = sensor.valGPS --set sensor GPSvalue
 								local minutes = (sensor.valGPS & 0xFFFF) * 0.001
 								local degs = (sensor.valGPS >> 16) & 0xFF
-								globVar.windows[j][i][11] = string.format("%d° %f'", sensor.label,degs,minutes)
+								globVar.windows[j][i][11] = string.format("%s %d° %f'", sensor.label,degs,minutes)
 							end
 						end
 					elseif(globVar.windows[j][i][4]>30)then -- value is one of the timers

@@ -80,6 +80,7 @@ local function loop()
 	globVar.debugmem = math.modf(collectgarbage('count'))
 	if (globVar.mem < globVar.debugmem) then
 		globVar.mem = globVar.debugmem
+		print("max Speicher Zyklus: "..globVar.mem.."K")		
 	end
 end
  
