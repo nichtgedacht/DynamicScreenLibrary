@@ -210,3 +210,28 @@ Timerfenster geteilt count down
 Beispiel nach obiger Beschreibung:
 [3,"Motorzet",4,32,420,0,0,0,0],
 
+
+
+###############################################################################################################
+
+globVar.scrSens = {{},{},{}},-- list of all screen sensors
+globVar.scrSPar = {{},{},{}},-- list of all screen sensor parameters
+globVar.sensors = {{}}, -- all sensor iDs
+globVar.sensParam = {{}} --all sensor parameter 
+
+
+local winList = {} -- all windows
+local sensList = {} -- all sensor labels
+local sensPaList = {} -- all sensor parameter labels for selected sensor
+local winListBox = nil -- ID of the windows label list box
+local sensorListBox = nil -- ID of the sensor list box
+local sensParListBox = nil -- ID of sensor param list box
+local winListIdx = 1 -- index of label list box
+local sensListIdx = 1 -- index of sensor list box
+local sensPaListIdx = 1 -- index of sesor parameter list box
+
+SensorID von Window[j][i]:			local sensID = globVar.scrSens[j][i]
+Sensorparameter von Window[j][i]: 	local sensPar = globVar.scrSPar[j][i] 
+local sensID = globVar.scrSens[j][i]
+local sensPar = globVar.scrSPar[j][i] 
+local sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])

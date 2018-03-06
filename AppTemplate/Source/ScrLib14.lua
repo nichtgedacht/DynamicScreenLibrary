@@ -15,21 +15,28 @@ local aTimeRunning = 0 --alert delay is running
 local aDelay = 0  --voltage alert delay
 local aPrepare = false -- alert in preparation
 local winList = {} -- all windows
-local sensList = {} -- all sensors
+local sensList = {} -- all sensor labels
+local sensPaList = {} -- all sensor parameter labels for selected sensor
 local winListBox = nil -- ID of the windows label list box
 local winListIdx = 1 -- index of label list box
 local sensorListBox = nil -- ID of the sensor list box
+local sensParListBox = nil -- ID of sensor param list box
 local sensListIdx = 1 -- index of sensor list box
+local sensPaListIdx = 1 -- index of sesor parameter list box
 local timListIdx = 0 -- index of timer list
 local mainWin_Lib = nil  -- main window
 local lib_Path = nil     -- path to last loaded main win library
 local switches = {{nil,nil,nil,nil},{nil,nil,nil,nil},{nil,nil,nil,nil}} -- start, stopp, reset switches for timers 1 - 4
+local timLimits = {0,0,0,0}
 local prevCountDownTime = 100 -- for count down timer
 
 -------------------------------------------------------------------- 
 -- Init function
 -------------------------------------------------------------------- 
-local function handleTimers(j,i,reset)
+local function handleTimers(j,i,reset_)
+	if(timLimits[globVar.windows[j][i][4]-30]>0)then
+		globVar.windows[j][i][5] = timLimits[globVar.windows[j][i][4]-30]
+	end
 	local timerID = globVar.windows[j][i][4]-30
 	local timVal = globVar.windows[j][i][4]
 	local start = switches[1][timerID]
@@ -44,9 +51,8 @@ local function handleTimers(j,i,reset)
 	local timeMs = 0
 	local temp = 0
 
-	if(1==system.getInputsVal(reset)or (reset==1))then
-		if(globVar.windows[j][i][7] ==0)then
-			globVar.windows[j][i][7] = 0 --switch timer off
+	if(1==system.getInputsVal(reset)or (reset_==1))then
+		if(globVar.windows[j][i][7] ==0)then -- is timer switched off
 			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] --preset start value in ms
 			system.pSave("timer"..timerID.."",globVar.windows[j][i][8]) -- save timer value on reset
 		end	
@@ -71,9 +77,6 @@ local function handleTimers(j,i,reset)
 	if(globVar.windows[j][i][7] == 1) then --timer is running
 		if (globVar.windows[j][i][3] %2 ==0)then --count down timer
 			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] - timeDif
-			if (globVar.windows[j][i][8] < 0)then
-				globVar.windows[j][i][8] = 0
-			end
 			countDownTime = math.modf(globVar.windows[j][i][8]/1000)+1
 		else									 --count up timer
 			globVar.windows[j][i][8] = timeDif
@@ -81,21 +84,27 @@ local function handleTimers(j,i,reset)
 		end
 	end
 
-	if((countDownTime >=0)and(countDownTime <11)and(countDownTime ~= prevCountDownTime))then
+	if((countDownTime <11)and(countDownTime ~= prevCountDownTime))then
 		if(countDownTime > 0)then
 			if (system.isPlayback () == false) then
 				system.playNumber(countDownTime,0) --audio remaining flight time
 				prevCountDownTime = countDownTime
-				--print(countDownTime)
 			end			
-		else		 
+		else	
+			if(countDownTime % 10 ==0)then	 
 				system.playBeep(1,4000,500) -- timer elapsedplay beep
 				prevCountDownTime = countDownTime
+			end	
 		end
 	end	
 	
 	
 	globVar.windows[j][i][11] = nil
+	local sign = " "
+	if(globVar.windows[j][i][8]<0)then
+		sign = nil
+		sign = "-"
+	end
 	if (globVar.windows[j][i][3]<3)then		--hour:min:sec
 		local temp = globVar.windows[j][i][8] / 3600000
 		timeHour,temp = math.modf(temp)
@@ -103,14 +112,14 @@ local function handleTimers(j,i,reset)
 		timeMin,temp = math.modf(temp)	
 		temp = temp *60
 		timesec = math.modf(temp)
-		globVar.windows[j][i][11] = string.format( "%02d:%02d:%02d",timeHour,timeMin,timesec ) 
+		globVar.windows[j][i][11] = string.format( "%s%02d:%02d:%02d",sign,math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
 	else									--min:sec:sec/10
 		timeMin,temp = math.modf(globVar.windows[j][i][8]/60000)
 		temp = temp * 60
 		timesec, temp = math.modf(temp)
 		temp = temp * 100
 		timeMs = math.modf(temp) 
-		globVar.windows[j][i][11] = string.format( "%02d:%02d:%02d", timeMin,timesec,timeMs ) 
+		globVar.windows[j][i][11] = string.format( "%s%02d:%02d:%02d", sign,math.abs(timeMin),math.abs(timesec),math.abs(timeMs) ) 
 	end	
 end
 
@@ -142,8 +151,6 @@ local function setTx_Tim(j,i)
 	else
 		if((globVar.windows[j][i][4]>30) and (globVar.windows[j][i][4]<35))then
 			local timerID = globVar.windows[j][i][4]-30
-			globVar.timers[timerID][1]=j -- timer window screen 1
-			globVar.timers[timerID][2]=i -- timer window number
 			globVar.windows[j][i][8]= system.pLoad("timer"..timerID.."",-1) -- preset timer value of window
 			if(globVar.windows[j][i][8]==-1)then -- reset timer if value was not stored
 				handleTimers(j,i,1)
@@ -170,6 +177,7 @@ local function init(globVar_)
 		switches[1][i] = system.pLoad("timStart"..i.."",nil)
 		switches[2][i] = system.pLoad("timStopp"..i.."",nil)
 		switches[3][i] = system.pLoad("timReset"..i.."",nil)
+		timLimits[i] = system.pLoad("timLimit"..i.."",0)
 		i=i+1
 	end
 	globVar.initDone = true
@@ -401,7 +409,14 @@ local function sensorChanged()
 	sensListIdx = form.getValue(sensorListBox)
 	local j,i = calcWinIdx(winListIdx)
 	globVar.scrSens[j][i] = sensListIdx -- set sensorid to corresponding window 
-	system.pSave("sensors"..i.."",globVar.scrSens[i])
+	system.pSave("sensors"..j.."",globVar.scrSens[j])
+end
+
+local function sensParChanged()
+	sensPaListIdx = form.getValue(sensParListBox)
+	local j,i = calcWinIdx(winListIdx)
+	globVar.scrSPar[j][i] = sensPaListIdx -- set sensor parameterid to corresponding window 
+	system.pSave("scrSPar"..j.."",globVar.scrSPar[j])
 end
 
 local function startSwitchChanged(value)
@@ -419,13 +434,37 @@ local function resetSwitchChanged(value)
 	system.pSave("timReset"..timListIdx.."",value)
 end
 
+local function limitChanged(value)
+	timLimits[timListIdx] = value
+	system.pSave("timLimit"..timListIdx.."",value)
+	local j,i = calcWinIdx(winListIdx)
+	globVar.windows[j][i][5] = value
+	handleTimers(j,i,1)
+end
+
 -------------------------------------------------------------------- 
 -- screen lib config page
 --------------------------------------------------------------------
 local function screenLibConfig()
-	local i,j = calcWinIdx(winListIdx)
-	if(globVar.scrSens[i][j]>0)then
-		sensListIdx = globVar.scrSens[i][j]
+
+	local j,i = calcWinIdx(winListIdx)
+	local sensor = {}
+
+	for k in next,sensList do sensList[k] = nil end
+	for k in next,sensPaList do sensPaList[k] = nil end
+	for k in next,winList do winList[k] = nil end
+
+	sensListIdx = globVar.scrSens[j][i] --preset sensorlist index
+	for idx in ipairs(globVar.sensors) do 
+		sensor = system.getSensorByID (globVar.sensors[idx],0)
+		table.insert(sensList, string.format("%s", sensor.label))
+	end
+	sensPaListIdx = globVar.scrSPar[j][i] --preset parameterlist index
+	if (globVar.sensParam[sensListIdx]~=nil) then
+		for idx in ipairs(globVar.sensParam[sensListIdx]) do 
+			sensor = system.getSensorByID (globVar.sensors[sensListIdx],globVar.sensParam[sensListIdx][idx])
+			table.insert(sensPaList, string.format("%s", sensor.label))
+		end
 	end
   
 	form.setTitle(globVar.trans.screenLib)
@@ -435,14 +474,8 @@ local function screenLibConfig()
 	form.addRow(1)
 	form.addLabel({label=globVar.trans.bindSens,font=FONT_BOLD})
 
-	sensList = {}
-	globVar.sensorIdx = {}
-	for idx,sensor in ipairs(globVar.sensors) do 
-		table.insert(sensList, string.format("%s", sensor.label))
-	end
 
-	if( sensList[1] ~= "...") then
-		winList = {}
+	if( sensPaList[1] ~=nil) then
 		for i in ipairs(globVar.windows[1]) do
 			table.insert(winList,globVar.windows[1][i][2])	
 		end		
@@ -469,6 +502,10 @@ local function screenLibConfig()
 			form.addRow(2)
 			form.addLabel({label="Sensor",width=170})
 			sensorListBox = form.addSelectbox(sensList,sensListIdx,true,sensorChanged)
+
+			form.addRow(2)
+			form.addLabel({label="SensParam",width=170})
+			sensParListBox = form.addSelectbox(sensPaList,sensPaListIdx,true,sensParChanged)
 		end	
 	end	
 
@@ -482,6 +519,23 @@ local function screenLibConfig()
 		form.addRow(2)
 		form.addLabel({label="Reset "..timListIdx..""})
 		form.addInputbox(switches[3][timListIdx],true,resetSwitchChanged)
+		form.addRow(2)
+		local j,i = calcWinIdx(winListIdx)
+		if(timLimits[timListIdx]==0) then
+			timLimits[timListIdx]=globVar.windows[j][i][5]
+		end
+		local labeltxt = "Limit "
+		local unit = " min"
+		if(globVar.windows[j][i][3] % 2 ==0)then
+			labeltxt = nil
+			labeltxt = "Preset "
+		end
+		if(globVar.windows[j][i][3]>2)then
+			unit = nil
+			unit = " s"
+		end
+		form.addLabel({label=""..labeltxt..""..timListIdx..""..unit..""})
+		form.addIntbox(timLimits[timListIdx],0,1000,globVar.windows[j][i][5],0,1,limitChanged)
     end	
 	-- version
 	form.addRow(1)
@@ -500,18 +554,22 @@ local function loop()
 		end
 		aPrepare = false
 		local sensor = {}
+		local sensID = nil
+		local sensPar = nil
 		for j in ipairs(globVar.windows)do
 			for i in ipairs(globVar.windows[j]) do --check limits of main window
 				if(globVar.windows[j][i][1]==2)then -- reset screen min max values
 					globVar.windows[j][i][10]=0 
 					globVar.windows[j][i][11]=0
 				end					
+				sensID = globVar.scrSens[j][i]
+				sensPar = globVar.scrSPar[j][i] 
 				if(globVar.windows[j][i][4]>0) then 
 					if(globVar.windows[j][i][4]==30)then -- value is GPS Coordinate
 						globVar.windows[j][i][8] = 0 -- reset screen value
 						sensor = {}
-						if(#globVar.sensors >0)then
-							sensor = globVar.sensors[globVar.scrSens[j][i]]-- read sensor
+							if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+							sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
 							if(sensor and sensor.valid and sensor.type ==9) then
 								local nesw = {"N", "E", "S", "W"}
 								globVar.windows[j][i][3] = nil
@@ -531,8 +589,8 @@ local function loop()
 				else				-- value from telemetry sensor
 					sensor = {}
 					globVar.windows[j][i][8] = 0 -- reset screen value
-					if(#globVar.sensors >0)then
-						sensor = globVar.sensors[globVar.scrSens[j][i]]-- read sensor
+					if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+						sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
 					end
 					if(sensor and sensor.valid) then
 						globVar.windows[j][i][8] = sensor.value --set sensor value

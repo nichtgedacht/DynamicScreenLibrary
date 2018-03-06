@@ -21,6 +21,7 @@ local configRow =1		--row of cap increase int box
 local fileBoxIndex = 0	--ID select box data files
 local datafiles = {}
 local fileIndex = 1
+local scrlib_Path = nil
 
 --------------------------------------------------------------------------------
 -- Application initializer
@@ -47,18 +48,71 @@ end
 
 local function init(code,globVar_)
 	globVar = globVar_
+	if(screen_lib ~= nil)then
+		local tempMem =  math.modf(collectgarbage('count'))
+		print("Speicher vor Entladen ScreenLib: "..tempMem.."K")		
+		package.loaded[scrlib_Path]=nil
+		_G[scrlib_Path]=nil
+		screen_lib = nil
+		scrlib_Path = nil
+		collectgarbage('collect')
+		tempMem =  math.modf(collectgarbage('count'))
+		print("Speicher nach Entladen ScreenLib: "..tempMem.."K")--todo remove		
+	end	
 	-- Read available sensors for user to select
-	globVar.scrSens[1] = system.pLoad("sensors1", {1,1})-- list of all binded sensors main
-	globVar.scrSens[2] = system.pLoad("sensors2", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 1
-	globVar.scrSens[3] = system.pLoad("sensors3", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 2
+	local sensors_ = system.getSensors() -- read in all sensor data
+	globVar.sensors = {}
+	globVar.sensParam = {}
+	sensPar = {}
+	for idx,sensor in ipairs(sensors_) do
+		if(sensor.param == 0) then
+			if(sensPar[1] ~=nil)then
+				table.insert(globVar.sensParam,sensPar)
+				sensPar = {}
+			end
+			table.insert(globVar.sensors,sensor.id)
+		else
+			table.insert(sensPar,sensor.param)
+		end
+	end
+	if(sensPar[1]~=nil)then
+		table.insert(globVar.sensParam,sensPar)
+		sensPar = {}
+	end	
+	collectgarbage('collect')
+	local tempMem =  math.modf(collectgarbage('count'))
+	print("Speicher vor Entladen der Sensoren: "..tempMem.."K")--todo remove		
+	sensors_ = nil --unload sensor list to avoid storage lack
+	collectgarbage('collect')
+	tempMem =  math.modf(collectgarbage('count'))
+	print("Speicher nach Entladen der Sensoren: "..tempMem.."K")--todo remove		
+	globVar.scrSens={}
+	globVar.scrSPar={}
+	tempList = {}
+	tempList = system.pLoad("sensors1", {1,1})-- list of all binded sensors main
+	table.insert(globVar.scrSens,tempList)
+	tempList = {} 
+	tempList = system.pLoad("sensors2", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 2
+	table.insert(globVar.scrSens,tempList)
+	tempList = {} 
+	tempList = system.pLoad("sensors3", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 3
+	table.insert(globVar.scrSens,tempList)
+	tempList = {} 
+	tempList = system.pLoad("scrSPar1", {1,1})-- list of all binded sensors parameters main
+	table.insert(globVar.scrSPar,tempList)
+	tempList = {} 
+	tempList = system.pLoad("scrSPar2", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors parameter telemetry screen 2
+	table.insert(globVar.scrSPar,tempList)
+	tempList = {} 
+	tempList = system.pLoad("scrSPar3", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors parameter telemetry screen 3
+	table.insert(globVar.scrSPar,tempList)
+	tempList = {} 
 	globVar.appValues = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- calculated application values
-	globVar.timers = {{0,0},{0,0},{0,0},{0,0}}-- list window index of all software timers
-
 	loadDataFile() -- load all screen data
 	-- read device type for loading corresponding screen library
 	local deviceType = system.getDeviceType()
 	if(( deviceType == "JETI DC-24")or(deviceTypeF3K == "JETI DS-24"))then
-	--todo	globVar.screenLib24 = 24 -- load screen library of DS / DC 24
+		globVar.screenLib24 = 24 -- load screen library of DS / DC 24
 	end
 	-- Set language
 	local lng=system.getLocale();
@@ -69,7 +123,8 @@ local function init(code,globVar_)
 	end
 	globVar.currentDate = system.getDateTime()
 	if(screen_lib == nil)then
-		screen_lib = require("AppTempl/Tasks/ScrLib"..globVar.screenLib24.."")
+		scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
+		screen_lib = require(scrlib_Path)
 	end
 	if(screen_lib ~=nil)then
 		local func = screen_lib[1]  --init() 
@@ -94,6 +149,7 @@ local function keyPressed(key)
 	if(key==KEY_MENU or key==KEY_ESC) then
 		form.preventDefault()
 	elseif(key==KEY_1)then
+		init(1,globVar)
 	-- open with Key 1 the screen lib config
 		form.reinit(globVar.screenlibID)
 --**************************************************************---
@@ -173,7 +229,7 @@ local function appConfig()
 	form.addLabel({label=globVar.trans.config,font=FONT_BOLD})
 
 	form.addRow(2)
-    form.addLabel({label="DataFile",width=100})
+    form.addLabel({label="DataFile",width=170})
 	fileBoxIndex = form.addSelectbox(datafiles,fileIndex,true,dataFileChanged,{width=170})
 	
 	if(globVar.windows[1][1][1] < 3) then 
@@ -242,9 +298,10 @@ end
 local function loop()
 	local sensor1 = {}
 	local sensor2 = {}
+	local sensID = 0
+	local sensPar = 0
+	
  	if((screen_lib ~= nil)and (globVar.initDone == true))then
-		globVar.sensors = {}
-		globVar.sensors = system.getSensors() -- read in all sensor data
 		-- register config page of the app template 
 		system.registerForm(1,MENU_MAIN,globVar.trans.appName,initTempl,keyPressedTempl,printForm);
 		local txTel = system.getTxTelemetry()
@@ -257,9 +314,17 @@ local function loop()
 		globVar.appValues[9]= txTel.RSSI[3]
 		globVar.appValues[10]= txTel.RSSI[4]
 
-		if(#globVar.sensors >0) then
-			sensor1 = globVar.sensors[globVar.scrSens[1][1]]  -- read sensor
-			sensor2 = globVar.sensors[globVar.scrSens[1][2]]  -- read sensor
+		sensID = globVar.scrSens[1][1]
+		sensPar = globVar.scrSPar[1][1] 
+		if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+			sensor1 = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])	
+		end
+		sensID = globVar.scrSens[1][2]
+		sensPar = globVar.scrSPar[1][2] 
+		if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+			sensor2 = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])	
+		end
+		
 		-- else
 	-- ------only for simulation without connected telemetry
 			-- sensor1 = {}
@@ -295,7 +360,7 @@ local function loop()
 			-- globVar.appValues[3] = RPM_SimVal * 25000
 			-- end
 	-- ------only for simulation without connected telemetry
-		end
+	--	end
 		if( system.getTime() % 2 == 0 ) then -- blink every second
 			globVar.secClock = true
 		else

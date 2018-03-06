@@ -25,7 +25,8 @@ local globVar ={--                          main version | version of screenlib 
 				currentDate  = nil,--       current date 
 				screenLib24  = 14,--        if 24 the screen library of ds / dc 24 is loaded otherwise screen lib of the DC / DS 14 / 16
 				trans = {},--               translations depending on set language
-				scrSens = {},--             list of all sensors for each screen area 2 sensors possible
+				scrSens = {},--             list of all screen sensors
+				scrSPar = {},--				list of all screen sensor parameters
 				appValues = {},--           calculated values of application
 				modelType = 2,--          	stroke or electro
 				model = nil, --             Model Name
@@ -33,8 +34,8 @@ local globVar ={--                          main version | version of screenlib 
 				txtColor = {},--            text and frame color
 				initDone = false, --        initialization of library done
 				secClock = false, --        second clock for blinking text on failure
-				sensors = {}, --			all sensor data 
-				timers = {}-- 				list of all software timers
+				sensors = {}, --			all sensor iDs
+				sensParam = {} --          all sensor parameter
 			   }
 
 -------------------------------------------------------------------- 
