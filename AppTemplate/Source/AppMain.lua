@@ -14,78 +14,16 @@
 -- Locals for the application
 local globVar =  nil--    global variables for application and screen library
 local screen_lib = nil --depending on device loaded screen library
-local nCell = 3--number of lipo cells
-local capa = 0-- capacity 
-local capIncrease = 100 --increase capacity config step with
-local configRow =1		--row of cap increase int box
-local fileBoxIndex = 0	--ID select box data files
-local datafiles = {}
-local fileIndex = 1
-local scrlib_Path = nil
+local config_lib = nil --loaded config library
+local scrlib_Path = nil --path to screen lib
+local config_Path = nil --path to config lib
+
 
 --------------------------------------------------------------------------------
 -- Application initializer
 
-local function loadDataFile()
-	datafiles = {}
-	for name in dir("Apps/AppTempl/data") do
-		if(#name >3) then
-		table.insert(datafiles,name)
-		end
-	end
-	fileIndex = system.pLoad("fileIndex",1)
-	if(fileIndex > #datafiles)then
-		fileIndex = 1
-	end
-	local file = io.readall("Apps/AppTempl/data/"..datafiles[fileIndex].." ")
-	if(file)then
-	    globVar.windows = {}
-		globVar.windows	= json.decode(file)
-	end	
-	return datafiles
-end
-
-
 local function init(code,globVar_)
 	globVar = globVar_
-	if(screen_lib ~= nil)then
-		local tempMem =  math.modf(collectgarbage('count'))
-		print("Speicher vor Entladen ScreenLib: "..tempMem.."K")		
-		package.loaded[scrlib_Path]=nil
-		_G[scrlib_Path]=nil
-		screen_lib = nil
-		scrlib_Path = nil
-		collectgarbage('collect')
-		tempMem =  math.modf(collectgarbage('count'))
-		print("Speicher nach Entladen ScreenLib: "..tempMem.."K")--todo remove		
-	end	
-	-- Read available sensors for user to select
-	local sensors_ = system.getSensors() -- read in all sensor data
-	globVar.sensors = {}
-	globVar.sensParam = {}
-	sensPar = {}
-	for idx,sensor in ipairs(sensors_) do
-		if(sensor.param == 0) then
-			if(sensPar[1] ~=nil)then
-				table.insert(globVar.sensParam,sensPar)
-				sensPar = {}
-			end
-			table.insert(globVar.sensors,sensor.id)
-		else
-			table.insert(sensPar,sensor.param)
-		end
-	end
-	if(sensPar[1]~=nil)then
-		table.insert(globVar.sensParam,sensPar)
-		sensPar = {}
-	end	
-	collectgarbage('collect')
-	local tempMem =  math.modf(collectgarbage('count'))
-	print("Speicher vor Entladen der Sensoren: "..tempMem.."K")--todo remove		
-	sensors_ = nil --unload sensor list to avoid storage lack
-	collectgarbage('collect')
-	tempMem =  math.modf(collectgarbage('count'))
-	print("Speicher nach Entladen der Sensoren: "..tempMem.."K")--todo remove		
 	globVar.scrSens={}
 	globVar.scrSPar={}
 	tempList = {}
@@ -108,7 +46,18 @@ local function init(code,globVar_)
 	table.insert(globVar.scrSPar,tempList)
 	tempList = {} 
 	globVar.appValues = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- calculated application values
-	loadDataFile() -- load all screen data
+	if(config_lib == nil)then -- initialize configurations, load datafile
+		config_Path = "AppTempl/Tasks/ConfLib"
+		config_lib = require(config_Path)
+	end
+	if(config_lib ~=nil)then
+		local func = config_lib[1]  --init() 
+		func(globVar,0) -- execute specific initializer of config lib
+		package.loaded[config_Path]=nil -- unload config lib
+		_G[config_Path]=nil
+		config_lib = nil
+		config_Path = nil
+    end
 	-- read device type for loading corresponding screen library
 	local deviceType = system.getDeviceType()
 	if(( deviceType == "JETI DC-24")or(deviceTypeF3K == "JETI DS-24"))then
@@ -131,9 +80,8 @@ local function init(code,globVar_)
 		func(globVar) -- execute specific initializer of screen library
     end	
 	globVar.model = system.getProperty("Model")
-	nCell = system.pLoad("nCell",3)
-	capIncrease = system.pLoad("capIncrease",100)
-	capa = system.pLoad("capa",2400)
+	globVar.nCell = system.pLoad("nCell",3)
+	globVar.capa = system.pLoad("capa",2400)
 	-- ----only for simulation without connected telemetry
 	-- SimCap = system.pLoad("SimCap")
 	-- ----only for simulation without connected telemetry
@@ -145,151 +93,43 @@ end
 --------------------------------------------------------------------
 -- main config key event handler
 --------------------------------------------------------------------
-local function keyPressed(key)
-	if(key==KEY_MENU or key==KEY_ESC) then
-		form.preventDefault()
-	elseif(key==KEY_1)then
-		init(1,globVar)
-	-- open with Key 1 the screen lib config
-		form.reinit(globVar.screenlibID)
---**************************************************************---
---**************add your own key handler here**************---
-
---**************************************************************---
-	end
-end	
 
 local function keyPressedTempl(key)
-	if(globVar.currentForm == globVar.screenlibID) then
-		if(screen_lib ~=nil)then
-			local func = screen_lib[3]  --keyPressed() 
-			func(key) -- execute config event handler of screen library
+	local func = nil
+	if(config_lib ~=nil)then
+		if(globVar.currentForm == globVar.screenlibID) then
+			func = config_lib[3]  --keyPressedScr()
+			func(key) -- execute config event handler screen library
+		else
+			func = config_lib[2]  --keyPressed()
+			if(func(key)==1) then -- execute config event handler app template
+				init(1,globVar)	  -- close and unload config, reinitialize
+				form.close()
+			end
 		end
-	else
-		keyPressed(key)
-	end
+	end	
 end
 
--------------------------------------------------------------------- 
--- app configbutton handler
---------------------------------------------------------------------
-
---***********************************************************---
---*************add your own button handler here**************---
-
-local function numberOfCellsChanged(value)
-	nCell = value
-	system.pSave("nCell",value)
-end
-local function capaChanged(value)
-	capa = value
-	system.pSave("capa",capa)
-end
-local function capIncreaseChanged(value)
-	capIncrease = value
-	system.pSave("capIncrease",value)
-	configRow = form.getFocusedRow()
-	form.reinit(globVar.templateAppID)
-end
-local function dataFileChanged()
-    system.pSave("fileIndex",form.getValue(fileBoxIndex))
-    loadDataFile()
-    if(screen_lib ~=nil)then
-		local func = screen_lib[5]  --loadmainWindow() 
-		func() -- execute config event handler of screen library
-	end
-    form.reinit(globVar.templateAppID)
-end
--- ------only for simulation without connected telemetry
--- local function SimCapChanged(value)
-	-- SimCap = value
-	-- system.pSave("SimCap",value)
--- end
--- ------only for simulation without connected telemetry
--- local function SimVoltChanged(value)
-	-- SimVolt = value
-	-- system.pSave("SimVolt",value)
--- end
--- ------only for simulation without connected telemetry
--- local function SimRPMChanged(value)
-	-- SimRPM = value
-	-- system.pSave("SimRPM",value)
--- end
-
---***********************************************************---
-
--------------------------------------------------------------------- 
--- app config page
---------------------------------------------------------------------
-local function appConfig()
-	form.setTitle(globVar.trans.appName)
-	form.setButton(1,"ScrLib",ENABLED)
-
-	form.addRow(1)
-	form.addLabel({label=globVar.trans.config,font=FONT_BOLD})
-
-	form.addRow(2)
-    form.addLabel({label="DataFile",width=170})
-	fileBoxIndex = form.addSelectbox(datafiles,fileIndex,true,dataFileChanged,{width=170})
-	
-	if(globVar.windows[1][1][1] < 3) then 
-	    if(globVar.windows[1][1][1] == 1) then --electro model 
-			form.addRow(2)
-			form.addLabel({label=globVar.trans.nCell,width=170})
-			form.addIntbox(nCell,1,24,3,0,1,numberOfCellsChanged)
-		end		
-
-		form.addRow(2)
-		form.addLabel({label=string.format("%s (%s)",globVar.trans.capa, globVar.windows[1][1][3]),width=170})
-		form.addIntbox(capa,0,32767,2400,0,capIncrease,capaChanged)
-			
-		form.addRow(2)
-		form.addLabel({label=globVar.trans.capInc,width=170})
-		form.addIntbox(capIncrease,10,100,100,0,10,capIncreaseChanged)
-	end
-
-    --***********************************************************---
-	--*******add your own app specific configuration here********---
-	-- if(#globVar.sensors ==0)then
-		-- form.addRow(1)
-		-- form.addLabel({label="SensorSimulation",font=FONT_BOLD})
-	
-		-- if(globVar.windows[1][1][1] == 1) then --electro model
-		-- ------only for simulation without connected telemetry
-			-- form.addRow(2)
-			-- form.addLabel({label="simCellVoltage"})
-			-- form.addInputbox(SimVolt,true,SimVoltChanged)
-		-- end
-		-- ------only for simulation without connected telemetry
-		-- form.addRow(2)
-		-- form.addLabel({label="simCapacity"})
-		-- form.addInputbox(SimCap,true,SimCapChanged)
-		-- ------only for simulation without connected telemetry
-		-- form.addRow(2)
-		-- form.addLabel({label="simRPM"})
-		-- form.addInputbox(SimRPM,true,SimRPMChanged)
-	-- end
-    --***********************************************************---
-	-- version
-	form.addRow(1)
-	form.addLabel({label="Powered by Geierwally - "..globVar.version.."  Mem max: "..globVar.mem.."K",font=FONT_MINI, alignRight=true})
-	form.setFocusedRow (configRow)
-	configRow = 1
-end
 
 --------------------------------------------------------------------
 -- main display function
 --------------------------------------------------------------------
 local function initTempl(formID)
     globVar.currentForm=formID
-	if(formID == globVar.templateAppID) then
-		appConfig()-- open app template config page 
-	else
-		if(screen_lib ~= nil) then
-			local func = screen_lib[4]  --screenLibConfig() 
-			func() -- open screenLib config page
-		end	
+	if(screen_lib ~= nil)then			--unload screen lib on open configuration
+		package.loaded[scrlib_Path]=nil
+		_G[scrlib_Path]=nil
+		screen_lib = nil
+		scrlib_Path = nil
 	end
+	if(config_lib == nil)then
+		config_Path = "AppTempl/Tasks/ConfLib"
+		config_lib = require(config_Path)
+	end
+	if(config_lib ~=nil)then
+		local func = config_lib[1]  --init() 
+		func(globVar,formID) -- execute specific initializer of config lib
+    end
 end
 
 --------------------------------------------------------------------
@@ -300,10 +140,12 @@ local function loop()
 	local sensor2 = {}
 	local sensID = 0
 	local sensPar = 0
+
+	system.registerForm(1,MENU_MAIN,globVar.trans.appName,initTempl,keyPressedTempl,printForm);
+	--system.unregisterForm(1);
 	
  	if((screen_lib ~= nil)and (globVar.initDone == true))then
 		-- register config page of the app template 
-		system.registerForm(1,MENU_MAIN,globVar.trans.appName,initTempl,keyPressedTempl,printForm);
 		local txTel = system.getTxTelemetry()
 		globVar.appValues[3]= txTel.rx1Voltage
 		globVar.appValues[4]= txTel.rx2Voltage
@@ -334,7 +176,7 @@ local function loop()
 				-- sensor1["valid"] = true
 				-- sensor1["value"] = 0
 				-- CapSimVal = math.modf(CapSimVal*100) 
-				-- CapSimVal = capa*CapSimVal/100
+				-- CapSimVal = globVar.capa*CapSimVal/100
 				-- sensor1.value = CapSimVal
 			-- else
 				-- sensor1["valid"] = false
@@ -367,7 +209,7 @@ local function loop()
 			globVar.secClock = false
 		end
 		if(sensor1 and sensor1.valid) then
-			globVar.appValues[1] = (((capa - sensor1.value) * 100) / capa) --calculate capacity
+			globVar.appValues[1] = (((globVar.capa - sensor1.value) * 100) / globVar.capa) --calculate capacity
 			if (globVar.appValues[1] < 0) then
 				globVar.appValues[1] = 0
 			else
@@ -379,7 +221,7 @@ local function loop()
 			globVar.appValues[1]=0
 		end	
 		if(sensor2 and sensor2.valid) then
-			globVar.appValues[2] = (sensor2.value / nCell) --calculate cell voltage
+			globVar.appValues[2] = (sensor2.value / globVar.nCell) --calculate cell voltage
 		else
 			globVar.appValues[2] = 0
 		end	
@@ -391,9 +233,7 @@ local function loop()
 	--*******add your own main loop functionalities here*********---
 
     --***********************************************************---
-	else	
-		system.unregisterForm(1);
-	end	
+	end
     collectgarbage()
 end
 

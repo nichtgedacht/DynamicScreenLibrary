@@ -34,8 +34,12 @@ local globVar ={--                          main version | version of screenlib 
 				txtColor = {},--            text and frame color
 				initDone = false, --        initialization of library done
 				secClock = false, --        second clock for blinking text on failure
+			    nCell = 1, --				number of lipo cells
+				capa = 0-- 					capacity 
+				switches = {{nil,nil,nil,nil},{nil,nil,nil,nil},{nil,nil,nil,nil}}, -- start, stopp, reset switches for timers 1 - 4
+				timLimits = {0,0,0,0},--    timer limits or preset values depending on count up / count down configuration
 				sensors = {}, --			all sensor iDs
-				sensParam = {} --          all sensor parameter
+				sensParam = {} --          	all sensor parameter
 			   }
 
 -------------------------------------------------------------------- 
