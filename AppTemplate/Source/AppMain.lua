@@ -24,27 +24,6 @@ local config_Path = nil --path to config lib
 
 local function init(code,globVar_)
 	globVar = globVar_
-	globVar.scrSens={}
-	globVar.scrSPar={}
-	tempList = {}
-	tempList = system.pLoad("sensors1", {1,1})-- list of all binded sensors main
-	table.insert(globVar.scrSens,tempList)
-	tempList = {} 
-	tempList = system.pLoad("sensors2", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 2
-	table.insert(globVar.scrSens,tempList)
-	tempList = {} 
-	tempList = system.pLoad("sensors3", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors telemetry screen 3
-	table.insert(globVar.scrSens,tempList)
-	tempList = {} 
-	tempList = system.pLoad("scrSPar1", {1,1})-- list of all binded sensors parameters main
-	table.insert(globVar.scrSPar,tempList)
-	tempList = {} 
-	tempList = system.pLoad("scrSPar2", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors parameter telemetry screen 2
-	table.insert(globVar.scrSPar,tempList)
-	tempList = {} 
-	tempList = system.pLoad("scrSPar3", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}) -- list of all binded sensors parameter telemetry screen 3
-	table.insert(globVar.scrSPar,tempList)
-	tempList = {} 
 	globVar.appValues = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- calculated application values
 	if(config_lib == nil)then -- initialize configurations, load datafile
 		config_Path = "AppTempl/Tasks/ConfLib"
@@ -156,17 +135,18 @@ local function loop()
 		globVar.appValues[9]= txTel.RSSI[3]
 		globVar.appValues[10]= txTel.RSSI[4]
 
-		sensID = globVar.scrSens[1][1]
-		sensPar = globVar.scrSPar[1][1] 
+		sensID = globVar.windows[1][1][10]
+		sensPar = globVar.windows[1][1][11] 
 		if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
 			sensor1 = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])	
 		end
-		sensID = globVar.scrSens[1][2]
-		sensPar = globVar.scrSPar[1][2] 
-		if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
-			sensor2 = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])	
-		end
-		
+		if(globVar.windows[1][1][1]==1)then
+			sensID = globVar.windows[1][2][10]
+			sensPar = globVar.windows[1][2][11] 
+			if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+				sensor2 = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])	
+			end
+		end	
 		-- else
 	-- ------only for simulation without connected telemetry
 			-- sensor1 = {}

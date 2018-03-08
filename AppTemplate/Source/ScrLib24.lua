@@ -87,7 +87,7 @@ local function handleTimers(j,i,reset_)
 	end	
 	
 	
-	globVar.windows[j][i][11] = nil
+	globVar.windows[j][i][14] = nil
 	local sign = " "
 	if(globVar.windows[j][i][8]<0)then
 		sign = nil
@@ -100,14 +100,14 @@ local function handleTimers(j,i,reset_)
 		timeMin,temp = math.modf(temp)	
 		temp = temp *60
 		timesec = math.modf(temp)
-		globVar.windows[j][i][11] = string.format( "%s%02d:%02d:%02d",sign,math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
+		globVar.windows[j][i][14] = string.format( "%s%02d:%02d:%02d",sign,math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
 	else									--min:sec:sec/10
 		timeMin,temp = math.modf(globVar.windows[j][i][8]/60000)
 		temp = temp * 60
 		timesec, temp = math.modf(temp)
 		temp = temp * 100
 		timeMs = math.modf(temp) 
-		globVar.windows[j][i][11] = string.format( "%s%02d:%02d:%02d", sign,math.abs(timeMin),math.abs(timesec),math.abs(timeMs) ) 
+		globVar.windows[j][i][14] = string.format( "%s%02d:%02d:%02d", sign,math.abs(timeMin),math.abs(timesec),math.abs(timeMs) ) 
 	end	
 end
 
@@ -231,7 +231,7 @@ local function drawWindow(winNr)
 	end
 	for i in ipairs(globVar.windows[winNr]) do --draw all configured telemetry windows
 		local window = globVar.windows[winNr][i]
-		if(((window[1]>3)and(window[10]==1))or(window[1]<=3)or (window[1]==7))then -- draw frame
+		if(((window[1]>3)and(window[13]==1))or(window[1]<=3)or (window[1]==7))then -- draw frame
 			nextYoffs = prepNextYoffs
 			if(160 - nextYoffs < txtyoffs[window[1]][1] ) then --not enough place for configured window
 				if(nextXoffs ==2)then
@@ -262,7 +262,7 @@ local function drawWindow(winNr)
 			labelYoffs = txtyoffs[window[1]][3] + lcd.getTextHeight(txtyoffs[window[1]][4])-lcd.getTextHeight(FONT_MINI) - corVal
 			local valTxt =nil
 			if(window[4]>29)then
-				valTxt = window[11] -- draw text
+				valTxt = window[14] -- draw text
 			else
 				valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
 			end
@@ -278,17 +278,17 @@ local function drawWindow(winNr)
 			else
 				if(window[1]>4) then -- calculate next Y text position for window types 4,5 and 6
 					if(window[1]==5)then
-						if(window[10]>2)then
+						if(window[13]>2)then
 							win457Yoffs = txtyoffs[window[1]][5]
 						else
 							win457Yoffs = 0	
 						end
 					else
-						win457Yoffs = (window[10]-1) * txtyoffs[window[1]][5]
+						win457Yoffs = (window[13]-1) * txtyoffs[window[1]][5]
 					end	
 				end
 				if((window[1] == 4)or(window[1]==5))then -- add x width of label 2 for window types 4 and 5
-					labelXoffs = 2*(labelXoffs + lcd.getTextWidth(FONT_MINI,window[11]))+2 -- add x width of label 2 for left label and multiply with 2 for 2 values in x
+					labelXoffs = 2*(labelXoffs + lcd.getTextWidth(FONT_MINI,window[14]))+2 -- add x width of label 2 for left label and multiply with 2 for 2 values in x
 				end
 				--draw center label for window 4
 				if(window[1]==4)then 
@@ -316,12 +316,12 @@ local function drawWindow(winNr)
 					end
 				end	
 				if((window[1] == 4)or(window[1]==5))then 
-					if(window[10]%2 ==0) then
+					if(window[13]%2 ==0) then
 						labelXoffs = win45Xoffs
 					end	
 				--draw label 2 for window type 4 and 5		
-					lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[11] ,FONT_MINI) 
-					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[11])+2
+					lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[14] ,FONT_MINI) 
+					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[14])+2
 				end
 			end
 			--draw value
@@ -332,20 +332,19 @@ local function drawWindow(winNr)
 				lcd.drawText(nextXoffs + labelXoffs,nextYoffs + labelYoffs+ win457Yoffs,window[3],FONT_MINI)
 			end	
 			if((window[1] == 4)or(window[1]==5))then 
-				if(window[10]%2 > 0) then
+				if(window[13]%2 > 0) then
 					win45Xoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[3])+2 -- store x offset for next values in same line for window type 5 and 6
 				end	
 			end		
 			if(window[1]== 2) then
 			--draw min max values
-				local minMaxTxt = string.format("min:%."..math.modf(window[7]).."f max:%."..math.modf(window[7]).."f",window[10],window[11])
+				local minMaxTxt = string.format("min:%."..math.modf(window[7]).."f max:%."..math.modf(window[7]).."f",window[13],window[14])
 				lcd.drawText(nextXoffs + 63 - lcd.getTextWidth(FONT_MINI,minMaxTxt)/2,nextYoffs + txtyoffs[window[1]][5],minMaxTxt,FONT_MINI)
 			end
 		end	
 		lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
 	end	
 end
-
 
 local function printTelemetry() 
 	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
@@ -365,6 +364,8 @@ local function loop()
 		system.registerTelemetry(1," "..globVar.model.." Scr1",4,printTelemetry)
 		if(#globVar.windows == 3)then
 			system.registerTelemetry(2," "..globVar.model.." Scr2",4,printTelemetry2)
+		else
+			system.unregisterTelemetry(2)
 		end
 		aPrepare = false
 		local sensor = {}
@@ -373,11 +374,11 @@ local function loop()
 		for j in ipairs(globVar.windows)do
 			for i in ipairs(globVar.windows[j]) do --check limits of main window
 				if(globVar.windows[j][i][1]==2)then -- reset screen min max values
-					globVar.windows[j][i][10]=0 
-					globVar.windows[j][i][11]=0
+					globVar.windows[j][i][13]=0 
+					globVar.windows[j][i][14]=0
 				end					
-				sensID = globVar.scrSens[j][i]
-				sensPar = globVar.scrSPar[j][i] 
+				sensID = globVar.windows[j][i][10]
+				sensPar = globVar.windows[j][i][11] 
 				if(globVar.windows[j][i][4]>0) then 
 					if(globVar.windows[j][i][4]==30)then -- value is GPS Coordinate
 						globVar.windows[j][i][8] = 0 -- reset screen value
@@ -387,12 +388,12 @@ local function loop()
 							if(sensor and sensor.valid and sensor.type ==9) then
 								local nesw = {"N", "E", "S", "W"}
 								globVar.windows[j][i][3] = nil
-								globVar.windows[j][i][11] = nil
+								globVar.windows[j][i][14] = nil
 								globVar.windows[j][i][3] = nesw[sensor.decimals+1]
 								globVar.windows[j][i][8] = sensor.valGPS --set sensor GPSvalue
 								local minutes = (sensor.valGPS & 0xFFFF) * 0.001
 								local degs = (sensor.valGPS >> 16) & 0xFF
-								globVar.windows[j][i][11] = string.format("%s %d° %f'", sensor.label,degs,minutes)
+								globVar.windows[j][i][14] = string.format("%s %d° %f'", sensor.label,degs,minutes)
 							end
 						end
 					elseif(globVar.windows[j][i][4]>30)then -- value is one of the timers
@@ -409,8 +410,8 @@ local function loop()
 					if(sensor and sensor.valid) then
 						globVar.windows[j][i][8] = sensor.value --set sensor value
 						if(globVar.windows[j][i][1]==2)then -- store min max values
-							globVar.windows[j][i][10]=sensor.min
-							globVar.windows[j][i][11]=sensor.max
+							globVar.windows[j][i][13]=sensor.min
+							globVar.windows[j][i][14]=sensor.max
 						end
 					end
 				end

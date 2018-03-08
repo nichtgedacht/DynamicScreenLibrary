@@ -31,7 +31,7 @@ local sensPaListIdx = 1 -- index of sesor parameter list box
 local timListIdx = 0 -- index of timer list
 
 -------------------------------------------------------------------- 
--- initialization
+-- filehandling
 -------------------------------------------------------------------- 
 
 local function loadDataFile()
@@ -56,6 +56,12 @@ local function loadDataFile()
 	return datafiles
 end
 
+local function storeDataFile()
+	local winListWrite = json.encode(globVar.windows)
+	local file = io.open ("Apps/AppTempl/data/"..datafiles[fileIndex].." ","w")
+	io.write(file,winListWrite)
+	io.close (file)
+end
 
 -------------------------------------------------------------------- 
 -- app configuration
@@ -198,15 +204,15 @@ end
 local function sensorChanged()
 	sensListIdx = form.getValue(sensorListBox)
 	local j,i = calcWinIdx(winListIdx)
-	globVar.scrSens[j][i] = sensListIdx -- set sensorid to corresponding window 
-	system.pSave("sensors"..j.."",globVar.scrSens[j])
+	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window 
+	storeDataFile()
 end
 
 local function sensParChanged()
 	sensPaListIdx = form.getValue(sensParListBox)
 	local j,i = calcWinIdx(winListIdx)
-	globVar.scrSPar[j][i] = sensPaListIdx -- set sensor parameterid to corresponding window 
-	system.pSave("scrSPar"..j.."",globVar.scrSPar[j])
+	globVar.windows[j][i][11] = sensPaListIdx -- set sensor parameterid to corresponding window 
+	storeDataFile()
 end
 
 local function startSwitchChanged(value)
@@ -250,12 +256,12 @@ local function screenLibConfig()
 	for k in next,sensPaList do sensPaList[k] = nil end
 	for k in next,winList do winList[k] = nil end
 
-	sensListIdx = globVar.scrSens[j][i] --preset sensorlist index
+	sensListIdx = globVar.windows[j][i][10] --preset sensorlist index
 	for idx in ipairs(globVar.sensors) do 
 		sensor = system.getSensorByID (globVar.sensors[idx],0)
 		table.insert(sensList, string.format("%s", sensor.label))
 	end
-	sensPaListIdx = globVar.scrSPar[j][i] --preset parameterlist index
+	sensPaListIdx = globVar.windows[j][i][11] --preset parameterlist index
 	if (globVar.sensParam[sensListIdx]~=nil) then
 		for idx in ipairs(globVar.sensParam[sensListIdx]) do 
 			sensor = system.getSensorByID (globVar.sensors[sensListIdx],globVar.sensParam[sensListIdx][idx])
