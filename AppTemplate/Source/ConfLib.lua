@@ -1,6 +1,6 @@
 --[[
 	---------------------------------------------------------
-	Geierwallys dynamic telemetry screen library for DC/DS 14 and 24 transmitters
+	Geierwallys dynamic telemetry screen library for DC/DS 14,16 and 24 transmitters
 	dynamic configuration page for app template and screen libray
 	---------------------------------------------------------
 	V1.1.1 Initial state prepares all functionalities of the app template except telemetry 

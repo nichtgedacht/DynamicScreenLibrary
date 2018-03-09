@@ -65,7 +65,7 @@ local function handleTimers(j,i,reset_)
 	if(globVar.windows[j][i][7] == 1) then --timer is running
 		if (globVar.windows[j][i][3] %2 ==0)then --count down timer
 			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] - timeDif
-			countDownTime = math.modf(globVar.windows[j][i][8]/1000)+1
+			countDownTime = math.modf(globVar.windows[j][i][8]/1000)
 		else									 --count up timer
 			globVar.windows[j][i][8] = timeDif
 			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][8])/1000)+1
@@ -79,11 +79,14 @@ local function handleTimers(j,i,reset_)
 				prevCountDownTime = countDownTime
 			end			
 		else	
+			globVar.windows[j][i][9] = 1--set alert active
 			if((countDownTime % 10 ==0)or(countDownTime == 0))then	 
-				system.playBeep(1,4000,500) -- timer elapsedplay beep
+				system.vibration (true,2)  -- timer elapsedplay vibration
 				prevCountDownTime = countDownTime
 			end	
 		end
+	else
+		globVar.windows[j][i][9] = 0--reset alert
 	end	
 	
 	

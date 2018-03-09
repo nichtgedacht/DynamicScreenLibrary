@@ -65,7 +65,7 @@ local function handleTimers(j,i,reset_)
 	if(globVar.windows[j][i][7] == 1) then --timer is running
 		if (globVar.windows[j][i][3] %2 ==0)then --count down timer
 			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] - timeDif
-			countDownTime = math.modf(globVar.windows[j][i][8]/1000)+1
+			countDownTime = math.modf(globVar.windows[j][i][8]/1000)
 		else									 --count up timer
 			globVar.windows[j][i][8] = timeDif
 			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][8])/1000)+1
@@ -79,11 +79,14 @@ local function handleTimers(j,i,reset_)
 				prevCountDownTime = countDownTime
 			end			
 		else	
+			globVar.windows[j][i][9] = 1--set alert active
 			if((countDownTime % 10 ==0)or(countDownTime == 0))then	 
 				system.playBeep(1,4000,500) -- timer elapsedplay beep
 				prevCountDownTime = countDownTime
 			end	
 		end
+	else
+		globVar.windows[j][i][9] = 0--reset alert
 	end	
 	
 	
@@ -260,13 +263,15 @@ local function drawWindow(winNr)
 			else
 				valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
 			end
-			
+print("debug_1", valTxt)
 			labelXoffs = lcd.getTextWidth(txtyoffs[window[1]][4],valTxt)+2 -- add x width of value
 			if(window[4]<31)then
+print("debug_2", window[3])
 				labelXoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[3])+2-- add x width of unit except timer window
 			end	
 			if(window[1]<3)then 
 			    --draw center label for window types 1,2 
+print("debug_3", window[2])
 				lcd.drawText(nextXoffs+63 - lcd.getTextWidth(FONT_MINI,window[2])/2,nextYoffs + txtyoffs[window[1]][2],window[2],FONT_MINI)
 				labelXoffs =63 - labelXoffs/2				
 			else
@@ -282,12 +287,15 @@ local function drawWindow(winNr)
 					end	
 				end
 				if((window[1] == 4)or(window[1]==5))then -- add x width of label 2 for window types 4 and 5
+print("debug_4", window[14])
 					labelXoffs = 2*(labelXoffs + lcd.getTextWidth(FONT_MINI,window[14]))+2 -- add x width of label 2 for left label and multiply with 2 for 2 values in x
 				end
 				--draw center label for window 4
 				if(window[1]==4)then 
+print("debug_5", window[2])
 					lcd.drawText(nextXoffs+63 - lcd.getTextWidth(FONT_MINI,window[2])/2,nextYoffs + txtyoffs[window[1]][2],window[2],FONT_MINI)
 				else
+print("debug_6", window[2])
 					labelXoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[2])+2 -- add x width of label 1 for left label
 				end	
 
@@ -299,6 +307,7 @@ local function drawWindow(winNr)
 					else
 						lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
 					end	
+print("debug_7", window[2])
 					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[2])+2
 				end	
 				if((window[9]>0)and(window[1]>3))then --failure display red
@@ -315,11 +324,13 @@ local function drawWindow(winNr)
 					end	
 				--draw label 2 for window type 4 and 5		
 					lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[14] ,FONT_MINI) 
+print("debug_8", window[14])
 					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[14])+2
 				end
 			end
 			--draw value
 			lcd.drawText(nextXoffs + labelXoffs,nextYoffs + txtyoffs[window[1]][3]+ win457Yoffs,valTxt,txtyoffs[window[1]][4])
+print("debug_9", valTxt)
 			labelXoffs = labelXoffs + lcd.getTextWidth(txtyoffs[window[1]][4],valTxt)+2
 			--draw unit except timer window
 			if(window[4]<31)then
@@ -327,12 +338,14 @@ local function drawWindow(winNr)
 			end	
 			if((window[1] == 4)or(window[1]==5))then 
 				if(window[13]%2 > 0) then
+print("debug_10", window[3])
 					win45Xoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[3])+2 -- store x offset for next values in same line for window type 5 and 6
 				end	
 			end		
 			if(window[1]== 2) then
 			--draw min max values
 				local minMaxTxt = string.format("min:%."..math.modf(window[7]).."f max:%."..math.modf(window[7]).."f",window[13],window[14])
+print("debug_11", minMaxTxt)
 				lcd.drawText(nextXoffs + 63 - lcd.getTextWidth(FONT_MINI,minMaxTxt)/2,nextYoffs + txtyoffs[window[1]][5],minMaxTxt,FONT_MINI)
 			end
 		end	
