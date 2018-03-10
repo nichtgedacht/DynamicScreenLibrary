@@ -65,17 +65,42 @@ local function loop()
 		init(1)
 		if((globVar.currentTime - initDelay > 5000)and(initDelay ~=0)) then
 			if(appLoaded == false)then
-				local memTxt = "max: "..globVar.mem.."K act: "..globVar.debugmem.."K"
-				print(memTxt)
-				main_lib = require("AppTempl/Tasks/AppMain")
-				if(main_lib ~= nil)then
-					appLoaded = true
-					init(1)
-					initDelay = 0
+				if(globVar.sensors[1]~=nil)then
+	globVar.debugmem = math.modf(collectgarbage('count'))
+	print("Speicher vor Laden der ScreenLib: "..globVar.debugmem.."K")	
+					main_lib = require("AppTempl/Tasks/AppMain")
+					if(main_lib ~= nil)then
+						appLoaded = true
+						init(1)
+						initDelay = 0
+					end
+					collectgarbage()
+				else
+					local memTxt = "max: "..globVar.mem.."K act: "..globVar.debugmem.."K"
+					print(memTxt)
+				
+					local sensors_ = system.getSensors() -- read in all sensor data
+					local sensPar = {}
+					for k in next,globVar.sensors do globVar.sensors[k] = nil end
+					for k in next,globVar.sensParam do globVar.sensParam[k] = nil end
+					for idx,sensor in ipairs(sensors_) do
+						if(sensor.param == 0) then
+							if(sensPar[1] ~=nil)then
+								table.insert(globVar.sensParam,sensPar)
+								sensPar = {}
+							end
+							table.insert(globVar.sensors,sensor.id)
+						else
+							table.insert(sensPar,sensor.param)
+						end
+					end	
+					if(sensPar[1]~=nil)then
+						table.insert(globVar.sensParam,sensPar)
+					end	
+
 				end
-				collectgarbage()
-			end
-		end
+			end	
+		end	
 	else
 		local func = main_lib[2] --loop()
 		func() -- execute main loop

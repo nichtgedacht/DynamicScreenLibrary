@@ -362,26 +362,7 @@ end
 local function init(globVar_,formID)
 	globVar = globVar_
 	capIncrease = system.pLoad("capIncrease",100)
-	-- Read available sensors for user to select
-	local sensors_ = system.getSensors() -- read in all sensor data
-	local sensPar = {}
 	loadDataFile()
-	for k in next,globVar.sensors do globVar.sensors[k] = nil end
-	for k in next,globVar.sensParam do globVar.sensParam[k] = nil end
-	for idx,sensor in ipairs(sensors_) do
-		if(sensor.param == 0) then
-			if(sensPar[1] ~=nil)then
-				table.insert(globVar.sensParam,sensPar)
-				sensPar = {}
-			end
-			table.insert(globVar.sensors,sensor.id)
-		else
-			table.insert(sensPar,sensor.param)
-		end
-	end
-	if(sensPar[1]~=nil)then
-		table.insert(globVar.sensParam,sensPar)
-	end	
 	if(formID == globVar.templateAppID) then
 		appConfig()-- open app template config page 
 	elseif(formID == globVar.screenlibID) then

@@ -65,10 +65,10 @@ local function handleTimers(j,i,reset_)
 	if(globVar.windows[j][i][7] == 1) then --timer is running
 		if (globVar.windows[j][i][3] %2 ==0)then --count down timer
 			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] - timeDif
-			countDownTime = math.modf(globVar.windows[j][i][8]/1000)
+			countDownTime = math.modf((globVar.windows[j][i][8]/1000) + 1)
 		else									 --count up timer
 			globVar.windows[j][i][8] = timeDif
-			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][8])/1000)+1
+			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][8])/1000)
 		end
 	end
 
@@ -174,7 +174,7 @@ end
 -------------------------------------------------------------------- 
 local function checkLimit(window,mainIndex)
 	local compareLogic = false
-	if((window[4]==30)or(window[6]==window[5]))then
+	if(((window[4]>29)and(window[4]<35))or(window[6]==window[5]))then
 		return --no check tel val is text or alert is switched off
 	end
 	if(window[6]>window[5])then
