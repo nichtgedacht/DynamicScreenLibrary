@@ -63,7 +63,7 @@ local function loop()
 	 -- load current task
     if(main_lib == nil)then
 		init(1)
-		if((globVar.currentTime - initDelay > 5000)and(initDelay ~=0)) then
+		if((globVar.currentTime - initDelay > 5)and(initDelay ~=0)) then
 			if(appLoaded == false)then
 				if(globVar.sensors[1]~=nil)then
 	globVar.debugmem = math.modf(collectgarbage('count'))

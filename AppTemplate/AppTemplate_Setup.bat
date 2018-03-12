@@ -55,6 +55,10 @@ setlocal
 %transmitter%:
 cd apps
 md AppTempl
+cd AppTempl
+md model
+cd model
+md data
 endlocal
 XCOPY /S apps\AppTempl %transmitter%:\apps\AppTempl
 copy apps\AppTempl.lc %transmitter%:\apps

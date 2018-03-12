@@ -35,17 +35,25 @@ local timListIdx = 0 -- index of timer list
 -------------------------------------------------------------------- 
 
 local function loadDataFile()
+	local file = nil
 	for k in next,datafiles do datafiles[k] = nil end
+	--local modelDatFile = ""..globVar.model..".jsn"
+	table.insert(datafiles,system.getProperty("ModelFile"))
 	for name in dir("Apps/AppTempl/data") do
 		if(#name >3) then
 		table.insert(datafiles,name)
 		end
 	end
 	fileIndex = system.pLoad("fileIndex",1)
-	if(fileIndex > #datafiles)then
-		fileIndex = 1
-	end
-	local file = io.readall("Apps/AppTempl/data/"..datafiles[fileIndex].." ")
+	if(fileIndex ==1)then
+		file = io.readall("Apps/AppTempl/model/data/"..datafiles[1].." ") --load model specific data file
+	end	
+	if(file==nil)then
+		if((fileIndex-1) > #datafiles or (fileIndex==1))then
+			fileIndex = 2
+		end
+		file = io.readall("Apps/AppTempl/data/"..datafiles[fileIndex].." ") --load datafile template
+	end	
 	if(file)then
 		for i in next,globVar.windows do --delete window list 
 			for k in next,globVar.windows[i] do globVar.windows[i][k] = nil end
@@ -58,9 +66,10 @@ end
 
 local function storeDataFile()
 	local winListWrite = json.encode(globVar.windows)
-	local file = io.open ("Apps/AppTempl/data/"..datafiles[fileIndex].." ","w")
+	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
 	io.write(file,winListWrite)
 	io.close (file)
+	system.pSave("fileIndex",1)
 end
 
 -------------------------------------------------------------------- 
@@ -82,8 +91,16 @@ local function capIncreaseChanged(value)
 	form.reinit(globVar.templateAppID)
 end
 local function dataFileChanged()
-    system.pSave("fileIndex",form.getValue(fileBoxIndex))
-    loadDataFile()
+	local fileIndex_ = form.getValue(fileBoxIndex)
+	if(fileIndex_ > 1)then
+		if(form.question(globVar.trans.cont,globVar.trans.lTDat,globVar.trans.ovConf,0,false,0)==1)then
+			system.pSave("fileIndex",fileIndex_)
+			loadDataFile()
+			fileIndex_ = 1
+			system.pSave("fileIndex",fileIndex_)
+		end
+	end	
+	storeDataFile()
     form.reinit(globVar.templateAppID)
 end
 -- ------only for simulation without connected telemetry

@@ -65,7 +65,7 @@ local function handleTimers(j,i,reset_)
 	if(globVar.windows[j][i][7] == 1) then --timer is running
 		if (globVar.windows[j][i][3] %2 ==0)then --count down timer
 			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] - timeDif
-			countDownTime = math.modf(globVar.windows[j][i][8]/1000)+1
+			countDownTime = math.modf((globVar.windows[j][i][8]/1000) + 1)
 		else									 --count up timer
 			globVar.windows[j][i][8] = timeDif
 			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][8])/1000)

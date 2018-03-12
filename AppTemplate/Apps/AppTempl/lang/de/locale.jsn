@@ -9,5 +9,8 @@
 	"capInc":"Zählwert Kapazität",
 	"full":"V",
 	"empty":"L",
-	"capa":"Kapazität"
+	"capa":"Kapazität",
+	"cont":"Fortsetzen ?",
+	"lTDat":"lade Template Datafile",
+	"ovConf":"Achtung!!! überschreibt Sensorkonfiguration"
 }

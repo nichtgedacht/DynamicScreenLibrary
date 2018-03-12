@@ -40,7 +40,7 @@ local function init(code,globVar_)
 	-- read device type for loading corresponding screen library
 	local deviceType = system.getDeviceType()
 	if(( deviceType == "JETI DC-24")or(deviceTypeF3K == "JETI DS-24"))then
-		--globVar.screenLib24 = 24 -- load screen library of DS / DC 24
+		globVar.screenLib24 = 24 -- load screen library of DS / DC 24
 	end
 	-- Set language
 	local lng=system.getLocale();
