@@ -17,6 +17,8 @@ local aPrepare = false -- alert in preparation
 local mainWin_Lib = nil  -- main window
 local lib_Path = nil     -- path to last loaded main win library
 local prevCountDownTime = 100 -- for count down timer
+local allertSet = false 
+local timExpired = false
 
 -------------------------------------------------------------------- 
 -- Init function
@@ -88,6 +90,11 @@ local function handleTimers(j,i,reset_)
 	else
 		globVar.windows[j][i][9] = 0--reset alert
 	end	
+	
+	if(countDownTime <=0)then
+		globVar.failWindow = j
+		timExpired = true
+	end
 	
 	
 	globVar.windows[j][i][14] = nil
@@ -223,6 +230,7 @@ local function drawWindow(winNr)
 	local labelXoffs = 2
 	local labelYoffs = 2
 	local txtyoffs = {{57,2,16,FONT_MAXI},{57,2,16,FONT_BIG,39},{28,13,3,FONT_BIG},{41,2,16,FONT_BOLD,0},{41,6,2,FONT_BOLD,19},{156,6,2,FONT_BOLD,20},{57}} --{hight y for summary |start label text y|start value text y|Font| start text min max oder offsetText}
+	local failColor = 0
 	if(mainWin_Lib~=nil)then
 		local func = mainWin_Lib[2]  --draw main window 
 		func() 
@@ -245,7 +253,7 @@ local function drawWindow(winNr)
 			if((window[9]>0)and(globVar.secClock == true))then --failure display red
 				if(window[1]<4)then
 					lcd.drawFilledRectangle(nextXoffs+1, nextYoffs+1, 128, txtyoffs[window[1]][1]-2,125)
-					lcd.setColor(255,255,255) -- failure white font color
+					failColor = FONT_XOR 
 				end	
 	        end
 			prepNextYoffs = nextYoffs+txtyoffs[window[1]][1]+1 --calculate next y offset
@@ -269,7 +277,7 @@ local function drawWindow(winNr)
 			end	
 			if(window[1]<3)then 
 			    --draw center label for window types 1,2 
-				lcd.drawText(nextXoffs+63 - lcd.getTextWidth(FONT_MINI,window[2])/2,nextYoffs + txtyoffs[window[1]][2],window[2],FONT_MINI)
+				lcd.drawText(nextXoffs+63 - lcd.getTextWidth(FONT_MINI,window[2])/2,nextYoffs + txtyoffs[window[1]][2],window[2],FONT_MINI|failColor)
 				labelXoffs =63 - labelXoffs/2				
 			else
 				if(window[1]>4) then -- calculate next Y text position for window types 4,5 and 6
@@ -288,7 +296,7 @@ local function drawWindow(winNr)
 				end
 				--draw center label for window 4
 				if(window[1]==4)then 
-					lcd.drawText(nextXoffs+63 - lcd.getTextWidth(FONT_MINI,window[2])/2,nextYoffs + txtyoffs[window[1]][2],window[2],FONT_MINI)
+					lcd.drawText(nextXoffs+63 - lcd.getTextWidth(FONT_MINI,window[2])/2,nextYoffs + txtyoffs[window[1]][2],window[2],FONT_MINI|failColor)
 				else
 					labelXoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[2])+2 -- add x width of label 1 for left label
 				end	
@@ -297,18 +305,21 @@ local function drawWindow(winNr)
 				--draw left label 1 
 				if(window[1]~=4)then
 					if(window[1]==6)then --only window type 6, draw label left
-						lcd.drawText(nextXoffs+3,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
+						lcd.drawText(nextXoffs+3,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI|failColor) 
 					else
-						lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
+						if((window[1]==5)and(window[13]%2==0))then --draw label of window 5 only once
+						else
+							lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI|failColor)
+						end	
 					end	
 					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[2])+2
 				end	
 				if((window[9]>0)and(window[1]>3))then --failure display red
 					if(globVar.secClock == true)then
-						lcd.setColor(0,0,0) -- failure black font color blinking
+						failColor = FONT_GRAYED
 					else
 						local bgr,bgg,bgb = lcd.getBgColor()
-						lcd.setColor(255,255,255) -- back ground color as font color blinking
+						failColor  = FONT_OR
 					end
 				end	
 				if((window[1] == 4)or(window[1]==5))then 
@@ -316,16 +327,16 @@ local function drawWindow(winNr)
 						labelXoffs = win45Xoffs
 					end	
 				--draw label 2 for window type 4 and 5		
-					lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[14] ,FONT_MINI) 
+					lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[14] ,FONT_MINI|failColor) 
 					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[14])+2
 				end
 			end
 			--draw value
-			lcd.drawText(nextXoffs + labelXoffs,nextYoffs + txtyoffs[window[1]][3]+ win457Yoffs,valTxt,txtyoffs[window[1]][4])
+			lcd.drawText(nextXoffs + labelXoffs,nextYoffs + txtyoffs[window[1]][3]+ win457Yoffs,valTxt,txtyoffs[window[1]][4]|failColor)
 			labelXoffs = labelXoffs + lcd.getTextWidth(txtyoffs[window[1]][4],valTxt)+2
 			--draw unit except timer window
 			if(window[4]<31)then
-				lcd.drawText(nextXoffs + labelXoffs,nextYoffs + labelYoffs+ win457Yoffs,window[3],FONT_MINI)
+				lcd.drawText(nextXoffs + labelXoffs,nextYoffs + labelYoffs+ win457Yoffs,window[3],FONT_MINI|failColor)
 			end	
 			if((window[1] == 4)or(window[1]==5))then 
 				if(window[13]%2 > 0) then
@@ -335,7 +346,7 @@ local function drawWindow(winNr)
 			if(window[1]== 2) then
 			--draw min max values
 				local minMaxTxt = string.format("min:%."..math.modf(window[7]).."f max:%."..math.modf(window[7]).."f",window[13],window[14])
-				lcd.drawText(nextXoffs + 63 - lcd.getTextWidth(FONT_MINI,minMaxTxt)/2,nextYoffs + txtyoffs[window[1]][5],minMaxTxt,FONT_MINI)
+				lcd.drawText(nextXoffs + 63 - lcd.getTextWidth(FONT_MINI,minMaxTxt)/2,nextYoffs + txtyoffs[window[1]][5],minMaxTxt,FONT_MINI|failColor)
 			end
 		end	
 		lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
@@ -344,12 +355,20 @@ end
 
 local function printTelemetry() 
 	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
-	drawWindow(2) --draw first telemetry window
+	if(globVar.failWindow ==3)then
+		drawWindow(3)
+	else	
+		drawWindow(2) --draw first telemetry window
+	end	
 end		
 
 local function printTelemetry2() 
 	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
-	drawWindow(3) --draw second telemetry window
+	if(globVar.failWindow ==2)then
+		drawWindow(2)
+	else	
+		drawWindow(3) --draw second telemetry window
+	end	
 end	
 
 --------------------------------------------------------------------
@@ -357,6 +376,8 @@ end
 --------------------------------------------------------------------
 local function loop()
 	if(globVar.initDone == true) then
+		allertSet = false
+		timExpired = false
 		system.registerTelemetry(1," "..globVar.model.." Scr1",4,printTelemetry)
 		if(#globVar.windows == 3)then
 			system.registerTelemetry(2," "..globVar.model.." Scr2",4,printTelemetry2)
@@ -414,10 +435,19 @@ local function loop()
 				if(sensor and sensor.valid) then
 					checkLimit(globVar.windows[j][i],j)
 				end	
+				if(globVar.windows[j][i][9]>0)then
+					globVar.failWindow = j
+					allertSet = true
+				end	
+
 			end
 		end
 		if(aPrepare == false)then
 			aTimeRunning = 0 --no alert in preparation, reset running alert delay
+		end
+
+		if((allertSet == false)and(timExpired == false))then
+			globVar.failWindow = 0
 		end
 	end	
 end

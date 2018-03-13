@@ -17,6 +17,8 @@ local aPrepare = false -- alert in preparation
 local mainWin_Lib = nil  -- main window
 local lib_Path = nil     -- path to last loaded main win library
 local prevCountDownTime = 100 -- for count down timer
+local allertSet = false 
+local timExpired = false
 
 -------------------------------------------------------------------- 
 -- Init function
@@ -89,6 +91,10 @@ local function handleTimers(j,i,reset_)
 		globVar.windows[j][i][9] = 0--reset alert
 	end	
 	
+	if(countDownTime <=0)then
+		globVar.failWindow = j
+		timExpired = true
+	end
 	
 	globVar.windows[j][i][14] = nil
 	local sign = " "
@@ -306,7 +312,10 @@ local function drawWindow(winNr)
 					if(window[1]==6)then --only window type 6, draw label left
 						lcd.drawText(nextXoffs+3,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
 					else
-						lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
+						if((window[1]==5)and(window[13]%2==0))then --draw label of window 5 only once
+						else
+							lcd.drawText(nextXoffs+labelXoffs,nextYoffs + labelYoffs + win457Yoffs,window[2] ,FONT_MINI) 
+						end	
 					end	
 					labelXoffs = labelXoffs+lcd.getTextWidth(FONT_MINI,window[2])+2
 				end	
@@ -351,19 +360,28 @@ end
 
 local function printTelemetry() 
 	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
-	drawWindow(2) --draw first telemetry window
+	if(globVar.failWindow ==3)then
+		drawWindow(3)
+	else	
+		drawWindow(2) --draw first telemetry window
+	end	
 end		
 
 local function printTelemetry2() 
 	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
-	drawWindow(3) --draw second telemetry window
+	if(globVar.failWindow ==2)then
+		drawWindow(2)
+	else	
+		drawWindow(3) --draw second telemetry window
+	end	
 end	
-
 --------------------------------------------------------------------
 -- main Loop function
 --------------------------------------------------------------------
 local function loop()
 	if(globVar.initDone == true) then
+		allertSet = false
+		timExpired = false
 		system.registerTelemetry(1," "..globVar.model.." Scr1",4,printTelemetry)
 		if(#globVar.windows == 3)then
 			system.registerTelemetry(2," "..globVar.model.." Scr2",4,printTelemetry2)
@@ -421,10 +439,18 @@ local function loop()
 				if(sensor and sensor.valid) then
 					checkLimit(globVar.windows[j][i],j)
 				end	
+				if(globVar.windows[j][i][9]>0)then
+					globVar.failWindow = j
+					allertSet = true
+				end	
 			end
 		end
 		if(aPrepare == false)then
 			aTimeRunning = 0 --no alert in preparation, reset running alert delay
+		end
+
+		if((allertSet == false)and(timExpired == false))then
+			globVar.failWindow = 0
 		end
 	end	
 end

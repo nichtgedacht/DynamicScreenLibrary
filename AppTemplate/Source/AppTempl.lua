@@ -37,7 +37,8 @@ local globVar ={--                          main version | version of screenlib 
 				switches = {{nil,nil,nil,nil},{nil,nil,nil,nil},{nil,nil,nil,nil}}, -- start, stopp, reset switches for timers 1 - 4
 				timLimits = {0,0,0,0},--    timer limits or preset values depending on count up / count down configuration
 				sensors = {}, --			all sensor iDs
-				sensParam = {} --          	all sensor parameter
+				sensParam = {}, --          all sensor parameter
+				failWindow = 0 --           draw telemetry window with failure
 			   }
 
 -------------------------------------------------------------------- 
