@@ -44,7 +44,7 @@ local function loadDataFile()
 		table.insert(datafiles,name)
 		end
 	end
-	fileIndex = system.pLoad("fileIndex",1)
+	fileIndex = system.pLoad("fileIndex",2)
 	if(fileIndex ==1)then
 		file = io.readall("Apps/AppTempl/model/data/"..datafiles[1].." ") --load model specific data file
 	end	
