@@ -97,7 +97,7 @@ local function handleTimers(j,i,reset_)
 	end
 	
 	
-	globVar.windows[j][i][14] = nil
+	globVar.windows[j][i][8] = nil
 	local sign = " "
 	if(globVar.windows[j][i][8]<0)then
 		sign = nil
@@ -110,14 +110,14 @@ local function handleTimers(j,i,reset_)
 		timeMin,temp = math.modf(temp)	
 		temp = temp *60
 		timesec = math.modf(temp)
-		globVar.windows[j][i][14] = string.format( "%s%02d:%02d:%02d",sign,math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
+		globVar.windows[j][i][8] = string.format( "%s%02d:%02d:%02d",sign,math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
 	else									--min:sec:sec/10
 		timeMin,temp = math.modf(globVar.windows[j][i][8]/60000)
 		temp = temp * 60
 		timesec, temp = math.modf(temp)
 		temp = temp * 100
 		timeMs = math.modf(temp) 
-		globVar.windows[j][i][14] = string.format( "%s%02d:%02d:%02d", sign,math.abs(timeMin),math.abs(timesec),math.abs(timeMs) ) 
+		globVar.windows[j][i][8] = string.format( "%s%02d:%02d:%02d", sign,math.abs(timeMin),math.abs(timesec),math.abs(timeMs) ) 
 	end	
 end
 
@@ -132,7 +132,7 @@ local function loadmainWindow()
 	end	
 	if(globVar.windows[1][1][1]==1) then -- electro
 		lib_Path = "AppTempl/Tasks/winEl"..globVar.screenLib24..""
-	elseif(globVar.windows[1][1][1]==2) then -- stroke
+	elseif((globVar.windows[1][1][1]==2)or(globVar.windows[1][1][1]==3)) then -- stroke or turbine
 		lib_Path = "AppTempl/Tasks/winNit"..globVar.screenLib24..""
 	elseif(globVar.windows[1][1][1]==3) then -- glider
 	end
@@ -267,11 +267,19 @@ local function drawWindow(winNr)
 			labelYoffs = txtyoffs[window[1]][3] + lcd.getTextHeight(txtyoffs[window[1]][4])-lcd.getTextHeight(FONT_MINI) - corVal
 			local valTxt =nil
 			if(window[4]>29)then
-				valTxt = window[14] -- draw text
+				valTxt = window[8] -- draw text
 			else
 				valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
 			end
+			if(window[4]==35)then -- text window for turbine data texttype is font bolt
+				if(window[1]==1)then
+					txtyoffs[window[1]][4] = FONT_BIG
+				else
+					txtyoffs[window[1]][4] = FONT_BOLD
+				end
+			end
 			labelXoffs = lcd.getTextWidth(txtyoffs[window[1]][4],valTxt)+2 -- add x width of value
+
 			if(window[4]<31)then
 				labelXoffs = labelXoffs + lcd.getTextWidth(FONT_MINI,window[3])+2-- add x width of unit except timer window
 			end	
@@ -371,6 +379,18 @@ local function printTelemetry2()
 	end	
 end	
 
+-------------------------------------------------------------------------------
+-- Configure turbine status lookup
+local function getECUStatus(value)
+	local file = io.readall("Apps/AppTempl/model/ECU_Data/"..globVar.ECUType..".jsn") -- hardcoded for now
+	local status = nil
+	local obj  = json.decode(file)
+	if(obj) then
+		status = obj[""..math.modf(value)..""]
+	end
+	return(status)
+end
+
 --------------------------------------------------------------------
 -- main Loop function
 --------------------------------------------------------------------
@@ -397,6 +417,7 @@ local function loop()
 				sensID = globVar.windows[j][i][10]
 				sensPar = globVar.windows[j][i][11] 
 				if(globVar.windows[j][i][4]>0) then 
+				
 					if(globVar.windows[j][i][4]==30)then -- value is GPS Coordinate
 						globVar.windows[j][i][8] = 0 -- reset screen value
 						sensor = {}
@@ -413,9 +434,24 @@ local function loop()
 								globVar.windows[j][i][14] = string.format("%s %d° %f'", sensor.label,degs,minutes)
 							end
 						end
-					elseif(globVar.windows[j][i][4]>30)then -- value is one of the timers
+					elseif((globVar.windows[j][i][4]>30)and(globVar.windows[j][i][4]<35))then -- value is one of the timers
 						handleTimers(j,i,0)
-					else                                 -- value from application
+					elseif(globVar.windows[j][i][4]==35)then --reserved for turbine status	
+						if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+							sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
+							if(sensor)then
+								if(sensor.value <0)then
+									globVar.windows[j][i][9] = 1 --set turbine alert
+								else
+									globVar.windows[j][i][9] = 0 --reset turbine alert
+								end
+								
+								globVar.windows[j][i][8] = nil
+								globVar.windows[j][i][8] = getECUStatus(sensor.value)
+
+							end	
+						end	
+					else 					-- value from application
 						globVar.windows[j][i][8] = globVar.appValues[globVar.windows[j][i][4]] --set app value 
 					end	
 				else				-- value from telemetry sensor

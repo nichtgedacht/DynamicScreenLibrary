@@ -59,6 +59,7 @@ cd AppTempl
 md model
 cd model
 md data
+md ECU_Data
 endlocal
 XCOPY /S apps\AppTempl %transmitter%:\apps\AppTempl
 copy apps\AppTempl.lc %transmitter%:\apps

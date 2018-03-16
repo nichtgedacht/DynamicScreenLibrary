@@ -38,11 +38,12 @@ local globVar ={--                          main version | version of screenlib 
 				timLimits = {0,0,0,0},--    timer limits or preset values depending on count up / count down configuration
 				sensors = {}, --			all sensor iDs
 				sensParam = {}, --          all sensor parameter
-				failWindow = 0 --           draw telemetry window with failure
+				failWindow = 0, --           draw telemetry window with failure
+				ECUType = 1 --				ECU Turbine Type
 			   }
 
 -------------------------------------------------------------------- 
--- Initialization
+-- 
 --------------------------------------------------------------------
 local function init(code)
 	if(code ==1)then

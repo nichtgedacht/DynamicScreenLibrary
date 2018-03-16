@@ -1,0 +1,19 @@
+{
+	"-20"   : "- ERROR -",
+	"-8"    : "Supply ASS lo",
+    "-7"    : "Supply low err",
+    "-6"    : "RPM high error",
+    "-5"    : "EGT error",
+    "-4"    : "Throttle failure",
+    "-3"    : "Switch failure",
+    "-2"    : "RPM low error",
+    "-1"    : "No serial input",
+    "0"     : "No Start clear",
+    "1"     : "Start clearance",
+    "2"     : "Starting",
+    "3"     : "Started up",
+    "4"     : "Calibrated",
+    "5"     : "Auto stop",
+    "6"     : "Running",
+	"7"     : "Max. RPM"
+}

@@ -122,7 +122,11 @@ end
 --***********************************************************---
 --*************add your own button handler here**************---
 --***********************************************************---
-
+-- Take care of user's settings-changes
+local function ECUTypeChanged(value)
+    globVar.ECUType  = value --The value is local to this function and not global to script, hence it must be set explicitly.
+	system.pSave("ECUType",  globVar.ECUType)
+end
 -------------------------------------------------------------------- 
 -- app config page
 --------------------------------------------------------------------
@@ -154,6 +158,13 @@ local function appConfig()
 	end
     --***********************************************************---
 	--*******add your own app specific configuration here********---
+	if(globVar.windows[1][1][1]==3)then
+		local ECUTypeA = {"JetCat","Jakadofsky","HORNET","PBS","evoJet","AMT"}
+		form.addRow(2)
+		form.addLabel({label="ECU Typ", width=200})
+		form.addSelectbox(ECUTypeA, globVar.ECUType, true, ECUTypeChanged)
+	end	
+
 	-- if(#globVar.sensors ==0)then
 		-- form.addRow(1)
 		-- form.addLabel({label="SensorSimulation",font=FONT_BOLD})
@@ -379,6 +390,7 @@ end
 local function init(globVar_,formID)
 	globVar = globVar_
 	capIncrease = system.pLoad("capIncrease",100)
+	globVar.ECUType = system.pLoad("ECUType",1)
 	loadDataFile()
 	if(formID == globVar.templateAppID) then
 		appConfig()-- open app template config page 
