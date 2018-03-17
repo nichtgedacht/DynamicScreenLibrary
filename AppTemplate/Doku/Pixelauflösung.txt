@@ -271,9 +271,9 @@ Timerfenster geteilt count down
 [5] 420                                 (Startwert 420 Sekunden countdown)
 [6] 0                                	(von App gesetzt Startwert Timer in ms)
 [7] 0                       			(von App gesetzt wenn 1 ist Timer aktiv)
-[8] 0									(von App gesetzt Timerwert in ms)
+[8] 0									(Timerwert als Text)
 [9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
-[10]1									(dummy)
+[10]1									(von App gesetzt Timerwert in ms)
 [11]1									(dummy)
 [12]0									(vorbereitet für Outputcontrol)
 Beispiel nach obiger Beschreibung:

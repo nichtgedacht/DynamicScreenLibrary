@@ -141,7 +141,7 @@ local function appConfig()
     form.addLabel({label="DataFile",width=170})
 	fileBoxIndex = form.addSelectbox(datafiles,fileIndex,true,dataFileChanged,{width=170})
 	
-	if(globVar.windows[1][1][1] < 3) then 
+	if(globVar.windows[1][1][1] < 4) then 
 	    if(globVar.windows[1][1][1] == 1) then --electro model 
 			form.addRow(2)
 			form.addLabel({label=globVar.trans.nCell,width=170})

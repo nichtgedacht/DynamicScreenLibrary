@@ -43,15 +43,15 @@ local function handleTimers(j,i,reset_)
 
 	if(1==system.getInputsVal(reset)or (reset_==1))then
 		if(globVar.windows[j][i][7] ==0)then -- is timer switched off
-			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] --preset start value in ms
-			system.pSave("timer"..timerID.."",globVar.windows[j][i][8]) -- save timer value on reset
+			globVar.windows[j][i][10] = preStart[globVar.windows[j][i][3]] --preset start value in ms
+			system.pSave("timer"..timerID.."",globVar.windows[j][i][10]) -- save timer value on reset
 		end	
 	else	
 		if((1==system.getInputsVal(start))and (globVar.windows[j][i][7] == 0))then
 			if (globVar.windows[j][i][3] %2 ==0)then --count down timer
-				globVar.windows[j][i][6] =  globVar.currentTime - (preStart[globVar.windows[j][i][3]] - globVar.windows[j][i][8])--preset start time
+				globVar.windows[j][i][6] =  globVar.currentTime - (preStart[globVar.windows[j][i][3]] - globVar.windows[j][i][10])--preset start time
 			else
-				globVar.windows[j][i][6] = globVar.currentTime - globVar.windows[j][i][8]--preset start time
+				globVar.windows[j][i][6] = globVar.currentTime - globVar.windows[j][i][10]--preset start time
 			end	
 			globVar.windows[j][i][7] = 1 --switch timer active
 			timeDif =0
@@ -66,11 +66,11 @@ local function handleTimers(j,i,reset_)
 	
 	if(globVar.windows[j][i][7] == 1) then --timer is running
 		if (globVar.windows[j][i][3] %2 ==0)then --count down timer
-			globVar.windows[j][i][8] = preStart[globVar.windows[j][i][3]] - timeDif
-			countDownTime = math.modf((globVar.windows[j][i][8]/1000) + 1)
+			globVar.windows[j][i][10] = preStart[globVar.windows[j][i][3]] - timeDif
+			countDownTime = math.modf((globVar.windows[j][i][10]/1000) + 1)
 		else									 --count up timer
-			globVar.windows[j][i][8] = timeDif
-			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][8])/1000)
+			globVar.windows[j][i][10] = timeDif
+			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][10])/1000)
 		end
 	end
 
@@ -96,15 +96,15 @@ local function handleTimers(j,i,reset_)
 		timExpired = true
 	end
 	
-	
+
 	globVar.windows[j][i][8] = nil
 	local sign = " "
-	if(globVar.windows[j][i][8]<0)then
+	if(globVar.windows[j][i][10]<0)then
 		sign = nil
 		sign = "-"
 	end
 	if (globVar.windows[j][i][3]<3)then		--hour:min:sec
-		local temp = globVar.windows[j][i][8] / 3600000
+		local temp = globVar.windows[j][i][10] / 3600000
 		timeHour,temp = math.modf(temp)
 		temp = temp *60
 		timeMin,temp = math.modf(temp)	
@@ -112,7 +112,7 @@ local function handleTimers(j,i,reset_)
 		timesec = math.modf(temp)
 		globVar.windows[j][i][8] = string.format( "%s%02d:%02d:%02d",sign,math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
 	else									--min:sec:sec/10
-		timeMin,temp = math.modf(globVar.windows[j][i][8]/60000)
+		timeMin,temp = math.modf(globVar.windows[j][i][10]/60000)
 		temp = temp * 60
 		timesec, temp = math.modf(temp)
 		temp = temp * 100
