@@ -365,19 +365,17 @@ local function printTelemetry()
 	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
 	if(globVar.failWindow ==3)then
 		drawWindow(3)
-	else	
+	elseif(globVar.failWindow ==2)then	
 		drawWindow(2) --draw first telemetry window
+	else
+		if(1==system.getInputsVal(globVar.ScrSwitch))then
+			drawWindow(3)
+		else
+			drawWindow(2)
+		end
 	end	
 end		
-
-local function printTelemetry2() 
-	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
-	if(globVar.failWindow ==2)then
-		drawWindow(2)
-	else	
-		drawWindow(3) --draw second telemetry window
-	end	
-end	
+	
 
 -------------------------------------------------------------------------------
 -- Configure turbine status lookup
@@ -399,11 +397,6 @@ local function loop()
 		allertSet = false
 		timExpired = false
 		system.registerTelemetry(1," "..globVar.model.." Scr1",4,printTelemetry)
-		if(#globVar.windows == 3)then
-			system.registerTelemetry(2," "..globVar.model.." Scr2",4,printTelemetry2)
-		else
-			system.unregisterTelemetry(2)
-		end
 		aPrepare = false
 		local sensor = {}
 		local sensID = nil

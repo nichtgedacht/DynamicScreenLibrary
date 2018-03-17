@@ -103,6 +103,11 @@ local function dataFileChanged()
 	storeDataFile()
     form.reinit(globVar.templateAppID)
 end
+
+local function ScrSwitchChanged(value)
+	globVar.ScrSwitch = value
+	system.pSave("scrSwitch",value)
+end
 -- ------only for simulation without connected telemetry
 -- local function SimCapChanged(value)
 	-- SimCap = value
@@ -140,6 +145,12 @@ local function appConfig()
 	form.addRow(2)
     form.addLabel({label="DataFile",width=170})
 	fileBoxIndex = form.addSelectbox(datafiles,fileIndex,true,dataFileChanged,{width=170})
+	
+	if(#globVar.windows == 3)then
+		form.addRow(2)
+		form.addLabel({label="TeleScreen2"})
+		form.addInputbox(globVar.ScrSwitch,true,ScrSwitchChanged)
+	end
 	
 	if(globVar.windows[1][1][1] < 4) then 
 	    if(globVar.windows[1][1][1] == 1) then --electro model 
@@ -234,6 +245,9 @@ local function sensorChanged()
 	local j,i = calcWinIdx(winListIdx)
 	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window 
 	storeDataFile()
+	sensPaListIdx = 1 
+	globVar.windows[j][i][11] = 1 -- preset parameter list index with first element
+	form.reinit(globVar.screenlibID)
 end
 
 local function sensParChanged()
@@ -390,7 +404,6 @@ end
 local function init(globVar_,formID)
 	globVar = globVar_
 	capIncrease = system.pLoad("capIncrease",100)
-	globVar.ECUType = system.pLoad("ECUType",1)
 	loadDataFile()
 	if(formID == globVar.templateAppID) then
 		appConfig()-- open app template config page 

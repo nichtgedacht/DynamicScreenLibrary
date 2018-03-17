@@ -38,8 +38,9 @@ local globVar ={--                          main version | version of screenlib 
 				timLimits = {0,0,0,0},--    timer limits or preset values depending on count up / count down configuration
 				sensors = {}, --			all sensor iDs
 				sensParam = {}, --          all sensor parameter
-				failWindow = 0, --           draw telemetry window with failure
-				ECUType = 1 --				ECU Turbine Type
+				failWindow = 0, --          draw telemetry window with failure
+				ECUType = 1, --				ECU Turbine Type
+				ScrSwitch = nil --			switch between telemetry pages active , page2, otherwise page1
 			   }
 
 -------------------------------------------------------------------- 

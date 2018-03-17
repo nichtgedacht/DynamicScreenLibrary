@@ -61,6 +61,9 @@ local function init(code,globVar_)
 	globVar.model = system.getProperty("Model")
 	globVar.nCell = system.pLoad("nCell",3)
 	globVar.capa = system.pLoad("capa",2400)
+	globVar.ECUType = system.pLoad("ECUType",1)
+	globVar.ScrSwitch = system.pLoad("scrSwitch")
+
 	-- ----only for simulation without connected telemetry
 	-- SimCap = system.pLoad("SimCap")
 	-- ----only for simulation without connected telemetry
