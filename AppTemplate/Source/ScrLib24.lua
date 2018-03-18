@@ -58,7 +58,7 @@ local function handleTimers(j,i,reset_)
 		end
 	end
 	if(1==system.getInputsVal(stopp))then
-		system.pSave("timer"..timerID.."",globVar.windows[j][i][8]) -- save timer value on stopp
+		system.pSave("timer"..timerID.."",globVar.windows[j][i][10]) -- save timer value on stopp
 		globVar.windows[j][i][7] = 0 --switch timer off
 	end
 	
@@ -145,8 +145,8 @@ end
 local function setTx_Tim(j,i)
 	if((globVar.windows[j][i][4]>30) and (globVar.windows[j][i][4]<35))then
 		local timerID = globVar.windows[j][i][4]-30
-		globVar.windows[j][i][8]= system.pLoad("timer"..timerID.."",-1) -- preset timer value of window
-		if(globVar.windows[j][i][8]==-1)then -- reset timer if value was not stored
+		globVar.windows[j][i][10]= system.pLoad("timer"..timerID.."",-1) -- preset timer value of window
+		if(globVar.windows[j][i][10]==-1)then -- reset timer if value was not stored
 			handleTimers(j,i,1)
 		end
 	end
@@ -444,7 +444,6 @@ local function loop()
 								
 								globVar.windows[j][i][8] = nil
 								globVar.windows[j][i][8] = getECUStatus(sensor.value)
-
 							end	
 						end	
 					else 					-- value from application

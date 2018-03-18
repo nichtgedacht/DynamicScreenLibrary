@@ -244,16 +244,19 @@ local function sensorChanged()
 	sensListIdx = form.getValue(sensorListBox)
 	local j,i = calcWinIdx(winListIdx)
 	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window 
-	storeDataFile()
 	sensPaListIdx = 1 
 	globVar.windows[j][i][11] = 1 -- preset parameter list index with first element
+	print("storeData_1",globVar.windows[j][i][10],globVar.windows[j][i][11])
+	storeDataFile()
 	form.reinit(globVar.screenlibID)
 end
 
 local function sensParChanged()
 	sensPaListIdx = form.getValue(sensParListBox)
 	local j,i = calcWinIdx(winListIdx)
+	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window
 	globVar.windows[j][i][11] = sensPaListIdx -- set sensor parameterid to corresponding window 
+	print("storeData_2",globVar.windows[j][i][10],globVar.windows[j][i][11])
 	storeDataFile()
 end
 
