@@ -252,7 +252,7 @@ local function drawWindow(winNr)
 			lcd.drawRectangle(nextXoffs, nextYoffs, 130, txtyoffs[window[1]][1],6) 
 			if((window[9]>0)and(globVar.secClock == true))then --failure display red
 				if(window[1]<4)then
-					lcd.drawFilledRectangle(nextXoffs+1, nextYoffs+1, 128, txtyoffs[window[1]][1]-2,125)
+					lcd.drawFilledRectangle(nextXoffs+1, nextYoffs+1, 128, txtyoffs[window[1]][1]-2)
 					failColor = FONT_XOR 
 				end	
 	        end
@@ -324,9 +324,8 @@ local function drawWindow(winNr)
 				end	
 				if((window[9]>0)and(window[1]>3))then --failure display red
 					if(globVar.secClock == true)then
-						failColor = FONT_GRAYED
+						failColor = 0
 					else
-						local bgr,bgg,bgb = lcd.getBgColor()
 						failColor  = FONT_OR
 					end
 				end	
