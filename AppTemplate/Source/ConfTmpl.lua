@@ -25,23 +25,17 @@ local capIncrease = 100 --increase capacity config step with
 local function loadDataFile()
 	local file = nil
 	for k in next,datafiles do datafiles[k] = nil end
-	--local modelDatFile = ""..globVar.model..".jsn"
-	table.insert(datafiles,system.getProperty("ModelFile"))
 	for name in dir("Apps/AppTempl/data") do
 		if(#name >3) then
 		table.insert(datafiles,name)
 		end
 	end
-	fileIndex = system.pLoad("fileIndex",2)
-	if(fileIndex ==1)then
-		file = io.readall("Apps/AppTempl/model/data/"..datafiles[1].." ") --load model specific data file
-	end	
-	if(file==nil)then
-		if((fileIndex-1) > #datafiles or (fileIndex==1))then
-			fileIndex = 2
-		end
-		file = io.readall("Apps/AppTempl/data/"..datafiles[fileIndex].." ") --load datafile template
-	end	
+	fileIndex = system.pLoad("fileIndex",1)
+	if(fileIndex > #datafiles)then
+		fileIndex = 1
+	end
+	file = io.readall("Apps/AppTempl/data/"..datafiles[fileIndex].." ") --load datafile template
+
 	if(file)then
 		for i in next,globVar.windows do --delete window list 
 			for k in next,globVar.windows[i] do globVar.windows[i][k] = nil end
@@ -49,15 +43,36 @@ local function loadDataFile()
 		end	
 		globVar.windows	= json.decode(file)
 	end	
+	file = nil
+	file = io.readall("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").." ") --load model specific data file
+	if(file)then
+		local sensors = json.decode(file)
+		for i in next,globVar.windows do
+			for k in next,globVar.windows[i] do
+				if(#sensors[i]==#globVar.windows[i])then --overwrite sensorID and sensorparam from model file
+					globVar.windows[i][k][10] = sensors[i][k][1]
+					globVar.windows[i][k][11] = sensors[i][k][2]
+				end
+			end
+		end
+	end	
 	return datafiles
 end
 
+
 local function storeDataFile()
-	local winListWrite = json.encode(globVar.windows)
+	local senslist = {{},{},{}}
+	for i in ipairs(globVar.windows)do
+		for j in ipairs(globVar.windows[i]) do
+			table.insert(senslist[i],{1,1}) 
+			senslist[i][j][1] = globVar.windows[i][j][10]
+			senslist[i][j][2] = globVar.windows[i][j][11]
+		end
+	end
+	local winListWrite = json.encode(senslist)
 	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
 	io.write(file,winListWrite)
 	io.close (file)
-	system.pSave("fileIndex",1)
 end
 
 -------------------------------------------------------------------- 
@@ -84,8 +99,6 @@ local function dataFileChanged()
 		if(form.question(globVar.trans.cont,globVar.trans.lTDat,globVar.trans.ovConf,0,false,0)==1)then
 			system.pSave("fileIndex",fileIndex_)
 			loadDataFile()
-			fileIndex_ = 1
-			system.pSave("fileIndex",fileIndex_)
 		end
 	end	
 	storeDataFile()

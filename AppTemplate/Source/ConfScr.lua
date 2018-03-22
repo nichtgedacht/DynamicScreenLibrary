@@ -23,13 +23,19 @@ local sensListIdx = 1 -- index of sensor list box
 local sensPaListIdx = 1 -- index of sesor parameter list box
 local timListIdx = 0 -- index of timer list
 
-
 local function storeDataFile()
-	local winListWrite = json.encode(globVar.windows)
+	local senslist = {{},{},{}}
+	for i in ipairs(globVar.windows)do
+		for j in ipairs(globVar.windows[i]) do
+			table.insert(senslist[i],{1,1}) 
+			senslist[i][j][1] = globVar.windows[i][j][10]
+			senslist[i][j][2] = globVar.windows[i][j][11]
+		end
+	end
+	local winListWrite = json.encode(senslist)
 	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
 	io.write(file,winListWrite)
 	io.close (file)
-	system.pSave("fileIndex",1)
 end
 -------------------------------------------------------------------- 
 -- screen lib configuration
