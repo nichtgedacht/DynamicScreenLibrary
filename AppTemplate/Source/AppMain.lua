@@ -14,9 +14,11 @@
 -- Locals for the application
 local globVar =  nil--    global variables for application and screen library
 local screen_lib = nil --depending on device loaded screen library
-local config_lib = nil --loaded config library
+local config_tmpl = nil --loaded config template library
+local config_scr = nil --loaded config screen library
 local scrlib_Path = nil --path to screen lib
-local config_Path = nil --path to config lib
+local config_tmplPath = nil --path to config template lib
+local config_scrPath = nil --path to config screen lib
 
 
 --------------------------------------------------------------------------------
@@ -25,17 +27,23 @@ local config_Path = nil --path to config lib
 local function init(code,globVar_)
 	globVar = globVar_
 	globVar.appValues = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- calculated application values
-	if(config_lib == nil)then -- initialize configurations, load datafile
-		config_Path = "AppTempl/Tasks/ConfLib"
-		config_lib = require(config_Path)
+	if(config_scr ~= nil)then --unload screen lib config
+		package.loaded[config_scrPath]=nil
+		_G[config_scrPath]=nil
+		config_scr = nil
+		config_scrPath = nil
 	end
-	if(config_lib ~=nil)then
-		local func = config_lib[1]  --init() 
-		func(globVar,0) -- execute specific initializer of config lib
-		package.loaded[config_Path]=nil -- unload config lib
-		_G[config_Path]=nil
-		config_lib = nil
-		config_Path = nil
+	if(config_tmpl == nil)then -- initialize configurations, load datafile
+		config_tmplPath = "AppTempl/Tasks/ConfTmpl"
+		config_tmpl = require(config_tmplPath)
+	end
+	if(config_tmpl ~=nil)then
+		local func = config_tmpl[1]  --init() 
+		func(globVar,0) -- execute specific initializer of app template config
+		package.loaded[config_tmplPath]=nil -- unload app template config
+		_G[config_tmplPath]=nil
+		config_tmpl = nil
+		config_tmplPath = nil
     end
 	-- read device type for loading corresponding screen library
 	local deviceType = system.getDeviceType()
@@ -78,18 +86,20 @@ end
 
 local function keyPressedTempl(key)
 	local func = nil
-	if(config_lib ~=nil)then
-		if(globVar.currentForm == globVar.screenlibID) then
-			func = config_lib[3]  --keyPressedScr()
+	if(globVar.currentForm == globVar.screenlibID) then
+		if(config_scr ~=nil)then
+			func = config_scr[2]  --keyPressedScr()
 			func(key) -- execute config event handler screen library
-		else
-			func = config_lib[2]  --keyPressed()
+		end	
+	else
+		if(config_tmpl ~=nil)then
+			func = config_tmpl[2]  --keyPressed()
 			if(func(key)==1) then -- execute config event handler app template
 				init(1,globVar)	  -- close and unload config, reinitialize
 				form.close()
 			end
 		end
-	end	
+	end
 end
 
 
@@ -104,14 +114,37 @@ local function initTempl(formID)
 		screen_lib = nil
 		scrlib_Path = nil
 	end
-	if(config_lib == nil)then
-		config_Path = "AppTempl/Tasks/ConfLib"
-		config_lib = require(config_Path)
-	end
-	if(config_lib ~=nil)then
-		local func = config_lib[1]  --init() 
-		func(globVar,formID) -- execute specific initializer of config lib
-    end
+	if(globVar.currentForm == globVar.templateAppID)then -- initialize template app config
+		if(config_scr ~= nil)then
+			package.loaded[config_scrPath]=nil
+			_G[config_scrPath]=nil
+			config_scr = nil
+			config_scrPath = nil
+		end
+		if(config_tmpl == nil)then
+			config_tmplPath = "AppTempl/Tasks/ConfTmpl"
+			config_tmpl = require(config_tmplPath)
+		end
+		if(config_tmpl ~=nil)then
+			local func = config_tmpl[1]  --init() 
+			func(globVar,formID) -- execute specific initializer of config app template
+		end
+	elseif(globVar.currentForm == globVar.screenlibID)then -- initialize screen config
+		if(config_tmpl ~= nil)then
+			package.loaded[config_tmplPath]=nil
+			_G[config_tmplPath]=nil
+			config_tmpl = nil
+			config_tmplPath = nil
+		end
+		if(config_scr == nil)then
+			config_scrPath = "AppTempl/Tasks/ConfScr"
+			config_scr = require(config_scrPath)
+		end
+		if(config_scr ~=nil)then
+			local func = config_scr[1]  --init() 
+			func(globVar,formID) -- execute specific initializer of config screen lib
+		end
+	end	
 end
 
 --------------------------------------------------------------------
