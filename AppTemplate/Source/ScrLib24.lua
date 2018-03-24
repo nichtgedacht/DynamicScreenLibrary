@@ -19,6 +19,7 @@ local lib_Path = nil     -- path to last loaded main win library
 local prevCountDownTime = 100 -- for count down timer
 local allertSet = false 
 local timExpired = false
+local modImage = nil
 
 -------------------------------------------------------------------- 
 -- Init function
@@ -265,7 +266,12 @@ local function drawWindow(winNr)
 			win45Xoffs = 0
 		end	
 		if(window[1]==7)then
-		-- todo draw image here
+			if(modImage~=nil)then
+				local imageX = nextXoffs+65 - modImage.width/2
+				lcd.drawImage (imageX, nextYoffs,modImage)
+			else
+				modImage = lcd.loadImage("Apps/AppTempl/model/img/"..window[3]..".jpg")
+			end
 		else
 			local corVal = lcd.getTextHeight(txtyoffs[window[1]][4]) * 0.1
 			labelYoffs = txtyoffs[window[1]][3] + lcd.getTextHeight(txtyoffs[window[1]][4])-lcd.getTextHeight(FONT_MINI) - corVal
