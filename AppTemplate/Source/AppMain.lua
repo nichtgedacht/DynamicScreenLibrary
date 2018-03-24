@@ -21,25 +21,31 @@ local config_tmplPath = nil --path to config template lib
 local config_scrPath = nil --path to config screen lib
 
 
+local function storeDataFile()
+	local senslist = {{},{},{}}
+	for i in ipairs(globVar.windows)do
+		for j in ipairs(globVar.windows[i]) do
+			table.insert(senslist[i],{1,1}) 
+			senslist[i][j][1] = globVar.windows[i][j][10]
+			senslist[i][j][2] = globVar.windows[i][j][11]
+		end
+	end
+	local winListWrite = json.encode(senslist)
+	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
+	io.write(file,winListWrite)
+	io.close (file)
+end
 --------------------------------------------------------------------------------
 -- Application initializer
 
 local function init(code,globVar_)
 	globVar = globVar_
 	globVar.appValues = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- calculated application values
-	if(config_scr ~= nil)then --unload screen lib config
-		package.loaded[config_scrPath]=nil
-		_G[config_scrPath]=nil
-		config_scr = nil
-		config_scrPath = nil
-	end
-	if(config_tmpl == nil)then -- initialize configurations, load datafile
-		config_tmplPath = "AppTempl/Tasks/ConfTmpl"
-		config_tmpl = require(config_tmplPath)
-	end
+	config_tmplPath = "AppTempl/Tasks/ConfTmpl"
+	config_tmpl = require(config_tmplPath)
 	if(config_tmpl ~=nil)then
-		local func = config_tmpl[1]  --init() 
-		func(globVar,0) -- execute specific initializer of app template config
+		local func = config_tmpl[3]  --init() 
+		func(globVar) -- execute specific initializer of app template config
 		package.loaded[config_tmplPath]=nil -- unload app template config
 		_G[config_tmplPath]=nil
 		config_tmpl = nil
@@ -94,9 +100,33 @@ local function keyPressedTempl(key)
 	else
 		if(config_tmpl ~=nil)then
 			func = config_tmpl[2]  --keyPressed()
-			if(func(key)==1) then -- execute config event handler app template
-				init(1,globVar)	  -- close and unload config, reinitialize
+			func(key)
+			if((key == KEY_5) or (key == KEY_ESC) or (key == KEY_MENU))then -- execute config event handler app template
+				if(config_scr ~= nil)then --unload screen lib config
+					package.loaded[config_scrPath]=nil
+					_G[config_scrPath]=nil
+					config_scr = nil
+					config_scrPath = nil
+				end
+				if(config_tmpl ~=nil)then
+					package.loaded[config_tmplPath]=nil -- unload app template config
+					_G[config_tmplPath]=nil
+					config_tmpl = nil
+					config_tmplPath = nil
+				end
+				print("storeData_1")
+				storeDataFile()
+				collectgarbage()
 				form.close()
+				if(screen_lib == nil)then
+				print("scrLibEmpty")
+					scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
+					screen_lib = require(scrlib_Path)
+				end
+				if(screen_lib ~=nil)then
+					local func = screen_lib[1]  --init() 
+					func(globVar) -- execute specific initializer of screen library
+				end	
 			end
 		end
 	end
@@ -127,7 +157,7 @@ local function initTempl(formID)
 		end
 		if(config_tmpl ~=nil)then
 			local func = config_tmpl[1]  --init() 
-			func(globVar,formID) -- execute specific initializer of config app template
+			func(globVar,1) -- execute specific initializer of config app template
 		end
 	elseif(globVar.currentForm == globVar.screenlibID)then -- initialize screen config
 		if(config_tmpl ~= nil)then
@@ -142,7 +172,7 @@ local function initTempl(formID)
 		end
 		if(config_scr ~=nil)then
 			local func = config_scr[1]  --init() 
-			func(globVar,formID) -- execute specific initializer of config screen lib
+			func(globVar) -- execute specific initializer of config screen lib
 		end
 	end	
 end
@@ -249,6 +279,7 @@ local function loop()
 	--*******add your own main loop functionalities here*********---
 
     --***********************************************************---
+
 	end
     collectgarbage()
 end

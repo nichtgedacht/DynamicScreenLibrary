@@ -23,20 +23,7 @@ local sensListIdx = 1 -- index of sensor list box
 local sensPaListIdx = 1 -- index of sesor parameter list box
 local timListIdx = 0 -- index of timer list
 
-local function storeDataFile()
-	local senslist = {{},{},{}}
-	for i in ipairs(globVar.windows)do
-		for j in ipairs(globVar.windows[i]) do
-			table.insert(senslist[i],{1,1}) 
-			senslist[i][j][1] = globVar.windows[i][j][10]
-			senslist[i][j][2] = globVar.windows[i][j][11]
-		end
-	end
-	local winListWrite = json.encode(senslist)
-	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
-	io.write(file,winListWrite)
-	io.close (file)
-end
+
 -------------------------------------------------------------------- 
 -- screen lib configuration
 -------------------------------------------------------------------- 
@@ -70,8 +57,6 @@ local function sensorChanged()
 	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window 
 	sensPaListIdx = 1 
 	globVar.windows[j][i][11] = 1 -- preset parameter list index with first element
-	print("storeData_1",globVar.windows[j][i][10],globVar.windows[j][i][11])
-	storeDataFile()
 	form.reinit(globVar.screenlibID)
 end
 
@@ -80,8 +65,6 @@ local function sensParChanged()
 	local j,i = calcWinIdx(winListIdx)
 	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window
 	globVar.windows[j][i][11] = sensPaListIdx -- set sensor parameterid to corresponding window 
-	print("storeData_2",globVar.windows[j][i][10],globVar.windows[j][i][11])
-	storeDataFile()
 end
 
 local function startSwitchChanged(value)

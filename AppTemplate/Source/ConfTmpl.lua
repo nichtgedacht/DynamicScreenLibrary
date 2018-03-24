@@ -23,11 +23,12 @@ local capIncrease = 100 --increase capacity config step with
 -------------------------------------------------------------------- 
 
 local function loadDataFile()
+print("loadDataFile")
 	local file = nil
 	for k in next,datafiles do datafiles[k] = nil end
 	for name in dir("Apps/AppTempl/data") do
 		if(#name >3) then
-		table.insert(datafiles,name)
+			table.insert(datafiles,name)
 		end
 	end
 	fileIndex = system.pLoad("fileIndex",1)
@@ -59,22 +60,6 @@ local function loadDataFile()
 	return datafiles
 end
 
-
-local function storeDataFile()
-	local senslist = {{},{},{}}
-	for i in ipairs(globVar.windows)do
-		for j in ipairs(globVar.windows[i]) do
-			table.insert(senslist[i],{1,1}) 
-			senslist[i][j][1] = globVar.windows[i][j][10]
-			senslist[i][j][2] = globVar.windows[i][j][11]
-		end
-	end
-	local winListWrite = json.encode(senslist)
-	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
-	io.write(file,winListWrite)
-	io.close (file)
-end
-
 -------------------------------------------------------------------- 
 -- app configuration
 -------------------------------------------------------------------- 
@@ -95,13 +80,10 @@ local function capIncreaseChanged(value)
 end
 local function dataFileChanged()
 	local fileIndex_ = form.getValue(fileBoxIndex)
-	if(fileIndex_ > 1)then
-		if(form.question(globVar.trans.cont,globVar.trans.lTDat,globVar.trans.ovConf,0,false,0)==1)then
-			system.pSave("fileIndex",fileIndex_)
-			loadDataFile()
-		end
-	end	
-	storeDataFile()
+	if(form.question(globVar.trans.cont,globVar.trans.lTDat,globVar.trans.ovConf,0,false,0)==1)then
+		system.pSave("fileIndex",fileIndex_)
+		loadDataFile()
+	end
     form.reinit(globVar.templateAppID)
 end
 
@@ -133,13 +115,24 @@ local function ECUTypeChanged(value)
     globVar.ECUType  = value --The value is local to this function and not global to script, hence it must be set explicitly.
 	system.pSave("ECUType",  globVar.ECUType)
 end
+
 -------------------------------------------------------------------- 
 -- app config page
 --------------------------------------------------------------------
 local function appConfig(globVar_)
 	globVar = globVar_
+	
+	for name in dir("Apps/AppTempl/data") do
+		if(#name >3) then
+			table.insert(datafiles,name)
+		end
+	end
+	fileIndex = system.pLoad("fileIndex",1)
+	
+	if(fileIndex > #datafiles)then
+		fileIndex = 1
+	end
 	capIncrease = system.pLoad("capIncrease",100)
-	loadDataFile()
 
 	form.setTitle(globVar.trans.appName)
 	form.setButton(1,"ScrLib",ENABLED)
@@ -208,6 +201,14 @@ local function appConfig(globVar_)
 	configRow = 1
 end
 
+
+local function init(globVar_)
+	globVar = globVar_
+	loadDataFile()
+	appConfig(globVar)
+end
+
+
 local function keyPressed(key)
 	if(key==KEY_MENU or key==KEY_ESC or key == KEY_5) then
 		return(1) -- unload config
@@ -220,5 +221,5 @@ end
 
 
 --------------------------------------------------------------------
-local ConfigLib = {appConfig,keyPressed}
+local ConfigLib = {appConfig,keyPressed,init}
 return ConfigLib
