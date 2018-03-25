@@ -22,7 +22,7 @@ local capIncrease = 100 --increase capacity config step with
 -- filehandling
 -------------------------------------------------------------------- 
 
-local function loadDataFile()
+local function loadDataFile(loadSensParam)
 print("loadDataFile")
 	local file = nil
 	for k in next,datafiles do datafiles[k] = nil end
@@ -44,19 +44,21 @@ print("loadDataFile")
 		end	
 		globVar.windows	= json.decode(file)
 	end	
-	file = nil
-	file = io.readall("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").." ") --load model specific data file
-	if(file)then
-		local sensors = json.decode(file)
-		for i in next,globVar.windows do
-			for k in next,globVar.windows[i] do
-				if(#sensors[i]==#globVar.windows[i])then --overwrite sensorID and sensorparam from model file
-					globVar.windows[i][k][10] = sensors[i][k][1]
-					globVar.windows[i][k][11] = sensors[i][k][2]
+	if(loadSensParam ==1)then
+		file = nil
+		file = io.readall("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").." ") --load model specific data file
+		if(file)then
+			local sensors = json.decode(file)
+			for i in next,globVar.windows do
+				for k in next,globVar.windows[i] do
+					if(#sensors[i]==#globVar.windows[i])then --overwrite sensorID and sensorparam from model file
+						globVar.windows[i][k][10] = sensors[i][k][1]
+						globVar.windows[i][k][11] = sensors[i][k][2]
+					end
 				end
 			end
-		end
-	end	
+		end	
+	end
 	return datafiles
 end
 
@@ -82,7 +84,7 @@ local function dataFileChanged()
 	local fileIndex_ = form.getValue(fileBoxIndex)
 	if(form.question(globVar.trans.cont,globVar.trans.lTDat,globVar.trans.ovConf,0,false,0)==1)then
 		system.pSave("fileIndex",fileIndex_)
-		loadDataFile()
+		loadDataFile(0)
 	end
     form.reinit(globVar.templateAppID)
 end
@@ -204,7 +206,7 @@ end
 
 local function init(globVar_)
 	globVar = globVar_
-	loadDataFile()
+	loadDataFile(1)
 	appConfig(globVar)
 end
 

@@ -26,28 +26,30 @@ local function storeDataFile()
 	local tmpWr1 = false
 	local tmpWr2 = false
 	local tmpString = nil
-	io.write(file,"[")
-	for i in ipairs(globVar.windows)do
-		if(tmpWr1 == false)then
-			tmpWr1 = true
-			io.write(file,"[")
-		else
-			io.write(file,",[")
-		end
-		tmpWr2 = false
-		for j in ipairs(globVar.windows[i]) do
-			if(tmpWr2 == false)then
-				tmpWr2 = true
-				tmpString = string.format("[%d,%d]",globVar.windows[i][j][10],globVar.windows[i][j][11])
+	if(file) then
+		io.write(file,"[")
+		for i in ipairs(globVar.windows)do
+			if(tmpWr1 == false)then
+				tmpWr1 = true
+				io.write(file,"[")
 			else
-				tmpString = string.format(",[%d,%d]",globVar.windows[i][j][10],globVar.windows[i][j][11])
+				io.write(file,",[")
 			end
-			io.write(file,tmpString)
+			tmpWr2 = false
+			for j in ipairs(globVar.windows[i]) do
+				if(tmpWr2 == false)then
+					tmpWr2 = true
+					tmpString = string.format("[%d,%d]",globVar.windows[i][j][10],globVar.windows[i][j][11])
+				else
+					tmpString = string.format(",[%d,%d]",globVar.windows[i][j][10],globVar.windows[i][j][11])
+				end
+				io.write(file,tmpString)
+			end
+			io.write(file,"]")
 		end
 		io.write(file,"]")
+		io.close (file)
 	end
-	io.write(file,"]")
-	io.close (file)
 end
 --------------------------------------------------------------------------------
 -- Application initializer
