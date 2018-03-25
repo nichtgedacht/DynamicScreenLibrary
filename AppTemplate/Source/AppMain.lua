@@ -22,33 +22,14 @@ local config_scrPath = nil --path to config screen lib
 
 
 local function storeDataFile()
-	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
-	local tmpWr1 = false
-	local tmpWr2 = false
-	local tmpString = nil
-	if(file) then
-		io.write(file,"[")
-		for i in ipairs(globVar.windows)do
-			if(tmpWr1 == false)then
-				tmpWr1 = true
-				io.write(file,"[")
-			else
-				io.write(file,",[")
-			end
-			tmpWr2 = false
-			for j in ipairs(globVar.windows[i]) do
-				if(tmpWr2 == false)then
-					tmpWr2 = true
-					tmpString = string.format("[%d,%d]",globVar.windows[i][j][10],globVar.windows[i][j][11])
-				else
-					tmpString = string.format(",[%d,%d]",globVar.windows[i][j][10],globVar.windows[i][j][11])
-				end
-				io.write(file,tmpString)
-			end
-			io.write(file,"]")
+	local SensIDs = {}
+	for i in ipairs(globVar.windows)do
+		for j in ipairs(globVar.windows[i]) do
+			table.insert(SensIDs,globVar.windows[i][j][10])
+			table.insert(SensIDs,globVar.windows[i][j][11])
 		end
-		io.write(file,"]")
-		io.close (file)
+		system.pSave("SensIDs"..i,SensIDs)
+		SensIDs = {}
 	end
 end
 --------------------------------------------------------------------------------

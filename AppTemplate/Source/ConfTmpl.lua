@@ -45,19 +45,30 @@ print("loadDataFile")
 		globVar.windows	= json.decode(file)
 	end	
 	if(loadSensParam ==1)then
-		file = nil
-		file = io.readall("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").." ") --load model specific data file
-		if(file)then
-			local sensors = json.decode(file)
-			for i in next,globVar.windows do
-				for k in next,globVar.windows[i] do
-					if(#sensors[i]==#globVar.windows[i])then --overwrite sensorID and sensorparam from model file
-						globVar.windows[i][k][10] = sensors[i][k][1]
-						globVar.windows[i][k][11] = sensors[i][k][2]
-					end
+		local SensIDs = {}
+		local index = 1
+		for i in next,globVar.windows do
+			SensIDs = {}
+			index = 1
+			SensIDs = system.pLoad("SensIDs"..i)
+			if(SensIDs)then
+				for k in next,globVar.windows[i] do --overwrite sensorID and sensorparam from model file
+					if(index <= #SensIDs)then
+						globVar.windows[i][k][10] = SensIDs[index]
+						index = index + 1
+					else
+						print("out of range")
+					
+					end	
+					if(index <= #SensIDs)then
+						globVar.windows[i][k][11] = SensIDs[index]
+						index = index + 1
+					else
+						print("out of range")	
+					end	
 				end
 			end
-		end	
+		end
 	end
 	return datafiles
 end
