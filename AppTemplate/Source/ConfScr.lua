@@ -23,6 +23,11 @@ local sensListIdx = 1 -- index of sensor list box
 local sensPaListIdx = 1 -- index of sesor parameter list box
 local timListIdx = 0 -- index of timer list
 
+local function destroyLists()
+	for k in next,sensList do sensList[k] = nil end
+	for k in next,sensPaList do sensPaList[k] = nil end
+	for k in next,winList do winList[k] = nil end
+end
 
 -------------------------------------------------------------------- 
 -- screen lib configuration
@@ -103,11 +108,7 @@ local function screenLibConfig(globVar_)
 	globVar = globVar_
 	local j,i = calcWinIdx(winListIdx)
 	local sensor = {}
-
-	for k in next,sensList do sensList[k] = nil end
-	for k in next,sensPaList do sensPaList[k] = nil end
-	for k in next,winList do winList[k] = nil end
-
+	destroyLists()
 	sensListIdx = globVar.windows[j][i][10] --preset sensorlist index
 	for idx in ipairs(globVar.sensors) do 
 		sensor = system.getSensorByID (globVar.sensors[idx],0)
@@ -202,6 +203,7 @@ end
 --------------------------------------------------------------------
 local function keyPressedScr(key)
     if(key==KEY_5 or key==KEY_ESC) then
+	  destroyLists()
       form.preventDefault()
       form.reinit(globVar.templateAppID)
 	  for k in next,winList do winList[k] = nil end
@@ -209,5 +211,5 @@ local function keyPressedScr(key)
 end 
 
 --------------------------------------------------------------------
-local ConfigScr = {screenLibConfig,keyPressedScr}
+local ConfigScr = {screenLibConfig,keyPressedScr,destroyLists}
 return ConfigScr
