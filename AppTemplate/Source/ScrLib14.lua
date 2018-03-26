@@ -20,6 +20,17 @@ local prevCountDownTime = 100 -- for count down timer
 local allertSet = false 
 local timExpired = false
 
+local function unloadMainWin()
+	print("unloadMainWin")
+	system.unregisterTelemetry(1)
+	if(mainWin_Lib ~= nil)then
+		package.loaded[lib_Path]=nil
+		_G[lib_Path]=nil
+		mainWin_Lib = nil
+		lib_Path = nil
+		collectgarbage('collect')
+	end	
+end
 -------------------------------------------------------------------- 
 -- Init function
 -------------------------------------------------------------------- 
@@ -480,6 +491,6 @@ local function loop()
 	end	
 end
 --------------------------------------------------------------------
-local ScreenLib = {init,loop}
+local ScreenLib = {init,loop,unloadMainWin}
 return ScreenLib
 

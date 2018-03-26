@@ -22,15 +22,33 @@ local config_scrPath = nil --path to config screen lib
 
 
 local function storeDataFile()
-	local SensIDs = {}
+	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
+	local tmpWr1 = false
+	local tmpWr2 = false
+	local tmpString = nil
+	io.write(file,"[")
 	for i in ipairs(globVar.windows)do
-		for j in ipairs(globVar.windows[i]) do
-			table.insert(SensIDs,globVar.windows[i][j][10])
-			table.insert(SensIDs,globVar.windows[i][j][11])
+		if(tmpWr1 == false)then
+			tmpWr1 = true
+			io.write(file,"[")
+		else
+			io.write(file,",[")
 		end
-		system.pSave("SensIDs"..i,SensIDs)
-		SensIDs = {}
+		tmpWr2 = false
+		for j in ipairs(globVar.windows[i]) do
+			if(tmpWr2 == false)then
+				tmpWr2 = true
+				tmpString = string.format("[%d,%d]",globVar.windows[i][j][10],globVar.windows[i][j][11])
+			else
+				tmpString = string.format(",[%d,%d]",globVar.windows[i][j][10],globVar.windows[i][j][11])
+			end
+			io.write(file,tmpString)
+		end
+		io.write(file,"]")
+			  
 	end
+	io.write(file,"]")
+	io.close (file)
 end
 --------------------------------------------------------------------------------
 -- Application initializer
@@ -61,14 +79,14 @@ local function init(code,globVar_)
 		globVar.trans = obj
 	end
 	globVar.currentDate = system.getDateTime()
-	if(screen_lib == nil)then
-		scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
-		screen_lib = require(scrlib_Path)
-	end
-	if(screen_lib ~=nil)then
-		local func = screen_lib[1]  --init() 
-		func(globVar) -- execute specific initializer of screen library
-    end	
+	 if(screen_lib == nil)then
+		 scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
+		 screen_lib = require(scrlib_Path)
+	 end
+	 if(screen_lib ~=nil)then
+		 local func = screen_lib[1]  --init() 
+		 func(globVar) -- execute specific initializer of screen library
+     end	
 	globVar.model = system.getProperty("Model")
 	globVar.nCell = system.pLoad("nCell",3)
 	globVar.capa = system.pLoad("capa",2400)
@@ -99,31 +117,37 @@ local function keyPressedTempl(key)
 			func = config_tmpl[2]  --keyPressed()
 			func(key)
 			if((key == KEY_5) or (key == KEY_ESC) or (key == KEY_MENU))then -- execute config event handler app template
+								globVar.debugmem = math.modf(collectgarbage('count'))
+	print("scrLibEmpty_1: "..globVar.debugmem.."K")	
+
 				if(config_scr ~= nil)then --unload screen lib config
+				print("unload scrconf")
 					package.loaded[config_scrPath]=nil
 					_G[config_scrPath]=nil
 					config_scr = nil
 					config_scrPath = nil
 				end
 				if(config_tmpl ~=nil)then
+				print("unload templconf")
 					package.loaded[config_tmplPath]=nil -- unload app template config
 					_G[config_tmplPath]=nil
 					config_tmpl = nil
 					config_tmplPath = nil
 				end
-				print("storeData_1")
 				storeDataFile()
 				collectgarbage()
 				form.close()
 				if(screen_lib == nil)then
-				print("scrLibEmpty")
 					scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
 					screen_lib = require(scrlib_Path)
 				end
+
 				if(screen_lib ~=nil)then
 					local func = screen_lib[1]  --init() 
 					func(globVar) -- execute specific initializer of screen library
 				end	
+											globVar.debugmem = math.modf(collectgarbage('count'))
+	print("scrLibEmpty_2: "..globVar.debugmem.."K")				
 			end
 		end
 	end
@@ -136,6 +160,8 @@ end
 local function initTempl(formID)
     globVar.currentForm=formID
 	if(screen_lib ~= nil)then			--unload screen lib on open configuration
+		local func = screen_lib[3]      --unload main windows
+		func()
 		package.loaded[scrlib_Path]=nil
 		_G[scrlib_Path]=nil
 		screen_lib = nil
@@ -182,11 +208,10 @@ local function loop()
 	local sensor2 = {}
 	local sensID = 0
 	local sensPar = 0
-
 	system.registerForm(1,MENU_MAIN,globVar.trans.appName,initTempl,keyPressedTempl,printForm);
-	--system.unregisterForm(1);
 	
  	if((screen_lib ~= nil)and (globVar.initDone == true))then
+		--system.unregisterForm(1);
 		-- register config page of the app template 
 		local txTel = system.getTxTelemetry()
 		globVar.appValues[3]= txTel.rx1Voltage
@@ -276,7 +301,13 @@ local function loop()
 	--*******add your own main loop functionalities here*********---
 
     --***********************************************************---
-
+	--globVar.debugmem = math.modf(collectgarbage('count'))
+	--print("scrLibEmpty_3: "..globVar.debugmem.."K")				
+	globVar.debugmem = math.modf(collectgarbage('count'))
+		if (globVar.mem < globVar.debugmem) then
+			globVar.mem = globVar.debugmem
+			print("max Speicher Zyklus: "..globVar.mem.."K")		
+		end
 	end
     collectgarbage()
 end

@@ -10,7 +10,7 @@
 -------------------------------------------------------------------- 
 -- local variables
 -------------------------------------------------------------------- 
-local globVar = {} --global variables for application and screen library
+local globVar = nil --global variables for application and screen library
 -- app template config
 local datafiles = {}    --list of all data files
 local configRow =1		--row of cap increase int box
@@ -44,32 +44,21 @@ print("loadDataFile")
 		end	
 		globVar.windows	= json.decode(file)
 	end	
-	if(loadSensParam ==1)then
-		local SensIDs = {}
-		local index = 1
+	file = nil
+	file = io.readall("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").." ") --load model specific data file
+	if(file)then
+		local sensors = json.decode(file)
 		for i in next,globVar.windows do
-			SensIDs = {}
-			index = 1
-			SensIDs = system.pLoad("SensIDs"..i)
-			if(SensIDs)then
-				for k in next,globVar.windows[i] do --overwrite sensorID and sensorparam from model file
-					if(index <= #SensIDs)then
-						globVar.windows[i][k][10] = SensIDs[index]
-						index = index + 1
-					else
-						print("out of range")
-					
-					end	
-					if(index <= #SensIDs)then
-						globVar.windows[i][k][11] = SensIDs[index]
-						index = index + 1
-					else
-						print("out of range")	
-					end	
+			if(i<= #sensors)then
+				for k in next,globVar.windows[i] do
+					if(#sensors[i]==#globVar.windows[i])then --overwrite sensorID and sensorparam from model file
+						globVar.windows[i][k][10] = sensors[i][k][1]
+						globVar.windows[i][k][11] = sensors[i][k][2]
+					end
 				end
-			end
+			end	
 		end
-	end
+	end	
 	return datafiles
 end
 
@@ -224,6 +213,8 @@ end
 
 local function keyPressed(key)
 	if(key==KEY_MENU or key==KEY_ESC or key == KEY_5) then
+		globVar = nil
+		datafiles = {}
 		return(1) -- unload config
 	elseif(key==KEY_1)then
 	-- open with Key 1 the screen lib config

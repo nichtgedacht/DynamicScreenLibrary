@@ -21,6 +21,17 @@ local allertSet = false
 local timExpired = false
 local modImage = nil
 
+local function unloadMainWin()
+	print("unloadMainWin")
+	system.unregisterTelemetry(1)
+	if(mainWin_Lib ~= nil)then
+		package.loaded[lib_Path]=nil
+		_G[lib_Path]=nil
+		mainWin_Lib = nil
+		lib_Path = nil
+		collectgarbage('collect')
+	end	
+end
 -------------------------------------------------------------------- 
 -- Init function
 -------------------------------------------------------------------- 
@@ -156,6 +167,7 @@ end
 local function init(globVar_)
 	globVar = globVar_
 	loadmainWindow()
+
 	local bgr,bgg,bgb = lcd.getBgColor() -- set frame and text color depending on back ground color
 	if (bgr+bgg+bgb)/3 >128 then
 		globVar.txtColor = {0,0,0} 
@@ -489,6 +501,6 @@ local function loop()
 	end	
 end
 --------------------------------------------------------------------
-local ScreenLib = {init,loop}
+local ScreenLib = {init,loop,unloadMainWin}
 return ScreenLib
 

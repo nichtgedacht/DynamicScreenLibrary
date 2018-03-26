@@ -206,7 +206,6 @@ local function keyPressedScr(key)
 	  destroyLists()
       form.preventDefault()
       form.reinit(globVar.templateAppID)
-	  for k in next,winList do winList[k] = nil end
     end
 end 
 
