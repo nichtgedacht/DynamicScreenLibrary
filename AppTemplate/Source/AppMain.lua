@@ -46,11 +46,11 @@ local function storeDataFile()
 				io.write(file,tmpString)
 			end
 			io.write(file,"]")
+			  
 		end
 		io.write(file,"]")
 		io.close (file)
 	end
-				   
 end
 --------------------------------------------------------------------------------
 -- Application initializer
