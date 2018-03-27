@@ -36,20 +36,18 @@ local function drawBattery()
 	else
 		lcd.drawText(textwithCap,4, textCap, FONT_BIG)
 	end
-	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
+																		  
 	-- Battery
 	lcd.drawFilledRectangle(148, 33, 24, 7)	-- Top of Battery
 	-- Level of Battery
 	chgH = 114 * telCapVal/100*1.02
 	chgY = 158-chgH
-	if((globVar.windows[1][1][9] >0)or(globVar.windows[1][2][9] >0)) then -- cap alert or voltage alert
+	if(((globVar.windows[1][1][9] >0)or(globVar.windows[1][2][9] >0))and(globVar.secClock == true)) then -- cap alert or voltage alert
 		lcd.drawFilledRectangle(135, chgY, 50, chgH,125)
 	else
 		lcd.drawFilledRectangle(135, chgY, 50, chgH)
 	end
-	lcd.setColor(255,255,255)	-- white color for voltage text
-	lcd.drawText(textwithVolt,135,textVolt,FONT_BIG)
-	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])	
+	lcd.drawText(textwithVolt,135,textVolt,FONT_BIG|FONT_XOR)
 	lcd.drawRectangle(134, 40, 52, 118) -- frame of battery
 	lcd.drawRectangle(134, 2, 52, 28, 6) --frame of percentage display
     collectgarbage()
