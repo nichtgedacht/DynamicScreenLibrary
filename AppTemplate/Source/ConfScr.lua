@@ -22,6 +22,7 @@ local sensParListBox = nil -- ID of sensor param list box
 local sensListIdx = 1 -- index of sensor list box
 local sensPaListIdx = 1 -- index of sesor parameter list box
 local timListIdx = 0 -- index of timer list
+local focRow = 3
 
 local function destroyLists()
 	for k in next,sensList do sensList[k] = nil end
@@ -53,6 +54,7 @@ local function windowChanged()
   else
 	timListIdx = 0                           -- activate sensor config
   end
+  focRow = 4
   form.reinit(globVar.screenlibID)
 end
 
@@ -62,6 +64,7 @@ local function sensorChanged()
 	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window 
 	sensPaListIdx = 1 
 	globVar.windows[j][i][11] = 1 -- preset parameter list index with first element
+	focRow = 5
 	form.reinit(globVar.screenlibID)
 end
 
@@ -70,21 +73,29 @@ local function sensParChanged()
 	local j,i = calcWinIdx(winListIdx)
 	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window
 	globVar.windows[j][i][11] = sensPaListIdx -- set sensor parameterid to corresponding window 
+	focRow = 3
+	form.reinit(globVar.screenlibID)
 end
 
 local function startSwitchChanged(value)
 	globVar.switches[1][timListIdx] = value
 	system.pSave("timStart"..timListIdx.."",value)
+	focRow = 5
+	form.reinit(globVar.screenlibID)
 end
 
 local function stoppSwitchChanged(value)
 	globVar.switches[2][timListIdx] = value
 	system.pSave("timStopp"..timListIdx.."",value)
+	focRow = 6
+	form.reinit(globVar.screenlibID)
 end
 
 local function resetSwitchChanged(value)
 	globVar.switches[3][timListIdx] = value
 	system.pSave("timReset"..timListIdx.."",value)
+	focRow = 3
+	form.reinit(globVar.screenlibID)
 end
 
 local function limitChanged(value)
@@ -128,28 +139,27 @@ local function screenLibConfig(globVar_)
 
 	form.addRow(1)
 	form.addLabel({label=globVar.trans.bindSens,font=FONT_BOLD})
-
-
-	if( sensPaList[1] ~=nil) then
-		for i in ipairs(globVar.windows[1]) do
-			table.insert(winList,globVar.windows[1][i][2])	
-		end		
-		for i in ipairs(globVar.windows[2]) do
-			if((globVar.windows[2][i][4]>0)and(globVar.windows[2][i][4]<11))then
-				table.insert(winList,"***"..globVar.windows[2][i][2].."***")
+	for i in ipairs(globVar.windows[1]) do
+		table.insert(winList,globVar.windows[1][i][2])	
+	end		
+	for i in ipairs(globVar.windows[2]) do
+		if((globVar.windows[2][i][4]>0)and(globVar.windows[2][i][4]<11))then
+			table.insert(winList,"***"..globVar.windows[2][i][2].."***")
+		else
+			table.insert(winList,globVar.windows[2][i][2])
+		end			
+	end	
+	if(#globVar.windows == 3) then
+		for i in ipairs(globVar.windows[3]) do
+			if((globVar.windows[3][i][4]>0)and(globVar.windows[3][i][4]<11))then					
+				table.insert(winList,"***"..globVar.windows[3][i][2].."***")
 			else
-				table.insert(winList,globVar.windows[2][i][2])
+				table.insert(winList,globVar.windows[3][i][2])
 			end			
 		end	
-		if(#globVar.windows == 3) then
-			for i in ipairs(globVar.windows[3]) do
-				if((globVar.windows[3][i][4]>0)and(globVar.windows[3][i][4]<11))then					
-					table.insert(winList,"***"..globVar.windows[3][i][2].."***")
-				else
-					table.insert(winList,globVar.windows[3][i][2])
-				end			
-			end	
-		end
+	end
+
+	if( sensPaList[1] ~=nil) then
 		form.addRow(2)   
 		form.addLabel({label="Label",width=170})
 		winListBox = form.addSelectbox(winList,winListIdx,true,windowChanged)
@@ -165,6 +175,9 @@ local function screenLibConfig(globVar_)
 	end	
 
 	if(timListIdx>0)then
+		form.addRow(2)   
+		form.addLabel({label="Label",width=170})
+		winListBox = form.addSelectbox(winList,winListIdx,true,windowChanged)
 		form.addRow(2)
 		form.addLabel({label="Start "..timListIdx..""})
 		form.addInputbox(globVar.switches[1][timListIdx],true,startSwitchChanged)
@@ -195,7 +208,7 @@ local function screenLibConfig(globVar_)
 	-- version
 	form.addRow(1)
 	form.addLabel({label="Powered by Geierwally - "..globVar.version.."  Mem max: "..globVar.mem.."K",font=FONT_MINI, alignRight=true})
-	form.setFocusedRow (3)
+	form.setFocusedRow (focRow)
 end 
 
 -------------------------------------------------------------------- 

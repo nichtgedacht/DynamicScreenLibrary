@@ -19,6 +19,9 @@ local lib_Path = nil     -- path to last loaded main win library
 local prevCountDownTime = 100 -- for count down timer
 local allertSet = false 
 local timExpired = false
+local prevInputVal = 0
+local drWin = 2
+local prevFailWindow = 0
 
 local function unloadMainWin()
 	print("unloadMainWin")
@@ -373,17 +376,24 @@ end
 
 local function printTelemetry() 
 	lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
-	if(globVar.failWindow ==3)then
-		drawWindow(3)
-	elseif(globVar.failWindow ==2)then	
-		drawWindow(2) --draw first telemetry window
-	else
-		if(1==system.getInputsVal(globVar.ScrSwitch))then
-			drawWindow(3)
+	local inputVal = system.getInputsVal(globVar.ScrSwitch)
+	if(inputVal ~= prevInputVal)then
+		prevInputVal = inputVal
+											 
+	 
+		if(inputVal == 1)then
+			drWin = 3
 		else
-			drawWindow(2)
+			drWin = 2
 		end
 	end	
+	if(globVar.failWindow ~= prevFailWindow)then
+		prevFailWindow = globVar.failWindow
+		if(globVar.failWindow ~=0)then
+			drWin = globVar.failWindow
+		end	
+	end
+	drawWindow(drWin)
 end		
 	
 
