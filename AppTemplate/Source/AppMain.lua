@@ -278,20 +278,34 @@ local function loop()
 		else
 			globVar.secClock = false
 		end
+		local ltype1 =nil
+		ltype1 = type(sensor1.value)
 		if(sensor1 and sensor1.valid) then
-			globVar.appValues[1] = (((globVar.capa - sensor1.value) * 100) / globVar.capa) --calculate capacity
-			if (globVar.appValues[1] < 0) then
-				globVar.appValues[1] = 0
-			else
-				if (globVar.appValues[1] > 100) then
-					globVar.appValues[1] = 100
+			if(ltype == "number")then
+				globVar.appValues[1] = (((globVar.capa - sensor1.value) * 100) / globVar.capa) --calculate capacity
+				if (globVar.appValues[1] < 0) then
+					globVar.appValues[1] = 0
+				else
+					if (globVar.appValues[1] > 100) then
+						globVar.appValues[1] = 100
+					end
 				end
+			else
+				print("capsensfailed", sensor1.value, ltype1)
+				globVar.appValues[1]= -1
 			end
 		else
 			globVar.appValues[1]=0
 		end	
+		ltype1 = nil
+		ltype1 = type(sensor2.value)
 		if(sensor2 and sensor2.valid) then
-			globVar.appValues[2] = (sensor2.value / globVar.nCell) --calculate cell voltage
+			if(ltype1 == "number")then
+				globVar.appValues[2] = (sensor2.value / globVar.nCell) --calculate cell voltage
+			else
+				print("Vsensfailed", sensor2.value, ltype1)
+				globVar.appValues[2] = -1
+			end
 		else
 			globVar.appValues[2] = 0
 		end	
