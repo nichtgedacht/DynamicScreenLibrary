@@ -187,6 +187,7 @@ local function init(globVar_)
 		globVar.timLimits[i] = system.pLoad("timLimit"..i.."",0)
 		i=i+1
 	end
+	prevInputVal = system.getInputsVal(globVar.ScrSwitch)
 	globVar.initDone = true
 end
 
@@ -441,19 +442,19 @@ local function loop()
 				if(globVar.windows[j][i][4]>0) then 
 				
 					if(globVar.windows[j][i][4]==30)then -- value is GPS Coordinate
-						globVar.windows[j][i][8] = 0 -- reset screen value
+														  
 						sensor = {}
-							if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+						if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
 							sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
 							if(sensor and sensor.valid and sensor.type ==9) then
+								globVar.windows[j][i][8] = nil -- reset screen value
 								local nesw = {"N", "E", "S", "W"}
 								globVar.windows[j][i][3] = nil
-								globVar.windows[j][i][14] = nil
+									   
 								globVar.windows[j][i][3] = nesw[sensor.decimals+1]
-								globVar.windows[j][i][8] = sensor.valGPS --set sensor GPSvalue
 								local minutes = (sensor.valGPS & 0xFFFF) * 0.001
 								local degs = (sensor.valGPS >> 16) & 0xFF
-								globVar.windows[j][i][14] = string.format("%s %d° %f'", sensor.label,degs,minutes)
+								globVar.windows[j][i][8] = string.format("%s %d° %f'", sensor.label,degs,minutes)
 							end
 						end
 					elseif((globVar.windows[j][i][4]>30)and(globVar.windows[j][i][4]<35))then -- value is one of the timers
