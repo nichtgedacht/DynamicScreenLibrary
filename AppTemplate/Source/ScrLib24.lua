@@ -292,10 +292,19 @@ local function drawWindow(winNr)
 			local corVal = lcd.getTextHeight(txtyoffs[window[1]][4]) * 0.1
 			labelYoffs = txtyoffs[window[1]][3] + lcd.getTextHeight(txtyoffs[window[1]][4])-lcd.getTextHeight(FONT_MINI) - corVal
 			local valTxt =nil
+			local ltype1 =nil
+			local ltype2 =nil
 			if(window[4]>29)then
 				valTxt = window[8] -- draw text
 			else
-				valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
+				ltype1 = type(window[8])
+				ltype2 = type(window[7])
+				if(ltype1=="number" and ltype2=="number")then
+					valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
+				else
+					valTxt = "failed"
+				    print(window[8], ltype1)
+				end
 			end
 			if(window[4]==35)then -- text window for turbine data texttype is font bolt
 				if(window[1]==1)then
@@ -483,6 +492,10 @@ local function loop()
 						sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
 					end
 					if(sensor and sensor.valid) then
+						local ltype = type(sensor.value)
+						if(ltype ~= "number")then
+							globVar.windows[j][i][8] = nil
+						end
 						globVar.windows[j][i][8] = sensor.value --set sensor value
 						if(globVar.windows[j][i][1]==2)then -- store min max values
 							globVar.windows[j][i][13]=sensor.min
@@ -491,7 +504,12 @@ local function loop()
 					end
 				end
 				if(sensor and sensor.valid) then
-					checkLimit(globVar.windows[j][i],j)
+					local ltype = type(globVar.windows[j][i])
+				    if (ltype == "number")then
+						checkLimit(globVar.windows[j][i],j)
+					else
+						print("limit check failed")
+					end	
 				end	
 				if(globVar.windows[j][i][9]>0)then
 					globVar.failWindow = j
