@@ -130,6 +130,7 @@ local function screenLibConfig(globVar_)
 		for idx in ipairs(globVar.sensParam[sensListIdx]) do 
 			sensor = system.getSensorByID (globVar.sensors[sensListIdx],globVar.sensParam[sensListIdx][idx])
 			table.insert(sensPaList, string.format("%s", sensor.label))
+			print(sensor.label)
 		end
 	end
   

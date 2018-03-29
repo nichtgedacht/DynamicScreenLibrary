@@ -115,6 +115,9 @@ end
 -- Take care of user's settings-changes
 local function ECUTypeChanged(value)
     globVar.ECUType  = value --The value is local to this function and not global to script, hence it must be set explicitly.
+	local file = io.readall("Apps/AppTempl/model/ECU_Data/"..value..".jsn") -- hardcoded for now
+	globVar.ECUStat = {}
+	globVar.ECUStat  = json.decode(file)
 	system.pSave("ECUType",  globVar.ECUType)
 end
 
@@ -208,6 +211,7 @@ local function init(globVar_)
 	globVar = globVar_
 	loadDataFile(1)
 	appConfig(globVar)
+	ECUTypeChanged(globVar.ECUType)
 end
 
 

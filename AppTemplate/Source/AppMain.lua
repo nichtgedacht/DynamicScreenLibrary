@@ -58,6 +58,11 @@ end
 local function init(code,globVar_)
 	globVar = globVar_
 	globVar.appValues = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- calculated application values
+	globVar.model = system.getProperty("Model")
+	globVar.nCell = system.pLoad("nCell",3)
+	globVar.capa = system.pLoad("capa",2400)
+	globVar.ECUType = system.pLoad("ECUType",1)
+	globVar.ScrSwitch = system.pLoad("scrSwitch")
 	config_tmplPath = "AppTempl/Tasks/ConfTmpl"
 	config_tmpl = require(config_tmplPath)
 	if(config_tmpl ~=nil)then
@@ -89,11 +94,6 @@ local function init(code,globVar_)
 		 local func = screen_lib[1]  --init() 
 		 func(globVar) -- execute specific initializer of screen library
      end	
-	globVar.model = system.getProperty("Model")
-	globVar.nCell = system.pLoad("nCell",3)
-	globVar.capa = system.pLoad("capa",2400)
-	globVar.ECUType = system.pLoad("ECUType",1)
-	globVar.ScrSwitch = system.pLoad("scrSwitch")
 
 	-- ----only for simulation without connected telemetry
 	-- SimCap = system.pLoad("SimCap")

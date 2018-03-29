@@ -407,18 +407,6 @@ local function printTelemetry()
 end		
 	
 
--------------------------------------------------------------------------------
--- Configure turbine status lookup
-local function getECUStatus(value)
-	local file = io.readall("Apps/AppTempl/model/ECU_Data/"..globVar.ECUType..".jsn") -- hardcoded for now
-	local status = nil
-	local obj  = json.decode(file)
-	if(obj) then
-		status = obj[""..math.modf(value)..""]
-	end
-	return(status)
-end
-
 --------------------------------------------------------------------
 -- main Loop function
 --------------------------------------------------------------------
@@ -470,8 +458,7 @@ local function loop()
 								end
 								
 								globVar.windows[j][i][8] = nil
-								globVar.windows[j][i][8] = getECUStatus(sensor.value)
-
+								globVar.windows[j][i][8] = globVar.ECUStat[""..math.modf(sensor.value)..""]
 							end	
 						end	
 					else 					-- value from application
