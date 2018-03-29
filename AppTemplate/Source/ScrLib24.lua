@@ -303,7 +303,7 @@ local function drawWindow(winNr)
 					valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
 				else
 					valTxt = "failed"
-				    print(window[8], ltype1)
+				   -- print(window[8], ltype1)
 				end
 			end
 			if(window[4]==35)then -- text window for turbine data texttype is font bolt
@@ -506,7 +506,7 @@ local function loop()
 				    if (ltype == "number")then
 						checkLimit(globVar.windows[j][i],j)
 					else
-						print("limit check failed")
+						--print("limit check failed frame",j,i)
 					end	
 				end	
 				if(globVar.windows[j][i][9]>0)then

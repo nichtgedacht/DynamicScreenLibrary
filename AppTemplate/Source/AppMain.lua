@@ -281,7 +281,7 @@ local function loop()
 		local ltype1 =nil
 		ltype1 = type(sensor1.value)
 		if(sensor1 and sensor1.valid) then
-			if(ltype == "number")then
+			if(ltype1 == "number")then
 				globVar.appValues[1] = (((globVar.capa - sensor1.value) * 100) / globVar.capa) --calculate capacity
 				if (globVar.appValues[1] < 0) then
 					globVar.appValues[1] = 0
