@@ -211,7 +211,9 @@ local function init(globVar_)
 	globVar = globVar_
 	loadDataFile(1)
 	appConfig(globVar)
-	ECUTypeChanged(globVar.ECUType)
+	if(globVar.windows[1][1][1]==3)then -- only for turbine
+		ECUTypeChanged(globVar.ECUType)
+	end	
 end
 
 

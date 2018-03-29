@@ -447,7 +447,7 @@ local function loop()
 						end
 					elseif((globVar.windows[j][i][4]>30)and(globVar.windows[j][i][4]<35))then -- value is one of the timers
 						handleTimers(j,i,0)
-					elseif(globVar.windows[j][i][4]==35)then --reserved for turbine status	
+					elseif((globVar.windows[j][i][4]==35)and(globVar.windows[1][1][1]==3))then --reserved for turbine status	
 						if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
 							sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
 							if(sensor)then
