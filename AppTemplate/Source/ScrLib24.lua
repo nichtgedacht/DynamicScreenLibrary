@@ -250,14 +250,14 @@ local function drawWindow(winNr)
 	local prepNextYoffs = 2
 	local labelXoffs = 2
 	local labelYoffs = 2
-	local txtyoffs = {{57,2,16,FONT_MAXI},{57,2,16,FONT_BIG,39},{28,13,3,FONT_BIG},{41,2,16,FONT_BOLD,0},{41,6,2,FONT_BOLD,19},{156,6,2,FONT_BOLD,20},{57}} --{hight y for summary |start label text y|start value text y|Font| start text min max oder offsetText}
+	local txtyoffs = {{57,2,16,FONT_MAXI},{57,2,16,FONT_BIG,39},{28,13,3,FONT_BIG},{41,2,16,FONT_BOLD,0},{41,6,2,FONT_BOLD,19},{156,6,2,FONT_BOLD,20},{57},{116}} --{hight y for summary |start label text y|start value text y|Font| start text min max oder offsetText}
 	if(mainWin_Lib~=nil)then
 		local func = mainWin_Lib[2]  --draw main window 
 		func() 
 	end
 	for i in ipairs(globVar.windows[winNr]) do --draw all configured telemetry windows
 		local window = globVar.windows[winNr][i]
-		if(((window[1]>3)and(window[13]==1))or(window[1]<=3)or (window[1]==7))then -- draw frame
+		if(((window[1]>3)and(window[13]==1))or(window[1]<=3)or (window[1]==7)or (window[1]==8))then -- draw frame
 			nextYoffs = prepNextYoffs
 			if(160 - nextYoffs < txtyoffs[window[1]][1] ) then --not enough place for configured window
 				if(nextXoffs ==2)then
@@ -269,22 +269,15 @@ local function drawWindow(winNr)
 				end	
 			end
 			labelXoffs = 2
-			lcd.drawRectangle(nextXoffs, nextYoffs, 130, txtyoffs[window[1]][1],6) 
-			if((window[9]>0)and(globVar.secClock == true))then --failure display red
-				lcd.setColor(200,0,0) -- failure red rectangle color
-				if(window[1]<4)then
-					lcd.drawFilledRectangle(nextXoffs+1, nextYoffs+1, 128, txtyoffs[window[1]][1]-2)
-					lcd.setColor(255,255,255) -- failure white font color
-				end	
-	        end
 			prepNextYoffs = nextYoffs+txtyoffs[window[1]][1]+1 --calculate next y offset
 			win457Yoffs = 0
 			win45Xoffs = 0
 		end	
-		if(window[1]==7)then
+		if((window[1]==7)or(window[1]==8))then
 			if(modImage~=nil)then
 				local imageX = nextXoffs+65 - modImage.width/2
-				lcd.drawImage (imageX, nextYoffs,modImage)
+				local imageY = nextYoffs + txtyoffs[window[1]][1]/2 - modImage.height/2
+				lcd.drawImage (imageX, imageY,modImage)
 			else
 				modImage = lcd.loadImage("Apps/AppTempl/model/img/"..window[3]..".jpg")
 			end
@@ -392,6 +385,14 @@ local function drawWindow(winNr)
 				lcd.drawText(nextXoffs + 63 - lcd.getTextWidth(FONT_MINI,minMaxTxt)/2,nextYoffs + txtyoffs[window[1]][5],minMaxTxt,FONT_MINI)
 			end
 		end	
+		lcd.drawRectangle(nextXoffs, nextYoffs, 130, txtyoffs[window[1]][1],6) 
+		if((window[9]>0)and(globVar.secClock == true))then --failure display red
+			lcd.setColor(200,0,0) -- failure red rectangle color
+			if(window[1]<4)then
+				lcd.drawFilledRectangle(nextXoffs+1, nextYoffs+1, 128, txtyoffs[window[1]][1]-2)
+				lcd.setColor(255,255,255) -- failure white font color
+			end	
+	    end
 		lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
 	end	
 end

@@ -304,3 +304,6 @@ Sensorparameter von Window[j][i]: 	local sensPar = globVar.scrSPar[j][i]
 local sensID = globVar.scrSens[j][i]
 local sensPar = globVar.scrSPar[j][i] 
 local sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
+
+Modellimage bei Frame 7  130 * 57    Frame 8 130 * 116
+                  
