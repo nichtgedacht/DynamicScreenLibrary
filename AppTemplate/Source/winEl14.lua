@@ -21,11 +21,17 @@ end
 local function drawBattery()
 	if((globVar.windows[1][1][8]~= "---")and (globVar.windows[1][2][8] ~= "---"))then
 		local telCapVal = string.format("%.1f", globVar.windows[1][1][8])
-		local textVolt = string.format("%.2fV", globVar.windows[1][2][8])
+		local textVolt = nil
 		local textCap = string.format("%.0f%%",telCapVal)
 		local textwithCap = 160 - lcd.getTextWidth(FONT_BIG, textCap) / 2
+		
+		if(globVar.windows[1][2][8]<10)then
+			textVolt = string.format("%.2fV", globVar.windows[1][2][8])
+		else
+			textVolt = string.format("%.1fV", globVar.windows[1][2][8])
+		end			-- Percentage Display
 		local textwithVolt = 160 - lcd.getTextWidth(FONT_BIG, textVolt) / 2
-			-- Percentage Display
+
 		if((globVar.windows[1][1][9] > 0)or(globVar.windows[1][2][9] > 0)) then -- cap alert or voltage alert
 			if(globVar.secClock == true) then -- blink every second
 				lcd.drawText(textwithCap,4, textCap, FONT_BIG)

@@ -19,6 +19,7 @@ local config_scr = nil --loaded config screen library
 local scrlib_Path = nil --path to screen lib
 local config_tmplPath = nil --path to config template lib
 local config_scrPath = nil --path to config screen lib
+local scrDelay = 0
 
 
 local function storeDataFile()
@@ -119,7 +120,7 @@ local function keyPressedTempl(key)
 			func = config_tmpl[2]  --keyPressed()
 			func(key)
 			if((key == KEY_5) or (key == KEY_ESC) or (key == KEY_MENU))then -- execute config event handler app template
-								globVar.debugmem = math.modf(collectgarbage('count'))
+	globVar.debugmem = math.modf(collectgarbage('count'))
 	print("scrLibEmpty_1: "..globVar.debugmem.."K")	
 
 				if(config_scr ~= nil)then --unload screen lib config
@@ -138,18 +139,9 @@ local function keyPressedTempl(key)
 				end
 				storeDataFile()
 				collectgarbage()
-				form.close()
-				if(screen_lib == nil)then
-					scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
-					screen_lib = require(scrlib_Path)
-				end
+				scrDelay = system.getTimeCounter()
 
-				if(screen_lib ~=nil)then
-					local func = screen_lib[1]  --init() 
-					func(globVar) -- execute specific initializer of screen library
-				end	
-											globVar.debugmem = math.modf(collectgarbage('count'))
-	print("scrLibEmpty_2: "..globVar.debugmem.."K")				
+				form.close()
 			end
 		end
 	end
@@ -324,6 +316,22 @@ local function loop()
 			globVar.mem = globVar.debugmem
 			print("max Speicher Zyklus: "..globVar.mem.."K")		
 		end
+	else
+		if((globVar.currentTime - scrDelay > 2000)and(scrDelay ~=0)) then
+			scrDelay = 0
+			if(screen_lib == nil)then
+				scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
+				screen_lib = require(scrlib_Path)
+			end
+
+			if(screen_lib ~=nil)then
+				local func = screen_lib[1]  --init() 
+				func(globVar) -- execute specific initializer of screen library
+			end	
+	globVar.debugmem = math.modf(collectgarbage('count'))
+	print("scrLibEmpty_2: "..globVar.debugmem.."K")		
+		end
+
 	end
     collectgarbage()
 end

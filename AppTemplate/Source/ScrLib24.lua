@@ -451,7 +451,7 @@ local function loop()
 										globVar.windows[j][i][3] = nesw[sensor.decimals+1]
 										local minutes = (sensor.valGPS & 0xFFFF) * 0.001
 										local degs = (sensor.valGPS >> 16) & 0xFF
-										globVar.windows[j][i][8] = string.format("%d° %3f'",degs,minutes)
+										globVar.windows[j][i][8] = string.format("%d° %.3f'",degs,minutes)
 									end
 								end
 							elseif((globVar.windows[j][i][4]==35)and(globVar.windows[1][1][1]==3))then --reserved for turbine status	
@@ -508,7 +508,6 @@ local function loop()
 					globVar.failWindow = j
 					allertSet = true
 				end	
-
 			end
 		end
 		if(aPrepare == false)then

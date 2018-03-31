@@ -110,7 +110,6 @@ local function handleTimers(j,i,reset_)
 		timExpired = true
 	end
 	
-
 	globVar.windows[j][i][8] = nil
 	local sign = " "
 	if(globVar.windows[j][i][10]<0)then
@@ -389,8 +388,6 @@ local function printTelemetry()
 	local inputVal = system.getInputsVal(globVar.ScrSwitch)
 	if(inputVal ~= prevInputVal)then
 		prevInputVal = inputVal
-											 
-	 
 		if(inputVal == 1)then
 			drWin = 3
 		else
@@ -405,8 +402,6 @@ local function printTelemetry()
 	end
 	drawWindow(drWin)
 end		
-	
-
 --------------------------------------------------------------------
 -- main Loop function
 --------------------------------------------------------------------
@@ -443,7 +438,7 @@ local function loop()
 										globVar.windows[j][i][3] = nesw[sensor.decimals+1]
 										local minutes = (sensor.valGPS & 0xFFFF) * 0.001
 										local degs = (sensor.valGPS >> 16) & 0xFF
-										globVar.windows[j][i][8] = string.format("%d° %3f'",degs,minutes)
+										globVar.windows[j][i][8] = string.format("%d° %.3f'",degs,minutes)
 									end
 								end
 							elseif((globVar.windows[j][i][4]==35)and(globVar.windows[1][1][1]==3))then --reserved for turbine status	
@@ -485,10 +480,10 @@ local function loop()
 						end
 						if(sensor and sensor.valid) then
 							local ltype = type(globVar.windows[j][i])
-						    if (ltype == "number")then
+							if (ltype == "number")then
 								checkLimit(globVar.windows[j][i],j)
 							else
-							--print("limit check failed frame",j,i)
+								--print("limit check failed frame",j,i)
 							end	
 						end
 					else
