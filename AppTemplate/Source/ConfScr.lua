@@ -61,19 +61,23 @@ end
 local function sensorChanged()
 	sensListIdx = form.getValue(sensorListBox)
 	local j,i = calcWinIdx(winListIdx)
-	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window 
-	sensPaListIdx = 1 
-	globVar.windows[j][i][11] = 1 -- preset parameter list index with first element
-	focRow = 5
+	if(sensListIdx < #sensList)then
+		globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window 
+		sensPaListIdx = 1 
+		globVar.windows[j][i][11] = 1 -- preset parameter list index with first element
+		focRow = 5
+	end	
 	form.reinit(globVar.screenlibID)
 end
 
 local function sensParChanged()
 	sensPaListIdx = form.getValue(sensParListBox)
-	local j,i = calcWinIdx(winListIdx)
-	globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window
-	globVar.windows[j][i][11] = sensPaListIdx -- set sensor parameterid to corresponding window 
-	focRow = 3
+	if(sensPaListIdx < #sensPaList)then
+		local j,i = calcWinIdx(winListIdx)
+		globVar.windows[j][i][10] = sensListIdx -- set sensorid to corresponding window
+		globVar.windows[j][i][11] = sensPaListIdx -- set sensor parameterid to corresponding window 
+		focRow = 3
+	end	
 	form.reinit(globVar.screenlibID)
 end
 
@@ -120,20 +124,30 @@ local function screenLibConfig(globVar_)
 	local j,i = calcWinIdx(winListIdx)
 	local sensor = {}
 	destroyLists()
-	sensListIdx = globVar.windows[j][i][10] --preset sensorlist index
+	
 	for idx in ipairs(globVar.sensors) do 
 		sensor = system.getSensorByID (globVar.sensors[idx],0)
 		table.insert(sensList, string.format("%s", sensor.label))
 	end
-	sensPaListIdx = globVar.windows[j][i][11] --preset parameterlist index
-	if (globVar.sensParam[sensListIdx]~=nil) then
-		for idx in ipairs(globVar.sensParam[sensListIdx]) do 
-			sensor = system.getSensorByID (globVar.sensors[sensListIdx],globVar.sensParam[sensListIdx][idx])
-			table.insert(sensPaList, string.format("%s", sensor.label))
-			print(sensor.label)
-		end
+	table.insert(sensList,"---")
+  	if(globVar.windows[j][i][10]>0)then
+		sensListIdx = globVar.windows[j][i][10] --preset sensorlist index
+		if (globVar.sensParam[sensListIdx]~=nil) then
+			for idx in ipairs(globVar.sensParam[sensListIdx]) do 
+				sensor = system.getSensorByID (globVar.sensors[sensListIdx],globVar.sensParam[sensListIdx][idx])
+				table.insert(sensPaList, string.format("%s", sensor.label))
+			end
+		end	
+	else
+		sensListIdx = #sensList
 	end
-  
+	table.insert(sensPaList,"---")
+	if(globVar.windows[j][i][11]>0)then
+		sensPaListIdx = globVar.windows[j][i][11] --preset parameterlist index
+	else
+		sensPaListIdx = #sensPaList
+	end
+	
 	form.setTitle(globVar.trans.screenLib)
 	form.addRow(1)
 	form.addLabel({label=globVar.trans.config,font=FONT_BOLD})
@@ -160,11 +174,11 @@ local function screenLibConfig(globVar_)
 		end	
 	end
 
-	if( sensPaList[1] ~=nil) then
-		form.addRow(2)   
-		form.addLabel({label="Label",width=170})
-		winListBox = form.addSelectbox(winList,winListIdx,true,windowChanged)
-		if(timListIdx==0)then
+	if(timListIdx==0)then
+		if( sensPaList[1] ~=nil) then
+			form.addRow(2)   
+			form.addLabel({label="Label",width=170})
+			winListBox = form.addSelectbox(winList,winListIdx,true,windowChanged)
 			form.addRow(2)
 			form.addLabel({label="Sensor",width=170})
 			sensorListBox = form.addSelectbox(sensList,sensListIdx,true,sensorChanged)
@@ -173,9 +187,7 @@ local function screenLibConfig(globVar_)
 			form.addLabel({label="SensParam",width=170})
 			sensParListBox = form.addSelectbox(sensPaList,sensPaListIdx,true,sensParChanged)
 		end	
-	end	
-
-	if(timListIdx>0)then
+	else
 		form.addRow(2)   
 		form.addLabel({label="Label",width=170})
 		winListBox = form.addSelectbox(winList,winListIdx,true,windowChanged)

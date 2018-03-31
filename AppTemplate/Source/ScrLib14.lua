@@ -291,7 +291,7 @@ local function drawWindow(winNr)
 				if(ltype1=="number" and ltype2=="number")then
 					valTxt = string.format("%."..math.modf(window[7]).."f",window[8])-- set telemetry value window[8] with precission of window[7]
 				else
-					valTxt = "failed"
+					valTxt = "---"
 				   -- print(window[8], ltype1)
 				end
 			end
@@ -425,76 +425,81 @@ local function loop()
 					globVar.windows[j][i][13]=0 
 					globVar.windows[j][i][14]=0
 				end					
-				sensID = globVar.windows[j][i][10]
-				sensPar = globVar.windows[j][i][11] 
-				if(globVar.windows[j][i][4]>0) then 
-				
-					if(globVar.windows[j][i][4]==30)then -- value is GPS Coordinate
-														  
-						sensor = {}
-						if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
-							sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
-							if(sensor and sensor.valid and sensor.type ==9) then
-								globVar.windows[j][i][8] = nil -- reset screen value
-								local nesw = {"N", "E", "S", "W"}
-								globVar.windows[j][i][3] = nil
-									   
-								globVar.windows[j][i][3] = nesw[sensor.decimals+1]
-								local minutes = (sensor.valGPS & 0xFFFF) * 0.001
-								local degs = (sensor.valGPS >> 16) & 0xFF
-								globVar.windows[j][i][8] = string.format("%s %d° %f'", sensor.label,degs,minutes)
+				if((globVar.windows[j][i][4]>30)and(globVar.windows[j][i][4]<35))then -- value is one of the timers
+					handleTimers(j,i,0)
+				else	
+					sensID = globVar.windows[j][i][10]
+					sensPar = globVar.windows[j][i][11] 
+					if((sensID >0)and (sensPar >0))then
+						if(globVar.windows[j][i][4]>0) then 
+							if(globVar.windows[j][i][4]==30)then -- value is GPS Coordinate
+								sensor = {}
+								if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+									sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
+									if(sensor and sensor.valid and sensor.type ==9) then
+										globVar.windows[j][i][8] = nil -- reset screen value
+										local nesw = {"N", "E", "S", "W"}
+										globVar.windows[j][i][3] = nil
+										globVar.windows[j][i][3] = nesw[sensor.decimals+1]
+										local minutes = (sensor.valGPS & 0xFFFF) * 0.001
+										local degs = (sensor.valGPS >> 16) & 0xFF
+										globVar.windows[j][i][8] = string.format("%d° %3f'",degs,minutes)
+									end
+								end
+							elseif((globVar.windows[j][i][4]==35)and(globVar.windows[1][1][1]==3))then --reserved for turbine status	
+								if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+									sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
+									if(sensor)then
+										if(sensor.value <0)then
+											globVar.windows[j][i][9] = 1 --set turbine alert
+										else
+											globVar.windows[j][i][9] = 0 --reset turbine alert
+										end
+										globVar.windows[j][i][8] = nil
+										if(globVar.ECUStat ~= nil)then
+											if(#globVar.ECUStat >= sensor.value) then
+												globVar.windows[j][i][8] = globVar.ECUStat[""..math.modf(sensor.value)..""]
+											end
+										end	
+									end	
+								end	
+							else 					-- value from application
+								globVar.windows[j][i][8] = nil
+								globVar.windows[j][i][8] = globVar.appValues[globVar.windows[j][i][4]] --set app value 
+							end	
+						else				-- value from telemetry sensor
+							sensor = {}
+							globVar.windows[j][i][8] = nil
+							globVar.windows[j][i][8] = 0 -- reset screen value
+							if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
+								sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
+							end
+							if(sensor and sensor.valid) then
+								globVar.windows[j][i][8] = nil
+								globVar.windows[j][i][8] = sensor.value --set sensor value
+								if(globVar.windows[j][i][1]==2)then -- store min max values
+									globVar.windows[j][i][13]=sensor.min
+									globVar.windows[j][i][14]=sensor.max
+								end
 							end
 						end
-					elseif((globVar.windows[j][i][4]>30)and(globVar.windows[j][i][4]<35))then -- value is one of the timers
-						handleTimers(j,i,0)
-					elseif((globVar.windows[j][i][4]==35)and(globVar.windows[1][1][1]==3))then --reserved for turbine status	
-						if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
-							sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
-							if(sensor)then
-								if(sensor.value <0)then
-									globVar.windows[j][i][9] = 1 --set turbine alert
-								else
-									globVar.windows[j][i][9] = 0 --reset turbine alert
-								end
-								
-								globVar.windows[j][i][8] = nil
-								globVar.windows[j][i][8] = globVar.ECUStat[""..math.modf(sensor.value)..""]
+						if(sensor and sensor.valid) then
+							local ltype = type(globVar.windows[j][i])
+						    if (ltype == "number")then
+								checkLimit(globVar.windows[j][i],j)
+							else
+							--print("limit check failed frame",j,i)
 							end	
-						end	
-					else 					-- value from application
-						globVar.windows[j][i][8] = globVar.appValues[globVar.windows[j][i][4]] --set app value 
-					end	
-				else				-- value from telemetry sensor
-					sensor = {}
-					globVar.windows[j][i][8] = 0 -- reset screen value
-					if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
-						sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
-					end
-					if(sensor and sensor.valid) then
-						local ltype = type(sensor.value)
-						if(ltype ~= "number")then
-							globVar.windows[j][i][8] = nil
 						end
-						globVar.windows[j][i][8] = sensor.value --set sensor value
-						if(globVar.windows[j][i][1]==2)then -- store min max values
-							globVar.windows[j][i][13]=sensor.min
-							globVar.windows[j][i][14]=sensor.max
-						end
+					else
+						globVar.windows[j][i][8] = nil
+						globVar.windows[j][i][8] = "---"
 					end
 				end
-				if(sensor and sensor.valid) then
-					local ltype = type(globVar.windows[j][i])
-				    if (ltype == "number")then
-						checkLimit(globVar.windows[j][i],j)
-					else
-					--	print("limit check failed frame",j,i)
-					end	
-				end	
 				if(globVar.windows[j][i][9]>0)then
 					globVar.failWindow = j
 					allertSet = true
 				end	
-
 			end
 		end
 		if(aPrepare == false)then

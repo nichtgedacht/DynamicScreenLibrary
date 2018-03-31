@@ -21,6 +21,13 @@ local capIncrease = 100 --increase capacity config step with
 -------------------------------------------------------------------- 
 -- filehandling
 -------------------------------------------------------------------- 
+local function ECUTypeChanged(value)
+    globVar.ECUType  = value --The value is local to this function and not global to script, hence it must be set explicitly.
+	local file = io.readall("Apps/AppTempl/model/ECU_Data/"..value..".jsn") -- hardcoded for now
+	globVar.ECUStat = {}
+	globVar.ECUStat  = json.decode(file)
+	system.pSave("ECUType",  globVar.ECUType)
+end
 
 local function loadDataFile(loadSensParam)
 print("loadDataFile")
@@ -86,6 +93,9 @@ local function dataFileChanged()
 		system.pSave("fileIndex",fileIndex_)
 		loadDataFile(0)
 	end
+	if(globVar.windows[1][1][1]==3)then -- only for turbine
+		ECUTypeChanged(globVar.ECUType)
+	end	
     form.reinit(globVar.templateAppID)
 end
 
@@ -113,13 +123,7 @@ end
 --*************add your own button handler here**************---
 --***********************************************************---
 -- Take care of user's settings-changes
-local function ECUTypeChanged(value)
-    globVar.ECUType  = value --The value is local to this function and not global to script, hence it must be set explicitly.
-	local file = io.readall("Apps/AppTempl/model/ECU_Data/"..value..".jsn") -- hardcoded for now
-	globVar.ECUStat = {}
-	globVar.ECUStat  = json.decode(file)
-	system.pSave("ECUType",  globVar.ECUType)
-end
+
 
 -------------------------------------------------------------------- 
 -- app config page
