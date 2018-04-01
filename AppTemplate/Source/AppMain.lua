@@ -19,8 +19,6 @@ local config_scr = nil --loaded config screen library
 local scrlib_Path = nil --path to screen lib
 local config_tmplPath = nil --path to config template lib
 local config_scrPath = nil --path to config screen lib
-local scrDelay = 0
-
 
 local function storeDataFile()
 	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
@@ -139,9 +137,21 @@ local function keyPressedTempl(key)
 				end
 				storeDataFile()
 				collectgarbage()
-				scrDelay = system.getTimeCounter()
-
 				form.close()
+		--		if(screen_lib == nil)then
+		--			scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
+		--			screen_lib = require(scrlib_Path)
+		--		end
+	--globVar.debugmem = math.modf(collectgarbage('count'))
+	--print("scrLibEmpty_2: "..globVar.debugmem.."K")		
+
+			--	if(screen_lib ~=nil)then
+			--		local func = screen_lib[1]  --init() 
+			--		func(globVar) -- execute specific initializer of screen library
+			--	end	
+	globVar.debugmem = math.modf(collectgarbage('count'))
+	print("scrLibEmpty_6: "..globVar.debugmem.."K")		
+
 			end
 		end
 	end
@@ -315,21 +325,6 @@ local function loop()
 		if (globVar.mem < globVar.debugmem) then
 			globVar.mem = globVar.debugmem
 			print("max Speicher Zyklus: "..globVar.mem.."K")		
-		end
-	else
-		if((globVar.currentTime - scrDelay > 2000)and(scrDelay ~=0)) then
-			scrDelay = 0
-			if(screen_lib == nil)then
-				scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
-				screen_lib = require(scrlib_Path)
-			end
-
-			if(screen_lib ~=nil)then
-				local func = screen_lib[1]  --init() 
-				func(globVar) -- execute specific initializer of screen library
-			end	
-	globVar.debugmem = math.modf(collectgarbage('count'))
-	print("scrLibEmpty_2: "..globVar.debugmem.."K")		
 		end
 
 	end
