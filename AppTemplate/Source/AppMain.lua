@@ -138,17 +138,19 @@ local function keyPressedTempl(key)
 				storeDataFile()
 				collectgarbage()
 				form.close()
-		--		if(screen_lib == nil)then
-		--			scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
-		--			screen_lib = require(scrlib_Path)
-		--		end
-	--globVar.debugmem = math.modf(collectgarbage('count'))
-	--print("scrLibEmpty_2: "..globVar.debugmem.."K")		
+				if(globVar.screenLib24  == 24)then
+					if(screen_lib == nil)then
+						scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24.."" -- reload screen lib only at 24 transmitters
+						screen_lib = require(scrlib_Path)
+					end
+	globVar.debugmem = math.modf(collectgarbage('count'))
+	print("scrLibEmpty_2: "..globVar.debugmem.."K")		
 
-			--	if(screen_lib ~=nil)then
-			--		local func = screen_lib[1]  --init() 
-			--		func(globVar) -- execute specific initializer of screen library
-			--	end	
+					if(screen_lib ~=nil)then
+						local func = screen_lib[1]  --init() 
+						func(globVar) -- execute specific initializer of screen library
+					end	
+				end
 	globVar.debugmem = math.modf(collectgarbage('count'))
 	print("scrLibEmpty_6: "..globVar.debugmem.."K")		
 

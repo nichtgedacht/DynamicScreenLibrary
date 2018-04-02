@@ -55,83 +55,87 @@ local function handleTimers(j,i,reset_)
 	local timeMs = 0
 	local temp = 0
 
-	if(1==system.getInputsVal(reset)or (reset_==1))then
-		if(globVar.windows[j][i][7] ==0)then -- is timer switched off
-			globVar.windows[j][i][10] = preStart[globVar.windows[j][i][3]] --preset start value in ms
-			system.pSave("timer"..timerID.."",globVar.windows[j][i][10]) -- save timer value on reset
-		end	
-	else	
-		if((1==system.getInputsVal(start))and (globVar.windows[j][i][7] == 0))then
-			if (globVar.windows[j][i][3] %2 ==0)then --count down timer
-				globVar.windows[j][i][6] =  globVar.currentTime - (preStart[globVar.windows[j][i][3]] - globVar.windows[j][i][10])--preset start time
-			else
-				globVar.windows[j][i][6] = globVar.currentTime - globVar.windows[j][i][10]--preset start time
-			end	
-			globVar.windows[j][i][7] = 1 --switch timer active
-			timeDif =0
-		end
-	end
-	if(1==system.getInputsVal(stopp))then
-		system.pSave("timer"..timerID.."",globVar.windows[j][i][10]) -- save timer value on stopp
-		globVar.windows[j][i][7] = 0 --switch timer off
-	end
-	
-	local countDownTime = 100
-	
-	if(globVar.windows[j][i][7] == 1) then --timer is running
-		if (globVar.windows[j][i][3] %2 ==0)then --count down timer
-			globVar.windows[j][i][10] = preStart[globVar.windows[j][i][3]] - timeDif
-			countDownTime = math.modf((globVar.windows[j][i][10]/1000) + 1)
-		else									 --count up timer
-			globVar.windows[j][i][10] = timeDif
-			countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][10])/1000)
-		end
-	end
-
-	if((countDownTime <11)and(countDownTime ~= prevCountDownTime))then
-		if(countDownTime > 0)then
-			if (system.isPlayback () == false) then
-				system.playNumber(countDownTime,0) --audio remaining flight time
-				prevCountDownTime = countDownTime
-			end			
-		else	
-			globVar.windows[j][i][9] = 1--set alert active
-			if((countDownTime % 10 ==0)or(countDownTime == 0))then	 
-				system.playBeep(1,4000,500) -- timer elapsedplay beep
-				prevCountDownTime = countDownTime
-			end	
-		end
+	if(start == nil)then
+		globVar.windows[j][i][8] = nil
+		globVar.windows[j][i][8] = "---"
 	else
-		globVar.windows[j][i][9] = 0--reset alert
-	end	
+		if(1==system.getInputsVal(reset)or (reset_==1))then
+			if(globVar.windows[j][i][7] ==0)then -- is timer switched off
+				globVar.windows[j][i][10] = preStart[globVar.windows[j][i][3]] --preset start value in ms
+				system.pSave("timer"..timerID.."",globVar.windows[j][i][10]) -- save timer value on reset
+			end	
+		else	
+			if((1==system.getInputsVal(start))and (globVar.windows[j][i][7] == 0))then
+				if (globVar.windows[j][i][3] %2 ==0)then --count down timer
+					globVar.windows[j][i][6] =  globVar.currentTime - (preStart[globVar.windows[j][i][3]] - globVar.windows[j][i][10])--preset start time
+				else
+					globVar.windows[j][i][6] = globVar.currentTime - globVar.windows[j][i][10]--preset start time
+				end	
+				globVar.windows[j][i][7] = 1 --switch timer active
+				timeDif =0
+			end
+		end
+		if((1==system.getInputsVal(stopp))or((stopp == nil) and (1~=system.getInputsVal(start))))then
+			system.pSave("timer"..timerID.."",globVar.windows[j][i][10]) -- save timer value on stopp
+			globVar.windows[j][i][7] = 0 --switch timer off
+		end
+		local countDownTime = 100
 	
-	if(countDownTime <=0)then
-		globVar.failWindow = j
-		timExpired = true
-	end
+		if(globVar.windows[j][i][7] == 1) then --timer is running
+			if (globVar.windows[j][i][3] %2 ==0)then --count down timer
+				globVar.windows[j][i][10] = preStart[globVar.windows[j][i][3]] - timeDif
+				countDownTime = math.modf((globVar.windows[j][i][10]/1000) + 1)
+			else									 --count up timer
+				globVar.windows[j][i][10] = timeDif
+				countDownTime = math.modf((preLim[globVar.windows[j][i][3]]-globVar.windows[j][i][10])/1000)
+			end
+		end
+
+		if((countDownTime <11)and(countDownTime ~= prevCountDownTime))then
+			if(countDownTime > 0)then
+				if (system.isPlayback () == false) then
+					system.playNumber(countDownTime,0) --audio remaining flight time
+					prevCountDownTime = countDownTime
+				end			
+			else	
+				globVar.windows[j][i][9] = 1--set alert active
+				if((countDownTime % 10 ==0)or(countDownTime == 0))then	 
+					system.playBeep(1,4000,500) -- timer elapsedplay beep
+					prevCountDownTime = countDownTime
+				end	
+			end
+		else
+			globVar.windows[j][i][9] = 0--reset alert
+		end	
 	
-	globVar.windows[j][i][8] = nil
-	local sign = " "
-	if(globVar.windows[j][i][10]<0)then
-		sign = nil
-		sign = "-"
+		if(countDownTime <=0)then
+			globVar.failWindow = j
+			timExpired = true
+		end
+	
+		globVar.windows[j][i][8] = nil
+		local sign = " "
+		if(globVar.windows[j][i][10]<0)then
+			sign = nil
+			sign = "-"
+		end
+		if (globVar.windows[j][i][3]<3)then		--hour:min:sec
+			local temp = globVar.windows[j][i][10] / 3600000
+			timeHour,temp = math.modf(temp)
+			temp = temp *60
+			timeMin,temp = math.modf(temp)	
+			temp = temp *60
+			timesec = math.modf(temp)
+			globVar.windows[j][i][8] = string.format( "%s%02d:%02d:%02d",sign,math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
+		else									--min:sec:sec/10
+			timeMin,temp = math.modf(globVar.windows[j][i][10]/60000)
+			temp = temp * 60
+			timesec, temp = math.modf(temp)
+			temp = temp * 100
+			timeMs = math.modf(temp) 
+			globVar.windows[j][i][8] = string.format( "%s%02d:%02d:%02d", sign,math.abs(timeMin),math.abs(timesec),math.abs(timeMs) ) 
+		end	
 	end
-	if (globVar.windows[j][i][3]<3)then		--hour:min:sec
-		local temp = globVar.windows[j][i][10] / 3600000
-		timeHour,temp = math.modf(temp)
-		temp = temp *60
-		timeMin,temp = math.modf(temp)	
-		temp = temp *60
-		timesec = math.modf(temp)
-		globVar.windows[j][i][8] = string.format( "%s%02d:%02d:%02d",sign,math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
-	else									--min:sec:sec/10
-		timeMin,temp = math.modf(globVar.windows[j][i][10]/60000)
-		temp = temp * 60
-		timesec, temp = math.modf(temp)
-		temp = temp * 100
-		timeMs = math.modf(temp) 
-		globVar.windows[j][i][8] = string.format( "%s%02d:%02d:%02d", sign,math.abs(timeMin),math.abs(timesec),math.abs(timeMs) ) 
-	end	
 end
 
 
@@ -147,7 +151,7 @@ local function loadmainWindow()
 		lib_Path = "AppTempl/Tasks/winEl"..globVar.screenLib24..""
 	elseif((globVar.windows[1][1][1]==2)or(globVar.windows[1][1][1]==3)) then -- stroke or turbine
 		lib_Path = "AppTempl/Tasks/winNit"..globVar.screenLib24..""
-	elseif(globVar.windows[1][1][1]==3) then -- glider
+	elseif(globVar.windows[1][1][1]==4) then -- glider
 	end
 	mainWin_Lib = require(lib_Path)
 	if(mainWin_Lib~=nil)then
@@ -263,7 +267,6 @@ local function drawWindow(winNr)
 				end	
 			end
 			labelXoffs = 2
-			lcd.drawRectangle(nextXoffs, nextYoffs, 130, txtyoffs[window[1]][1],6) 
 			if((window[9]>0)and(globVar.secClock == true))then --failure display red
 				if(window[1]<4)then
 					lcd.drawFilledRectangle(nextXoffs+1, nextYoffs+1, 128, txtyoffs[window[1]][1]-2)
@@ -379,6 +382,7 @@ local function drawWindow(winNr)
 				lcd.drawText(nextXoffs + 63 - lcd.getTextWidth(FONT_MINI,minMaxTxt)/2,nextYoffs + txtyoffs[window[1]][5],minMaxTxt,FONT_MINI|failColor)
 			end
 		end	
+		lcd.drawRectangle(nextXoffs, nextYoffs, 130, txtyoffs[window[1]][1],6) 
 		lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
 	end	
 end
