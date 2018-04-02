@@ -290,7 +290,8 @@ local function drawWindow(winNr)
 				local imageY = nextYoffs + txtyoffs[window[1]][1]/2 - modImage.height/2
 				lcd.drawImage (imageX, imageY,modImage)
 			else
-				modImage = lcd.loadImage("Apps/AppTempl/model/img/"..window[3]..".jpg")
+				local imgFileName = system.pLoad("imgFileName","---")
+				modImage = lcd.loadImage("Apps/AppTempl/model/img/"..imgFileName.."")
 			end
 		else
 			local corVal = lcd.getTextHeight(txtyoffs[window[1]][4]) * 0.1

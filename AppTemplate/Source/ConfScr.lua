@@ -23,6 +23,9 @@ local sensListIdx = 1 -- index of sensor list box
 local sensPaListIdx = 1 -- index of sesor parameter list box
 local timListIdx = 0 -- index of timer list
 local focRow = 3
+local imgFileName = nil -- img file for 24 transmitters
+local imgfileIdx = 0    -- img file list index
+local imgFile = {}
 
 local function destroyLists()
 	for k in next,sensList do sensList[k] = nil end
@@ -53,6 +56,12 @@ local function windowChanged()
 	timListIdx = math.modf(globVar.windows[j][i][4]-30) -- activate timer config
   else
 	timListIdx = 0                           -- activate sensor config
+	if((globVar.windows[j][i][1]==7)or(globVar.windows[j][i][1]==8))then
+		imgFileName = nil
+		imgFileName = system.pLoad("imgFileName","---")
+	else
+		imgFileName = nil
+	end
   end
   focRow = 4
   form.reinit(globVar.screenlibID)
@@ -115,6 +124,9 @@ local function limitChanged(value)
 	end	
 end
 
+local function imgChanged(value)
+	system.pSave("imgFileName",imgFile[value])
+end
 -------------------------------------------------------------------- 
 -- screen lib config page
 --------------------------------------------------------------------
@@ -123,7 +135,24 @@ local function screenLibConfig(globVar_)
 	globVar = globVar_
 	local j,i = calcWinIdx(winListIdx)
 	local sensor = {}
+	imgFile = {}
+	imgfileIdx = 0
 	destroyLists()
+
+	if(globVar.screenLib24 == 24)then
+		for name in dir("Apps/AppTempl/model/img") do
+			if(#name >3) then
+				table.insert(imgFile,name)
+				if(imgFileName == name)then
+					imgfileIdx = #imgFile
+				end
+			end
+		end
+		table.insert(imgFile,"---")
+		if(imgfileIdx ==0)then
+			imgfileIdx = #imgFile
+		end
+	end	
 	
 	for idx in ipairs(globVar.sensors) do 
 		sensor = system.getSensorByID (globVar.sensors[idx],0)
@@ -175,18 +204,26 @@ local function screenLibConfig(globVar_)
 	end
 
 	if(timListIdx==0)then
-		if( sensPaList[1] ~=nil) then
+		if(imgFileName ~= nil)then
 			form.addRow(2)   
 			form.addLabel({label="Label",width=170})
 			winListBox = form.addSelectbox(winList,winListIdx,true,windowChanged)
 			form.addRow(2)
-			form.addLabel({label="Sensor",width=170})
-			sensorListBox = form.addSelectbox(sensList,sensListIdx,true,sensorChanged)
-
-			form.addRow(2)
-			form.addLabel({label="SensParam",width=170})
-			sensParListBox = form.addSelectbox(sensPaList,sensPaListIdx,true,sensParChanged)
-		end	
+			form.addLabel({label="Image",width=170})
+			imgListBox = form.addSelectbox(imgFile,imgfileIdx,true,imgChanged)
+		else
+			if( sensPaList[1] ~=nil) then
+				form.addRow(2)   
+				form.addLabel({label="Label",width=170})
+				winListBox = form.addSelectbox(winList,winListIdx,true,windowChanged)
+				form.addRow(2)
+				form.addLabel({label="Sensor",width=170})
+				sensorListBox = form.addSelectbox(sensList,sensListIdx,true,sensorChanged)
+				form.addRow(2)
+				form.addLabel({label="SensParam",width=170})
+				sensParListBox = form.addSelectbox(sensPaList,sensPaListIdx,true,sensParChanged)
+			end	
+		end
 	else
 		form.addRow(2)   
 		form.addLabel({label="Label",width=170})
