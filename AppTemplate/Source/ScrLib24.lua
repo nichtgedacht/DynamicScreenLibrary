@@ -23,6 +23,7 @@ local modImage = nil
 local prevInputVal = 0
 local drWin = 2
 local prevFailWindow = 0
+local prevECUStat = 0
 
 local function unloadMainWin()
 	print("unloadMainWin")
@@ -472,7 +473,14 @@ local function loop()
 										globVar.windows[j][i][8] = nil
 										if(globVar.ECUStat ~= nil)then
 											if(#globVar.ECUStat >= sensor.value) then
-												globVar.windows[j][i][8] = globVar.ECUStat[""..math.modf(sensor.value)..""]
+												local ECUStat_ =  math.modf(sensor.value)
+												if (prevECUStat~= ECUStat_)then
+												    if (system.isPlayback () == false) then --audio turbine state
+														prevECUStat = ECUStat_
+														system.playFile("Apps/AppTempl/model/ECU_Data/Audio/"..globVar.ECUType.."/"..ECUStat_..".wav",AUDIO_QUEUE)
+													end		
+												end
+												globVar.windows[j][i][8] = globVar.ECUStat[""..ECUStat_..""]
 											end
 										end	
 									end	
