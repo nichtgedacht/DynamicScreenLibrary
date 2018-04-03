@@ -29,20 +29,25 @@ local function ECUTypeChanged(value)
 	system.pSave("ECUType",  globVar.ECUType)
 end
 
-local function loadDataFile(loadSensParam)
+local function loadDataFile()
 print("loadDataFile")
+	fileIndex = 1
 	local file = nil
 	for k in next,datafiles do datafiles[k] = nil end
+	local datFile = system.pLoad("datFile","---")
 	for name in dir("Apps/AppTempl/data") do
 		if(#name >3) then
 			table.insert(datafiles,name)
+			if(name == datFile)then
+				fileIndex = #datafiles
+			end
 		end
 	end
-	fileIndex = system.pLoad("fileIndex",1)
-	if(fileIndex > #datafiles)then
-		fileIndex = 1
+    if(datFile == "---")then
+		datFile = nil
+		datFile = datafiles[1]
 	end
-	file = io.readall("Apps/AppTempl/data/"..datafiles[fileIndex].." ") --load datafile template
+	file = io.readall("Apps/AppTempl/data/"..datFile.."") --load datafile template
 
 	if(file)then
 		for i in next,globVar.windows do --delete window list 
@@ -87,11 +92,11 @@ local function capIncreaseChanged(value)
 	configRow = form.getFocusedRow()
 	form.reinit(globVar.templateAppID)
 end
-local function dataFileChanged()
-	local fileIndex_ = form.getValue(fileBoxIndex)
+local function dataFileChanged(value)
 	if(form.question(globVar.trans.cont,globVar.trans.lTDat,globVar.trans.ovConf,0,false,0)==1)then
-		system.pSave("fileIndex",fileIndex_)
-		loadDataFile(0)
+		fileIndex = value
+		system.pSave("datFile",datafiles[fileIndex])
+		loadDataFile()
 	end
 	if(globVar.windows[1][1][1]==3)then -- only for turbine
 		ECUTypeChanged(globVar.ECUType)
@@ -130,17 +135,16 @@ end
 --------------------------------------------------------------------
 local function appConfig(globVar_)
 	globVar = globVar_
-	
+	local datFile = system.pLoad("datFile","---")
 	for name in dir("Apps/AppTempl/data") do
 		if(#name >3) then
 			table.insert(datafiles,name)
+			if(name == datFile)then
+				fileIndex = #datafiles
+			end
 		end
-	end
-	fileIndex = system.pLoad("fileIndex",1)
+	end	
 	
-	if(fileIndex > #datafiles)then
-		fileIndex = 1
-	end
 	capIncrease = system.pLoad("capIncrease",100)
 
 	form.setTitle(globVar.trans.appName)
@@ -213,7 +217,7 @@ end
 
 local function init(globVar_)
 	globVar = globVar_
-	loadDataFile(1)
+	loadDataFile()
 	appConfig(globVar)
 	if(globVar.windows[1][1][1]==3)then -- only for turbine
 		ECUTypeChanged(globVar.ECUType)
