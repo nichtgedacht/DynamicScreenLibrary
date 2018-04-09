@@ -136,6 +136,7 @@ end
 local function appConfig(globVar_)
 	globVar = globVar_
 	local datFile = system.pLoad("datFile","---")
+	for k in next,datafiles do datafiles[k] = nil end
 	for name in dir("Apps/AppTempl/data") do
 		if(#name >3) then
 			table.insert(datafiles,name)

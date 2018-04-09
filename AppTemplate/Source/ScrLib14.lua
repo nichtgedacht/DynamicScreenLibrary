@@ -462,7 +462,11 @@ local function loop()
 												if (prevECUStat~= ECUStat_)then
 												    if (system.isPlayback () == false) then --audio turbine state
 														prevECUStat = ECUStat_
-														system.playFile("Apps/AppTempl/model/ECU_Data/Audio/"..globVar.ECUType.."/"..ECUStat_..".wav",AUDIO_QUEUE)
+														if(system.getLocale()=="de")then
+															system.playFile("Apps/AppTempl/model/ECU_Data/Audio/de/"..globVar.ECUType.."/"..ECUStat_..".wav",AUDIO_QUEUE)
+														else
+															system.playFile("Apps/AppTempl/model/ECU_Data/Audio/en/"..globVar.ECUType.."/"..ECUStat_..".wav",AUDIO_QUEUE)
+														end
 													end		
 												end
 												globVar.windows[j][i][8] = globVar.ECUStat[""..ECUStat_..""]
