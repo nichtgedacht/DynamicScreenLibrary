@@ -68,7 +68,7 @@ Main Turbine:
 [11]1									von Screenlib gesetzt zugewiesener Sensor Parameter
 [12]0									von Screenlib gesetzt (Platzhalter für spätere Anwendung)
 Beispiel nach obiger Beschreibung:
-[3,"Tankinhalt","ml",1,30,100,0,0,0,1,1,0]
+[3,"Tankinhalt","ml",1,30,100,0,0,0,0,0,0]
 
 Main:
 [1] 1 									[1] 1    (1 Elektro  2 Verbrenner 3 Turbine , 4 Segler) 
@@ -98,11 +98,11 @@ Normalfenster
 [7] 0                        			Anzahl der Nachkommastellen
 [8] 0									von Screenlib gesetzt aktueller Wert
 [9] 0									von Screenlib gesetzt wenn 1, ist Alarm aktiv
-[10]1									von Screenlib gesetzt zugewiesene SensorID
-[11]1									von Screenlib gesetzt zugewiesener Sensor Parameter
+[10]0									von Screenlib gesetzt zugewiesene SensorID
+[11]0									von Screenlib gesetzt zugewiesener Sensor Parameter
 [12]0									von Screenlib gesetzt (Platzhalter für spätere Anwendung)
 Beispiel nach obiger Beschreibung:
-[1,"Temperatur Turbine","°C",0,0,0,0,0,0,1,1,0],
+[1,"Temperatur Turbine","°C",0,0,0,0,0,0,0,0,0],
 
 
 Min Max Fenster 
@@ -115,13 +115,13 @@ Min Max Fenster
 [7] 0                        			(Anzahl der Nachkommastellen)
 [8] 0									(von Screenlib gesetzt aktueller Sensorwert)
 [9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
-[10]1									(von Screenlib gesetzt SensorID)
-[11]1									(von Screenlib gesetzt Sensor Parameter)
+[10]0									(von Screenlib gesetzt SensorID)
+[11]0									(von Screenlib gesetzt Sensor Parameter)
 [12]0									(vorbereitet für Outputcontrol)
 [13]0									(von Screenlib gesetzt min Wert)
 [14]0									(von Screenlib gesetzt max Wert)
 Beispiel nach obiger Beschreibung:
-[2,"Drehzahl","1/min",0,20130,19000,0,0,0,1,1,0,0,0],
+[2,"Drehzahl","1/min",0,20130,19000,0,0,0,0,0,0,0,0],
 
 
 Geteilte Fenster 
@@ -134,11 +134,11 @@ Geteilte Fenster
 [7] 0                        			Anzahl der Nachkommastellen
 [8] 0									von Screenlib gesetzt aktueller Wert
 [9] 0									von Screenlib gesetzt wenn 1, ist Alarm aktiv
-[10]1									von Screenlib gesetzt zugewiesene SensorID
-[11]1									von Screenlib gesetzt zugewiesener Sensor Parameter
+[10]0									von Screenlib gesetzt zugewiesene SensorID
+[11]0									von Screenlib gesetzt zugewiesener Sensor Parameter
 [12]0									von Screenlib gesetzt (Platzhalter für spätere Anwendung)
 Beispiel nach obiger Beschreibung:
-[3,"Höhe","m",0,0,0,0,0,0,1,1,0],
+[3,"Höhe","m",0,0,0,0,0,0,0,0,0],
 
 [1] 1 									Frametype 3 (1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
 [2] "Acceleration"						Framelabel, Text wird in der Konfig der Sensorzuweisung aufgelistet
