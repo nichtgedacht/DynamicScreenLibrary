@@ -192,6 +192,7 @@ local function init(globVar_)
 		i=i+1
 	end
 	prevInputVal = system.getInputsVal(globVar.ScrSwitch)
+
 	globVar.initDone = true
 end
 
@@ -256,7 +257,7 @@ local function drawWindow(winNr)
 	end
 	for i in ipairs(globVar.windows[winNr]) do --draw all configured telemetry windows
 		local window = globVar.windows[winNr][i]
-		if(((window[1]>3)and(window[13]==1))or(window[1]<=3)or (window[1]==7))then -- draw frame
+		if(((window[1]>3)and(window[13]==1))or(window[1]<=3)or (window[1]==7)or (window[1]==8))then -- draw frame
 			nextYoffs = prepNextYoffs
 			if(160 - nextYoffs < txtyoffs[window[1]][1] ) then --not enough place for configured window
 				if(nextXoffs ==2)then

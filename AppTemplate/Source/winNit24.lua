@@ -41,7 +41,7 @@ local function drawFuel()
 		else
 			lcd.setColor(0,196,0)
 		end
-		chgY = 30
+		local chgY = 30
 		--fuel bar 
 		--calc bar chart values
 		local nSolidBar = math.floor( telCapVal / 20)

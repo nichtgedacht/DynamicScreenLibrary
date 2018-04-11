@@ -19,13 +19,13 @@ end
 -- draw fuel 
 -------------------------------------------------------------------- 
 -- Draw Fuelgauge and percentage display
-
 local function drawFuel()
 	if(globVar.windows[1][1][8]~= "---")then
 		local telCapVal = string.format("%.1f", globVar.windows[1][1][8])
 		local textCap = string.format("%.0f%%",telCapVal)
 		local textwithCap = 160 - lcd.getTextWidth(FONT_BIG, textCap) / 2
 		--percentage display
+
 		if(globVar.windows[1][1][9] > 0) then -- fuel cap alert
 			if(globVar.secClock == true) then -- blink every second
 				lcd.drawText(textwithCap,4, textCap, FONT_BIG)
@@ -35,7 +35,7 @@ local function drawFuel()
 		end
 		lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])
 		--fuel
-		chgY = 30
+		local chgY = 30
 		--fuel bar 
 		--calc bar chart values
 		local nSolidBar = math.floor( telCapVal / 20)
@@ -73,7 +73,7 @@ local function drawFuel()
 		lcd.drawPoint(xO + 11,yO+4)
 		lcd.drawPoint(xO + 10,yO+8)
 		lcd.drawPoint(xO + 12,yO+13)
-
+		--draw frames
 		lcd.drawRectangle (135,105+chgY,26,24)	--lowest bar segment frame
 		lcd.drawRectangle (135,79+chgY,26,24)  
 		lcd.drawRectangle (135,53+chgY,26,24)  

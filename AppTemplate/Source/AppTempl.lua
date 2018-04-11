@@ -51,6 +51,7 @@ local function init(code)
 		if(initDelay == 0)then
 			initDelay = system.getTimeCounter()
 		end	
+
 		if(main_lib ~= nil) then
 			local func = main_lib[1]
 			func(0,globVar) --init(0)

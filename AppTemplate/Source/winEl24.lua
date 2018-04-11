@@ -57,8 +57,8 @@ local function drawBattery()
 		else
 			lcd.setColor(0,196,0)
 		end
-		chgH = 114 * telCapVal/100*1.02
-		chgY = 158-chgH
+		local chgH = 114 * telCapVal/100*1.02
+		local chgY = 158-chgH
 		lcd.drawFilledRectangle(135, chgY, 50, chgH)
 	
 		lcd.setColor(globVar.txtColor[1],globVar.txtColor[2],globVar.txtColor[3])	

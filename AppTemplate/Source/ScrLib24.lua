@@ -175,7 +175,6 @@ end
 local function init(globVar_)
 	globVar = globVar_
 	loadmainWindow()
-
 	local bgr,bgg,bgb = lcd.getBgColor() -- set frame and text color depending on back ground color
 	if (bgr+bgg+bgb)/3 >128 then
 		globVar.txtColor = {0,0,0} 
@@ -199,6 +198,7 @@ local function init(globVar_)
 		i=i+1
 	end
 	prevInputVal = system.getInputsVal(globVar.ScrSwitch)
+
 	globVar.initDone = true
 end
 

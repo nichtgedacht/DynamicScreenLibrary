@@ -19,6 +19,7 @@ local config_scr = nil --loaded config screen library
 local scrlib_Path = nil --path to screen lib
 local config_tmplPath = nil --path to config template lib
 local config_scrPath = nil --path to config screen lib
+local loadScreenLib = false
 
 local function storeDataFile()
 	local file = io.open ("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").."","w")
@@ -71,6 +72,7 @@ local function init(code,globVar_)
 		_G[config_tmplPath]=nil
 		config_tmpl = nil
 		config_tmplPath = nil
+		collectgarbage('collect')
     end
 	-- read device type for loading corresponding screen library
 	local deviceType = system.getDeviceType()
@@ -85,15 +87,8 @@ local function init(code,globVar_)
 		globVar.trans = obj
 	end
 	globVar.currentDate = system.getDateTime()
-	 if(screen_lib == nil)then
-		 scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
-		 screen_lib = require(scrlib_Path)
-	 end
-	 if(screen_lib ~=nil)then
-		 local func = screen_lib[1]  --init() 
-		 func(globVar) -- execute specific initializer of screen library
-     end	
-
+	loadScreenLib = true;
+	
 	-- ----only for simulation without connected telemetry
 	-- SimCap = system.pLoad("SimCap")
 	-- ----only for simulation without connected telemetry
@@ -119,8 +114,7 @@ local function keyPressedTempl(key)
 			func(key)
 			if((key == KEY_5) or (key == KEY_ESC) or (key == KEY_MENU))then -- execute config event handler app template
 	globVar.debugmem = math.modf(collectgarbage('count'))
-	print("scrLibEmpty_1: "..globVar.debugmem.."K")	
-
+	print("config loaded: "..globVar.debugmem.."K")	
 				if(config_scr ~= nil)then --unload screen lib config
 				print("unload scrconf")
 					package.loaded[config_scrPath]=nil
@@ -136,23 +130,11 @@ local function keyPressedTempl(key)
 					config_tmplPath = nil
 				end
 				storeDataFile()
-				collectgarbage()
+				collectgarbage('collect')
 				form.close()
-				if(globVar.screenLib24  == 24)then
-					if(screen_lib == nil)then
-						scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24.."" -- reload screen lib only at 24 transmitters
-						screen_lib = require(scrlib_Path)
-					end
+				loadScreenLib = true -- load screen lib on loop cycle
 	globVar.debugmem = math.modf(collectgarbage('count'))
-	print("scrLibEmpty_2: "..globVar.debugmem.."K")		
-
-					if(screen_lib ~=nil)then
-						local func = screen_lib[1]  --init() 
-						func(globVar) -- execute specific initializer of screen library
-					end	
-				end
-	globVar.debugmem = math.modf(collectgarbage('count'))
-	print("scrLibEmpty_6: "..globVar.debugmem.."K")		
+	print("config unloaded: "..globVar.debugmem.."K")		
 
 			end
 		end
@@ -172,6 +154,7 @@ local function initTempl(formID)
 		_G[scrlib_Path]=nil
 		screen_lib = nil
 		scrlib_Path = nil
+		collectgarbage('collect')
 	end
 	if(globVar.currentForm == globVar.templateAppID)then -- initialize template app config
 		if(config_scr ~= nil)then
@@ -179,21 +162,25 @@ local function initTempl(formID)
 			_G[config_scrPath]=nil
 			config_scr = nil
 			config_scrPath = nil
+			collectgarbage('collect')
 		end
+
 		if(config_tmpl == nil)then
 			config_tmplPath = "AppTempl/Tasks/ConfTmpl"
 			config_tmpl = require(config_tmplPath)
 		end
+
 		if(config_tmpl ~=nil)then
 			local func = config_tmpl[1]  --init() 
 			func(globVar,1) -- execute specific initializer of config app template
 		end
-	elseif(globVar.currentForm == globVar.screenlibID)then -- initialize screen config
+		elseif(globVar.currentForm == globVar.screenlibID)then -- initialize screen config
 		if(config_tmpl ~= nil)then
 			package.loaded[config_tmplPath]=nil
 			_G[config_tmplPath]=nil
 			config_tmpl = nil
 			config_tmplPath = nil
+			collectgarbage('collect')
 		end
 		if(config_scr == nil)then
 			config_scrPath = "AppTempl/Tasks/ConfScr"
@@ -214,6 +201,7 @@ local function loop()
 	local sensor2 = {}
 	local sensID = 0
 	local sensPar = 0
+
 	system.registerForm(1,MENU_MAIN,globVar.trans.appName,initTempl,keyPressedTempl,printForm);
 	
  	if((screen_lib ~= nil)and (globVar.initDone == true))then
@@ -319,18 +307,30 @@ local function loop()
 		
     --***********************************************************---
 	--*******add your own main loop functionalities here*********---
-
+ 
     --***********************************************************---
-	--globVar.debugmem = math.modf(collectgarbage('count'))
-	--print("scrLibEmpty_3: "..globVar.debugmem.."K")				
+	else
+		if(loadScreenLib == true)then
+			loadScreenLib = false
+			if(screen_lib == nil)then
+				scrlib_Path = "AppTempl/Tasks/ScrLib"..globVar.screenLib24..""
+				screen_lib = require(scrlib_Path)
+			end
+			if(screen_lib ~=nil)then
+				local func = screen_lib[1]  --init() 
+				func(globVar) -- execute specific initializer of screen library
+			end
+    collectgarbage('collect')
 	globVar.debugmem = math.modf(collectgarbage('count'))
-		if (globVar.mem < globVar.debugmem) then
-			globVar.mem = globVar.debugmem
-			print("max Speicher Zyklus: "..globVar.mem.."K")		
-		end
-
+	print("scrlib loaded: "..globVar.debugmem.."K")		
+		end	
 	end
-    collectgarbage()
+    collectgarbage('collect')
+	globVar.debugmem = math.modf(collectgarbage('count'))
+	if (globVar.mem < globVar.debugmem) then
+		globVar.mem = globVar.debugmem
+		print("max Speicher Zyklus: "..globVar.mem.."K")		
+	end
 end
 
 --------------------------------------------------------------------
