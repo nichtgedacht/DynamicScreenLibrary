@@ -20,7 +20,7 @@ end
 -------------------------------------------------------------------- 
 local function drawBattery()
 	if((globVar.windows[1][1][8]~= "---")and (globVar.windows[1][2][8] ~= "---"))then
-		local telCapVal = string.format("%.1f", globVar.windows[1][1][8])
+		local telCapVal = math.modf(globVar.windows[1][1][8] *10)/10
 		local textVolt = nil
 		local textCap = string.format("%.0f%%",telCapVal)
 		local textwithCap = 160 - lcd.getTextWidth(FONT_BIG, textCap) / 2

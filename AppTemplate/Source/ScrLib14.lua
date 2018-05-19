@@ -445,6 +445,7 @@ local function loop()
 										local minutes = (sensor.valGPS & 0xFFFF) * 0.001
 										local degs = (sensor.valGPS >> 16) & 0xFF
 										globVar.windows[j][i][8] = string.format("%d° %.3f'",degs,minutes)
+										print(degs,minutes,globVar.windows[j][i][8]) --rvtest remove after test
 									end
 								end
 							elseif((globVar.windows[j][i][4]==35)and(globVar.windows[1][1][1]==3))then --reserved for turbine status	
