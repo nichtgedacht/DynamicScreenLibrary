@@ -16,7 +16,7 @@ local datafiles = {}    --list of all data files
 local configRow =1		--row of cap increase int box
 local fileBoxIndex = 0	--ID select box data files
 local fileIndex = 1     --index of data file list
-local capIncrease = 100 --increase capacity config step with
+
 
 -------------------------------------------------------------------- 
 -- filehandling
@@ -87,7 +87,7 @@ local function capaChanged(value)
 	system.pSave("capa",globVar.capa)
 end
 local function capIncreaseChanged(value)
-	capIncrease = value
+	globVar.capIncrease = value
 	system.pSave("capIncrease",value)
 	configRow = form.getFocusedRow()
 	form.reinit(globVar.templateAppID)
@@ -108,6 +108,32 @@ local function ScrSwitchChanged(value)
 	globVar.ScrSwitch = value
 	system.pSave("scrSwitch",value)
 end
+
+local function SwitchLockAlertChanged(value)
+	globVar.LockAlertSwitch = value
+	system.pSave("LockAlertSwitch",value)
+end
+
+local function SwitchMaintCountChanged(value)
+	globVar.maintCountSwitch = value
+	system.pSave("MaintCountSwitch",value)
+end
+
+local function maint1Changed(value)
+	globVar.mainten[1]  = value
+	system.pSave("Maintenance_1",value)
+end
+
+local function maint2Changed(value)
+	globVar.mainten[2]  = value
+	system.pSave("Maintenance_2",value)
+end
+
+local function maint3Changed(value)
+	globVar.mainten[3]  = value
+	system.pSave("Maintenance_3",value)
+end
+
 -- ------only for simulation without connected telemetry
 -- local function SimCapChanged(value)
 	-- SimCap = value
@@ -146,10 +172,9 @@ local function appConfig(globVar_)
 		end
 	end	
 	
-	capIncrease = system.pLoad("capIncrease",100)
-
 	form.setTitle(globVar.trans.appName)
 	form.setButton(1,"ScrLib",ENABLED)
+	form.setButton(2,"ResTim",ENABLED)
 
 	form.addRow(1)
 	form.addLabel({label=globVar.trans.config,font=FONT_BOLD})
@@ -173,11 +198,31 @@ local function appConfig(globVar_)
 
 		form.addRow(2)
 		form.addLabel({label=string.format("%s (%s)",globVar.trans.capa, globVar.windows[1][1][3]),width=170})
-		form.addIntbox(globVar.capa,0,32767,2400,0,capIncrease,capaChanged)
+		form.addIntbox(globVar.capa,0,32767,2400,0,globVar.capIncrease,capaChanged)
 			
 		form.addRow(2)
 		form.addLabel({label=globVar.trans.capInc,width=170})
-		form.addIntbox(capIncrease,10,100,100,0,10,capIncreaseChanged)
+		form.addIntbox(globVar.capIncrease,10,100,100,0,10,capIncreaseChanged)
+		
+		form.addRow(2)
+		form.addLabel({label=globVar.trans.swLckAl})
+		form.addInputbox(globVar.LockAlertSwitch,true,SwitchLockAlertChanged)
+		
+		form.addRow(2)
+		form.addLabel({label=globVar.trans.swMaintCount})
+		form.addInputbox(globVar.maintCountSwitch,true,SwitchMaintCountChanged)
+		
+		form.addRow(2)
+		form.addLabel({label=globVar.trans.maint1,width=170})
+		form.addIntbox(globVar.mainten[1],0,1000,100,0,globVar.capIncrease,maint1Changed)
+		
+		form.addRow(2)
+		form.addLabel({label=globVar.trans.maint2,width=170})
+		form.addIntbox(globVar.mainten[2],0,1000,100,0,globVar.capIncrease,maint2Changed)
+		
+		form.addRow(2)
+		form.addLabel({label=globVar.trans.maint3,width=170})
+		form.addIntbox(globVar.mainten[3],0,1000,100,0,globVar.capIncrease,maint3Changed)
 	end
     --***********************************************************---
 	--*******add your own app specific configuration here********---
@@ -209,8 +254,22 @@ local function appConfig(globVar_)
 	-- end
     --***********************************************************---
 	-- version
+	local timeVal = globVar.maintenTimer
+	if(0 < globVar.maintenStartTime) then
+		timeVal = globVar.currentTime - globVar.maintenStartTime + globVar.maintenTimer
+	end	
+	local temp = timeVal / 3600000
+	local timeHour = 0
+	local timeMin = 0	
+	local timesec = 0
+	timeHour,temp = math.modf(temp)
+	temp = temp *60
+	timeMin,temp = math.modf(temp)	
+	temp = temp *60
+	timesec = math.modf(temp)
+	local timestring = string.format( "%03d:%02d:%02d",math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
 	form.addRow(1)
-	form.addLabel({label="Powered by Geierwally - "..globVar.version.."  Mem max: "..globVar.mem.."K",font=FONT_MINI, alignRight=true})
+	form.addLabel({label=""..timestring.."  Powered by Geierwally - "..globVar.version.."  Mem max: "..globVar.mem.."K",font=FONT_MINI, alignRight=true})
 	form.setFocusedRow (configRow)
 	configRow = 1
 end
@@ -218,6 +277,7 @@ end
 
 local function init(globVar_)
 	globVar = globVar_
+	globVar.capIncrease = system.pLoad("capIncrease",100)
 	loadDataFile()
 	appConfig(globVar)
 	if(globVar.windows[1][1][1]==3)then -- only for turbine
@@ -235,6 +295,12 @@ local function keyPressed(key)
 	-- open with Key 1 the screen lib config
 		form.reinit(globVar.screenlibID)
 		return(0)
+	elseif(key==KEY_2)then
+    -- open yes no box for reset maintenance timer
+		if(form.question(globVar.trans.ResTim,globVar.trans.Tim,globVar.trans.TimDes,0,false,0)==1)then
+			globVar.maintenTimer = 0
+		    system.pSave("MaintenanceTimer",globVar.maintenTimer) -- save maintanance necessary set value
+		end	
 	end
 end	
 

@@ -40,7 +40,14 @@ local globVar ={--                          main version | version of screenlib 
 				sensParam = {}, --          all sensor parameter
 				failWindow = 0, --          draw telemetry window with failure
 				ECUType = 1, --				ECU Turbine Type
-				ScrSwitch = nil --			switch between telemetry pages active , page2, otherwise page1
+				ScrSwitch = nil, --			switch between telemetry pages active , page2, otherwise page1
+				LockAlertSwitch = nil, --   switch lock alert output
+				maintCountSwitch = nil, --  switch Maintanance Timer on/off
+				mainten = {0,0,0}, --       maintenance limit times in hours
+				maintenTimer = 0, --        maintenance timer
+				maintenSet = 0, --          maintenance necessary set
+				maintenStartTime = 0,--      maintenance start time
+			    capIncrease = 100 --        increase capacity config step with
 			   }
 
 -------------------------------------------------------------------- 

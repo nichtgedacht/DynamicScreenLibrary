@@ -24,6 +24,8 @@ local prevInputVal = 0
 local drWin = 2
 local prevFailWindow = 0
 local prevECUStat = 0
+local maintTimerOn = 0 -- if 1 maintanance timer is running, otherwise not running
+local remainingFuelDone = false
 
 local function unloadMainWin()
 	print("unloadMainWin")
@@ -140,6 +142,41 @@ local function handleTimers(j,i,reset_)
 	end
 end
 
+local function handleMaintenanceTimer()
+	if(1 == maintTimerOn) then
+
+		local timeVal = globVar.currentTime - globVar.maintenStartTime + globVar.maintenTimer -- count maintanance timer value 
+		local timehour = timeVal / 3600000
+		local temp = 0
+		timehour,temp = math.modf(timehour) -- maintanance timer in hours
+		--check maintenance limits 
+		if((0 < globVar.mainten[1])and(0 == timehour % globVar.mainten[1])and(0 == (globVar.maintenSet & 0x01)))then -- limit 1 reached and maintenSet not active
+			globVar.maintenSet = globVar.maintenSet | 0x01
+			system.pSave("MaintenanceSet",globVar.maintenSet) -- save maintanance necessary set value
+		elseif((0 < globVar.mainten[2])and(0 == timehour % globVar.mainten[2])and(0 == (globVar.maintenSet & 0x02)))then -- limit 2 reached and maintenSet not active
+			globVar.maintenSet = globVar.maintenSet | 0x02
+			system.pSave("MaintenanceSet",globVar.maintenSet) -- save maintanance necessary set value
+		elseif((0 < globVar.mainten[3])and(0 == timehour % globVar.mainten[3])and(0 == (globVar.maintenSet & 0x04)))then -- limit 3 reached and maintenSet not active
+			globVar.maintenSet = globVar.maintenSet | 0x04
+			system.pSave("MaintenanceSet",globVar.maintenSet) -- save maintanance necessary set value
+		end
+
+	end
+	if(1==system.getInputsVal(globVar.maintCountSwitch)) then -- is switch Maintanance Timer active?
+		if(0 == maintTimerOn)then
+			globVar.maintenStartTime = globVar.currentTime -- preset maintenance start time
+		end
+		maintTimerOn = 1
+	else
+		if(1 == maintTimerOn)then
+		    globVar.maintenTimer = globVar.currentTime - globVar.maintenStartTime + globVar.maintenTimer
+			system.pSave("MaintenanceTimer",globVar.maintenTimer) -- save maintanance timer value
+			globVar.maintenStartTime = 0	 -- reset maintenance start time
+		end
+		maintTimerOn = 0
+	end
+end
+
 
 local function loadmainWindow()
 	if(mainWin_Lib ~= nil)then
@@ -240,9 +277,25 @@ local function checkLimit(window,mainIndex)
 					window[9]=2 --alert audio played
 				end	
 			end	
-		end	
+		end
 	end
 end
+
+-------------------------------------------------------------------- 
+-- Audio output remaining gasoline
+-------------------------------------------------------------------- 
+local function audioRemainGas()
+	if((globVar.capa - globVar.appValues[11]>1)and (globVar.appValues[11] % globVar.capIncrease ==0) )then
+		if ((system.isPlayback () == false)and (remainingFuelDone ==false)) then
+			system.playNumber (globVar.appValues[11], 2,"ml","Capacity") --audio output of value, unit and label
+			remainingFuelDone = true -- audio output was done
+		end	
+	else
+		remainingFuelDone = false -- reset audio output done 
+	end
+end	
+
+
 
 -------------------------------------------------------------------- 
 -- Draw the telemetry windows
@@ -436,6 +489,8 @@ local function loop()
 		local sensor = {}
 		local sensID = nil
 		local sensPar = nil
+		local inputVal = system.getInputsVal(globVar.LockAlertSwitch)
+
 		for j in ipairs(globVar.windows)do
 			for i in ipairs(globVar.windows[j]) do --check limits of main window
 				if(globVar.windows[j][i][1]==2)then -- reset screen min max values
@@ -513,12 +568,14 @@ local function loop()
 						end
 
 						if((sensor and sensor.valid)or(type(globVar.appValues[globVar.windows[j][i][4]])=="number")) then
-							local ltype = type(globVar.windows[j][i][8])
-							if (ltype == "number")then
-								checkLimit(globVar.windows[j][i],j)
-							else
-								--print("limit check failed frame",j,i)
-							end	
+							if((inputVal ~= nil)and(inputVal ~= 1))then -- is output alert locked?
+								local ltype = type(globVar.windows[j][i][8])
+								if (ltype == "number")then
+									checkLimit(globVar.windows[j][i],j)
+								else
+									--print("limit check failed frame",j,i)
+								end
+						    end
 						end
 					else
 						globVar.windows[j][i][8] = nil
@@ -531,6 +588,10 @@ local function loop()
 				end	
 			end
 		end
+		handleMaintenanceTimer()
+		if((inputVal ~= nil)and(inputVal ~= 1))then -- is output alert and audio output locked?
+			audioRemainGas()
+		end	
 		if(aPrepare == false)then
 			aTimeRunning = 0 --no alert in preparation, reset running alert delay
 		end

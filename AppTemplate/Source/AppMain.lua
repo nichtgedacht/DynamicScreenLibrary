@@ -63,6 +63,13 @@ local function init(code,globVar_)
 	globVar.capa = system.pLoad("capa",2400)
 	globVar.ECUType = system.pLoad("ECUType",1)
 	globVar.ScrSwitch = system.pLoad("scrSwitch")
+	globVar.LockAlertSwitch = system.pLoad("LockAlertSwitch")
+	globVar.maintCountSwitch = system.pLoad("MaintCountSwitch")
+	globVar.mainten[1] = system.pLoad("Maintenance_1",0)
+	globVar.mainten[2] = system.pLoad("Maintenance_2",0)
+	globVar.mainten[3] = system.pLoad("Maintenance_3",0)
+	globVar.maintenTimer = system.pLoad("MaintenanceTimer",0)
+	globVar.maintenSet = system.pLoad("MaintenanceSet",0)
 	config_tmplPath = "AppTempl/Tasks/ConfTmpl"
 	config_tmpl = require(config_tmplPath)
 	if(config_tmpl ~=nil)then
@@ -76,10 +83,11 @@ local function init(code,globVar_)
     end
 	-- read device type for loading corresponding screen library
 	local deviceType = system.getDeviceType()
+
 	if(( deviceType == "JETI DC-24")or(deviceType == "JETI DS-24"))then
 		globVar.screenLib24 = 24 -- load screen library of DS / DC 24
 	end
-	-- Set language
+
 	local lng=system.getLocale();
 	local file = io.readall("Apps/AppTempl/lang/"..lng.."/locale.jsn")
 	local obj = json.decode(file)  
@@ -88,6 +96,39 @@ local function init(code,globVar_)
 	end
 	globVar.currentDate = system.getDateTime()
 	loadScreenLib = true;
+
+	-- reset maintenance requests if done 
+	if((globVar.mainten[1] > 0) and ( 1 < ((globVar.maintenTimer/3600000) % globVar.mainten[1]))and(0 < (globVar.maintenSet & 0x10)))then -- limit 1 maintenance done, reset request
+		globVar.maintenSet = globVar.maintenSet & 0xee
+		system.pSave("MaintenanceSet",globVar.maintenSet) -- save maintanance necessary set value
+	elseif((globVar.mainten[2] > 0) and ( 1 < ((globVar.maintenTimer/3600000)  % globVar.mainten[2]))and(0 < (globVar.maintenSet & 0x20)))then -- limit 2 maintenance done, reset request
+		globVar.maintenSet = globVar.maintenSet & 0xdd
+		system.pSave("MaintenanceSet",globVar.maintenSet) -- save maintanance necessary set value
+	elseif((globVar.mainten[3] > 0) and ( 1 < ((globVar.maintenTimer/3600000)  % globVar.mainten[3]))and(0 < (globVar.maintenSet & 0x40)))then -- limit 3 maintenance done, reset request
+		globVar.maintenSet = globVar.maintenSet & 0xbb
+		system.pSave("MaintenanceSet",globVar.maintenSet) -- save maintanance necessary set value
+	end
+	
+    -- yes no box maintenance done	
+	if(1 ==  (globVar.maintenSet & 0x11)) then -- maintenance necessary but not done
+		local memTxt = " "..globVar.trans.maint.."  "..globVar.mainten[1].."h"
+		if(form.question(globVar.trans.maintDone,memTxt,globVar.trans.maintDes,0,false,0)==1)then
+			globVar.maintenSet = globVar.maintenSet | 0x10
+		    system.pSave("MaintenanceSet",globVar.maintenSet) -- save maintanance necessary set value
+		end
+	elseif(2 ==  (globVar.maintenSet & 0x22)) then -- maintenance necessary but not done
+		local memTxt = " "..globVar.trans.maint.."  "..globVar.mainten[2].."h"
+		if(form.question(globVar.trans.maintDone,memTxt,globVar.trans.maintDes,0,false,0)==1)then
+			globVar.maintenSet = globVar.maintenSet | 0x20
+		    system.pSave("MaintenanceSet",globVar.maintenSet) -- save maintanance necessary set value
+		end
+	elseif(4 ==  (globVar.maintenSet & 0x44)) then -- maintenance necessary but not done
+		local memTxt = " "..globVar.trans.maint.."  "..globVar.mainten[3].."h"
+		if(form.question(globVar.trans.maintDone,memTxt,globVar.trans.maintDes,0,false,0)==1)then
+			globVar.maintenSet = globVar.maintenSet | 0x40
+		    system.pSave("MaintenanceSet",globVar.maintenSet) -- save maintanance necessary set value
+		end	
+	end	
 	
 	-- ----only for simulation without connected telemetry
 	-- SimCap = system.pLoad("SimCap")
@@ -228,8 +269,8 @@ local function loop()
 			if((globVar.sensors[sensID]~=nil)and(globVar.sensParam[sensID][sensPar] ~=nil)) then
 				sensor2 = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])	
 			end
-		end	
-		-- else
+
+		 --else
 	-- ------only for simulation without connected telemetry
 			-- sensor1 = {}
 			-- sensor2  = {}
@@ -264,7 +305,7 @@ local function loop()
 			-- globVar.appValues[3] = RPM_SimVal * 25000
 			-- end
 	-- ------only for simulation without connected telemetry
-	--	end
+		end
 		if( system.getTime() % 2 == 0 ) then -- blink every second
 			globVar.secClock = true
 		else
@@ -274,7 +315,8 @@ local function loop()
 		ltype1 = type(sensor1.value)
 		if(sensor1 and sensor1.valid) then
 			if(ltype1 == "number")then
-				globVar.appValues[1] = (((globVar.capa - sensor1.value) * 100) / globVar.capa) --calculate capacity
+			    globVar.appValues[11]= globVar.capa - sensor1.value -- remainning gas
+				globVar.appValues[1] = ((globVar.appValues[11] * 100) / globVar.capa) --calculate capacity
 				if (globVar.appValues[1] < 0) then
 					globVar.appValues[1] = 0
 				else
@@ -331,6 +373,23 @@ local function loop()
 		globVar.mem = globVar.debugmem
 		print("max Speicher Zyklus: "..globVar.mem.."K")		
 	end
+	local timeVal = globVar.maintenTimer
+	if(globVar.maintenStartTime >0)then
+		timeVal = globVar.currentTime - globVar.maintenStartTime + globVar.maintenTimer
+	end	
+	
+	--comment in following lines for display maintenance timer on console
+	--local temp = timeVal / 3600000
+	--local timeHour = 0
+	--local timeMin = 0	
+	--local timesec = 0
+	--timeHour,temp = math.modf(temp)
+	--temp = temp *60
+	--timeMin,temp = math.modf(temp)	
+	--temp = temp *60
+	--timesec = math.modf(temp)
+	--local timestring = string.format( "%03d:%02d:%02d",math.abs(timeHour),math.abs(timeMin),math.abs(timesec) ) 
+	--print(timestring)
 end
 
 --------------------------------------------------------------------

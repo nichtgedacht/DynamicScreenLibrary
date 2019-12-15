@@ -12,5 +12,16 @@
 	"capa":"Kapazität",
 	"cont":"Fortsetzen ?",
 	"lTDat":"lade Template Datafile",
-	"ovConf":"Achtung!!! überschreibt Sensorkonfiguration"
+	"ovConf":"Achtung!!! überschreibt Sensorkonfiguration",
+	"swLckAl":"Alarmausgabe aus",
+	"swMaintCount":"Wartungszähler ein",
+	"maintDone":"Wartung durchgeführt?",
+	"maintDes":"Durchgeführte Wartung mit ja bestätigen",
+	"maint":"Wartung",
+	"maint1":"Wartung 1 (h)",
+	"maint2":"Wartung 2 (h)",
+	"maint3":"Wartung 3 (h)",
+	"ResTim":"Wartungszähler zurücksetzen?",	
+	"Tim":"Wartungszähler",
+	"TimDes":"Zurücksetzen Wartungszähler mit ja bestätigen"
 }

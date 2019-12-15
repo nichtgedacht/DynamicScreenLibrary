@@ -12,5 +12,16 @@
 	"capa":"Capacity",
 	"cont":"Continue ?",
 	"lTDat":"load template datafile",
-	"ovConf":"Attention!!! overwrite sensor configuration"
+	"ovConf":"Attention!!! overwrite sensor configuration",
+	"swLckAl":"lock allert switch",
+	"swMaintCount":"maintenance counter on",
+	"maintDone":"Maintenance done?",
+	"maintDes":"press yes on maintenance done",
+	"maint":"Maintenance",
+	"maint1":"Maintenance 1 (h)",
+	"maint2":"Maintenance 2 (h)",
+	"maint3":"Maintenance 3 (h)",
+	"ResTim":"Reset maintenance timer?",	
+	"Tim":"Maintenance Timer",
+	"TimDes":"press yes to reset maintenance timer"	
  }
