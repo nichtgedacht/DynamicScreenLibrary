@@ -1,0 +1,309 @@
+16-er
+320*160
+
+Schrifthöhen:
+FONT_MINI   12
+FONT_NORMAL 18
+FONT_BOLD	18
+FONT_BIG	22
+FONT_MAXI	40
+________________________________________________
+Fensteroffsets normal Schrift  X max 126 Y max 55  geteilt Y max 26
+MinMax
+Titel   FONT_MINI  Y 0  X zenriert (2)
+Wert    FONT_BIG   Y 14 X zentriert (16)
+Min Max FONT_MINI  Y 37 X zentriert (39)
+
+Normal
+Titel   FONT_MINI  Y 0  X zenriert (2)
+Wert	FONT_MAXI  Y 14 X zentriert (16)  
+
+geteilt
+		FONT_BIG   Y 1   X zentriert (3)
+		FONT_BIG   Y 31  X zentriert (33)
+
+________________________________________________
+Fensteroffsets klein Schrift X max 126 Y max 39
+Titel   FONT_MINI  Y 0  X zentriert (2)
+Wert    FONT_BOLD  Y14  X zentriert (16)
+________________________________________________
+Fensteroffset X Y Fenster 1   X 2    Y 2	Y 31
+Fensteroffset X Y Fenster 2	  X 2    Y 60   Y 89
+Fensteroffset X Y Fenster 3   X 2    Y 118
+Fensteroffset X Y Fenster 1   X 188  Y 2    Y 31
+Fensteroffset X Y Fenster 2	  X 188  Y 60   Y 89
+Fensteroffset X Y Fenster 3   X 188  Y 118
+
+
+________________________________________________
+datafile Daten
+Supportete Einheiten:
+Wmi, F, °C, °, W, s, min, h, mAh, Ah, A, V, %
+hPa, kPa, psi, atm, b
+m/s, ft./s, km/h, kt., mph
+m, ft, km, mi., yd.
+ml, l, hl, floz, gal
+ml/m, l/m, oz/m, gpm
+
+Supportete Label:
+Voltage, Current, Run time, U Rx, A1, A2, T, Q
+Input A, Input B, Input C, Output, Power, Velocity, Speed, Temp. A, Temp. B
+Cell 1, Cell 2, Cell 3, Cell 4, Cell 5, Cell 6, LowestVolt, LowestCell, Accu. volt
+Vario, Abs. altit, Rel. altit, Air press.
+U Battery, I Battery, U BEC, I BEC, Capacity, Revolution, Temp., Run Time, PWM
+Quality, SatCount, Altitude, AltRelat., Distance, Course, Azimuth, Impulse, Trip
+R.volume, R.volumeP, Flow, Pressure
+
+Main Turbine:
+[1] 3 									Modelltyp 3    (1 Elektro  2 Verbrenner 3 Turbine , 4 Segler) 
+[2] "Tankinhalt   						Framelabel, Text wird in der Konfig der Sensorzuweisung aufgelistet
+[3] "ml"  								Einheit ist ml , wird im Frame dargestellt
+[4] 1    								Wert wird in Templateapp in % zur Füllstandsanzeige umgerechnet
+[5] 30   								Ab 30% erfolgt Fehlermeldung
+[6] 100  								Bei 100 % (voll getankt) wird Fehler wieder gelöscht
+[7] 0                        			Platzhalter Anzahl der Nachkommastellen  (wird hier nicht verwendet)
+[8] 0									von Screenlib gesetzt aktueller Wert
+[9] 0									von Screenlib gesetzt wenn 1, ist Alarm aktiv
+[10]1									von Screenlib gesetzt zugewiesene SensorID
+[11]1									von Screenlib gesetzt zugewiesener Sensor Parameter
+[12]0									von Screenlib gesetzt (Platzhalter für spätere Anwendung)
+Beispiel nach obiger Beschreibung:
+[3,"Tankinhalt","ml",1,30,100,0,0,0,0,0,0]
+
+Main:
+[1] 1 									[1] 1    (1 Elektro  2 Verbrenner 3 Turbine , 4 Segler) 
+[2] "Capacity"							[2] "LowestCell"  (label)
+[3] "%"  (Einheit ist %) 			    [3] "V"  (Einheit ist Volt)
+[4] 1    (app wert 1 Kapazität)			[4] 2    (app wert 2 berechnete Zellspannung)
+[5] 30   (30% min)						[5] 3.28 (3.28 Volt niedrigste Zellspannung)
+[6] 100  (100% Fehler gelöscht)			[6] 3.9  (3.9 Volt Fehler gelöscht , Akku gewechselt)
+[7] 0                        			[7] 0 	 (Anzahl der Nachkommastellen)
+[8] 0									[8] 0	 (von Screenlib gesetzt aktueller Wert)
+[9] 0									[9] 0	 (von Screenlib gesetzt wenn 1 Alarm aktiv)
+[10]1									[10]1	 (von Screenlib gesetzt SensorID)
+[11]1									[11]1	 (von Screenlib gesetzt Sensor Parameter)
+[12]0									[12]0    (vorbereitet für Outputcontrol)
+Beispiel nach obiger Beschreibung:
+[1,"Capacity","%",1,30,100,0,0,0,1,1,0],
+[1,"LowestCell","V",2,3.2,3.9,0,0,0,1,1,0]
+
+
+Normalfenster 
+[1] 1 									Frametype 1 (1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
+[2] "Temperatur Turbine"				Framelabel, Text wird in der Konfig der Sensorzuweisung aufgelistet
+[3] "°C" 					 			Einheit ist °C , wird im Frame dargestellt
+[4] 0                                   Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App
+[5] 0                                   Alarmwert in dem Fall kein Alarm
+[6] 0                                   Alarmwert gelöscht, in dem Fall ist kein Alarm konfiguriert
+[7] 0                        			Anzahl der Nachkommastellen
+[8] 0									von Screenlib gesetzt aktueller Wert
+[9] 0									von Screenlib gesetzt wenn 1, ist Alarm aktiv
+[10]0									von Screenlib gesetzt zugewiesene SensorID
+[11]0									von Screenlib gesetzt zugewiesener Sensor Parameter
+[12]0									von Screenlib gesetzt (Platzhalter für spätere Anwendung)
+Beispiel nach obiger Beschreibung:
+[1,"Temperatur Turbine","°C",0,0,0,0,0,0,0,0,0],
+
+
+Min Max Fenster 
+[1] 2 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image)  
+[2] "Drehzahl"							(label Drehzahl)
+[3] "1/min" 					 	    (Einheit ist 1/min)
+[4] 0                                   (Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App)
+[5] 20130                               (Alarmwert wenn mehr als 20130 U/min)
+[6] 19000                               (Bei 19000 U/min wird der Fehler gelöscht)
+[7] 0                        			(Anzahl der Nachkommastellen)
+[8] 0									(von Screenlib gesetzt aktueller Sensorwert)
+[9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
+[10]0									(von Screenlib gesetzt SensorID)
+[11]0									(von Screenlib gesetzt Sensor Parameter)
+[12]0									(vorbereitet für Outputcontrol)
+[13]0									(von Screenlib gesetzt min Wert)
+[14]0									(von Screenlib gesetzt max Wert)
+Beispiel nach obiger Beschreibung:
+[2,"Drehzahl","1/min",0,20130,19000,0,0,0,0,0,0,0,0],
+
+
+Geteilte Fenster 
+[1] 3 									Frametype 3 (1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
+[2] "Höhe"								Framelabel, Text wird in der Konfig der Sensorzuweisung aufgelistet
+[3] "m" 					 			Einheit ist m , wird im Frame dargestellt
+[4] 0                                   Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App
+[5] 0                                   Alarmwert in dem Fall kein Alarm
+[6] 0                                   Alarmwert gelöscht, in dem Fall ist kein Alarm konfiguriert
+[7] 0                        			Anzahl der Nachkommastellen
+[8] 0									von Screenlib gesetzt aktueller Wert
+[9] 0									von Screenlib gesetzt wenn 1, ist Alarm aktiv
+[10]0									von Screenlib gesetzt zugewiesene SensorID
+[11]0									von Screenlib gesetzt zugewiesener Sensor Parameter
+[12]0									von Screenlib gesetzt (Platzhalter für spätere Anwendung)
+Beispiel nach obiger Beschreibung:
+[3,"Höhe","m",0,0,0,0,0,0,0,0,0],
+
+[1] 1 									Frametype 3 (1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
+[2] "Acceleration"						Framelabel, Text wird in der Konfig der Sensorzuweisung aufgelistet
+[3] "°C" 					 			Einheit ist °C , wird im Frame dargestellt
+[4] 0                                   Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App
+[5] 0                                   Alarmwert in dem Fall kein Alarm
+[6] 0                                   Alarmwert gelöscht, in dem Fall ist kein Alarm konfiguriert
+[7] 0                        			Anzahl der Nachkommastellen
+[8] 0									von Screenlib gesetzt aktueller Wert
+[9] 0									von Screenlib gesetzt wenn 1, ist Alarm aktiv
+[10]1									von Screenlib gesetzt zugewiesene SensorID
+[11]1									von Screenlib gesetzt zugewiesener Sensor Parameter
+[12]0									von Screenlib gesetzt (Platzhalter für spätere Anwendung)
+
+Beispiel nach obiger Beschreibung:
+[3,"Acceleration","g",0,8.2,2.0,0,0,0,1,1,0],
+
+Abschlussfenster 2 Werte es sind zwei Zeilen zu konfigurieren, welche sich nur im Fensterwert unterscheiden
+[1] 4 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
+[2] "Empfängerspannung"   				(label Empfängerspannung)
+[3] "V" 					 			(Einheit ist V)
+[4] 3                                   (Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App für Empfängerspannung sind die Daten über index 3,4,5,6 fix eingestellt)
+[5] 4.2                                 (Alarmwert wenn kleiner als 4,2 Volt)
+[6] 4.8                                 (bei 4,8 Volt  wird der Fehler gelöscht)
+[7] 2                        			(Anzahl der Nachkommastellen)
+[8] 0									(von Screenlib gesetzt aktueller Sensorwert)
+[9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
+[10]1									(von Screenlib gesetzt SensorID)
+[11]1									(von Screenlib gesetzt Sensor Parameter)
+[12]0									(vorbereitet für Outputcontrol)
+[13]1									(Fensterwert 1)
+[14]"U1"								(Label 2)
+
+Beispiel nach obiger Beschreibung:
+[4,"Empfängerspannung","V",3,4.2,4.8,2,0,0,1,1,0,1,"U1"],
+[4,"Empfängerspannung","V",4,4.2,4.8,2,0,0,1,1,0,2,"U2"],
+
+Abschlussfenster 5 Werte es sind vier Zeilen zu konfigurieren, welche sich nur im Fensterwert unterscheiden
+[1] 5 									Frametype 5 , 4 Anzeigewerte 
+[2] "Bat1"   				   			Framelabel Zeile 1 ist Bat1
+[3] "V" 					 			Einheit ist Volt
+[4] 0                                   Wert kommt direkt vom Telemetriesensor
+[5] 0                                   Alarmwert kein Alarm konfiguriert
+[6] 0                                   Alarm zurückgesetzt , in dem Fall kein Alarm 
+[7] 2                        			Anzahl der Nachkommastellen für Spannung 2 , für Strom 0
+[8] 0									von Screenlib gesetzt aktueller Sensorwert
+[9] 0									von Screenlib gesetzt wenn 1 Alarm aktiv
+[10]1									von Screenlib gesetzt SensorID
+[11]1									von Screenlib gesetzt Sensor Parameter
+[12]0									vorbereitet für Outputcontrol
+[13]1                        			Framewert 1   (bei diesem Frametyp von 1 - 4)
+[14]""								    optional Label für jeden Wert , hier aus Platzgründen nicht definiert
+
+Beispiel nach obiger Beschreibung:
+[5,"Bat1","V",0,0,0,2,0,0,1,1,0,1,""],
+[5,"Bat1","mAh",0,0,0,0,0,0,1,1,0,2,""],
+[5,"Bat2","V",0,0,0,2,0,0,1,1,0,3,""],
+[5,"Bat2","mAh",0,0,0,0,0,0,1,1,0,4,""],
+
+Abschlussfenster 5 Werte es sind vier Zeilen zu konfigurieren, welche sich nur im Fensterwert unterscheiden
+[1] 5 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
+[2] "RX1"   				   			(label Empfänger 1)
+[3] "%" 					 			(Einheit ist V)
+[4] 0                                   (Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App, für Empfangsquallität sind index 7,8,9,10 von der App fix eingerichtet)
+[5] 60                                  (Alarmwert wenn kleiner als 60%)
+[6] 90                                  (bei 90 %  wird der Fehler gelöscht)
+[7] 0                        			(Anzahl der Nachkommastellen)
+[8] 0									(von Screenlib gesetzt aktueller Sensorwert)
+[9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
+[10]1									(von Screenlib gesetzt SensorID)
+[11]1									(von Screenlib gesetzt Sensor Parameter)
+[12]0									(vorbereitet für Outputcontrol)
+[13]1                        			(Fensterwert 1)
+[14]"A1"								(Label 2  Antenne 1)
+
+Beispiel nach obiger Beschreibung:
+[5,"RX1","%",7,60,90,0,0,0,1,1,0,1,"A1:"],
+[5,"RX1","%",8,60,90,0,0,0,1,1,0,2,"A2:"],
+[5,"RX2","%",9,60,90,0,0,0,1,1,0,3,"A1:"],
+[5,"RX2","%",10,60,90,0,0,0,1,1,0,4,"A2:"],
+
+
+Abschlussfenster 4 Werte es sind 7 Zeilen zu konfigurieren, welche sich in Fensterwert Label etc. unterscheiden
+[1] 6 									(1 Normalfenster, 2 MinMax, 3 geteiltes Fenster, 4 Abschlussfenster 2Werte,5 Abschlussfenster 4Werte 6 global,7 image) 
+[2] "Flugrichtung"   				   	(label Flugrichtung)
+[3] "°" 					 			(Einheit ist Grad)
+[4] 0                                   (Wert kommt direkt vom Telemetriesensor, wenn > 0 dann von der App) wenn 30 dann als Text in index[11] wenn 31 als Timer
+[5] 0                                   (Alarmwert kein Alarm)
+[6] 0                                   (kein Alarm löschen)
+[7] 2                        			(Anzahl der Nachkommastellen)
+[8] 0.0								    (von Screenlib gesetzt aktueller Sensorwert)
+[9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
+[10]1									(von Screenlib gesetzt SensorID)
+[11]1									(von Screenlib gesetzt Sensor Parameter)
+[12]0									(vorbereitet für Outputcontrol)
+[13]1                        			(Fensterwert 1)
+[14]"0° 0.000000'"                      (GPS Koordinaten als Text)
+
+Beispiel nach obiger Beschreibung:
+[6,"FlDir:","°",0,0,0,2,0.0,0,1,1,0,1],
+[6,"Pos:","°",0,0,0,2,0.0,0,1,1,0,2],
+[6,"Entf:","m",0,0,0,0,0,0,1,1,0,3],
+[6,"B:","N",30,0,0,0,0,0,1,1,0,4,"0° 0.000000'"],
+[6,"L:","E",30,0,0,0,0,0,1,1,0,5,"0° 0.000000'"],
+[6,"Strecke:","m",0,0,0,0,0,0,1,1,0,6],
+[6,"Vario:","m/s",0,0,0,2,0.0,0,1,1,0,7]
+
+
+Timerfenster normal 
+[1] 1 									(1 Normalfenster,3 geteiltes Fenster)
+[2] "Flugzeit"							(label Flugzeit)
+[3] 1					 			    (1 count up min , 2 count down min, 3 count up sec, 4 count down sec)
+[4] 31                                  (Wert 31 - 34 Timer 1 - Timer 4)
+[5] 9                                   (Limit 9 Minuten count up , wenn Wert = 0, kein Limit)
+[6] 0                                	(von App gesetzt Startwert Timer in ms)
+[7] 0                       			(von App gesetzt wenn 1 ist Timer aktiv)
+[8] 0									(von App gesetzt Timerwert in ms)
+[9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
+[10]1									(dummy)
+[11]1									(dummy)
+[12]0									(vorbereitet für Outputcontrol)
+Beispiel nach obiger Beschreibung:
+[1,"Flugzeit",1,31,9,0,0,0,0,1,1,0],
+
+Timerfenster geteilt count down 
+[1] 3 									(1 Normalfenster,3 geteiltes Fenster) 
+[2] "Motorzeit"							(label Motorzeit)
+[3] 4					 			    (1 count up min , 2 count down min, 3 count up sec, 4 count down sec)
+[4] 32                                  (Wert 31 - 34 Timer 1 - Timer 4)
+[5] 420                                 (Startwert 420 Sekunden countdown)
+[6] 0                                	(von App gesetzt Startwert Timer in ms)
+[7] 0                       			(von App gesetzt wenn 1 ist Timer aktiv)
+[8] 0									(Timerwert als Text)
+[9] 0									(von Screenlib gesetzt wenn 1 Alarm aktiv)
+[10]1									(von App gesetzt Timerwert in ms)
+[11]1									(dummy)
+[12]0									(vorbereitet für Outputcontrol)
+Beispiel nach obiger Beschreibung:
+[3,"Motorzet",4,32,420,0,0,0,0,1,1,0],
+
+
+
+###############################################################################################################
+
+globVar.scrSens = {{},{},{}},-- list of all screen sensors
+globVar.scrSPar = {{},{},{}},-- list of all screen sensor parameters
+globVar.sensors = {{}}, -- all sensor iDs
+globVar.sensParam = {{}} --all sensor parameter 
+
+
+local winList = {} -- all windows
+local sensList = {} -- all sensor labels
+local sensPaList = {} -- all sensor parameter labels for selected sensor
+local winListBox = nil -- ID of the windows label list box
+local sensorListBox = nil -- ID of the sensor list box
+local sensParListBox = nil -- ID of sensor param list box
+local winListIdx = 1 -- index of label list box
+local sensListIdx = 1 -- index of sensor list box
+local sensPaListIdx = 1 -- index of sesor parameter list box
+
+SensorID von Window[j][i]:			local sensID = globVar.scrSens[j][i]
+Sensorparameter von Window[j][i]: 	local sensPar = globVar.scrSPar[j][i] 
+local sensID = globVar.scrSens[j][i]
+local sensPar = globVar.scrSPar[j][i] 
+local sensor = system.getSensorByID (globVar.sensors[sensID],globVar.sensParam[sensID][sensPar])
+
+Modellimage bei Frame 7  130 * 57    Frame 8 130 * 116
+                  
