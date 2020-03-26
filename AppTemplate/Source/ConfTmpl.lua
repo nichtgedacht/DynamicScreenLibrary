@@ -55,6 +55,18 @@ print("loadDataFile")
 			globVar.windows[i] = nil
 		end	
 		globVar.windows	= json.decode(file)
+		
+		-- replace any string with numbers if it contains digits and no letters (i.e. "120" but not "1/min")
+		for i in next,globVar.windows do
+			for k in next,globVar.windows[i] do
+				for s in next, globVar.windows[i][k] do
+					if ( string.match(globVar.windows[i][k][s], "%d") and not string.match(globVar.windows[i][k][s], "%a") ) then
+						globVar.windows[i][k][s] = tonumber(globVar.windows[i][k][s])
+					end
+				end	
+			end
+		end
+		
 	end	
 	file = nil
 	file = io.readall("Apps/AppTempl/model/data/"..system.getProperty("ModelFile").." ") --load model specific data file

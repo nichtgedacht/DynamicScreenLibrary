@@ -86,8 +86,10 @@ local function init(code,globVar_)
 
 	if(( deviceType == "JETI DC-24")or(deviceType == "JETI DS-24"))then
 		globVar.screenLib24 = 24 -- load screen library of DS / DC 24
+	else
+		globVar.screenLib24 = 14
 	end
-
+	
 	local lng=system.getLocale();
 	local file = io.readall("Apps/AppTempl/lang/"..lng.."/locale.jsn")
 	local obj = json.decode(file)  
@@ -189,8 +191,7 @@ end
 local function initTempl(formID)
     globVar.currentForm=formID
 	if(screen_lib ~= nil)then			--unload screen lib on open configuration
-		local func = screen_lib[3]      --unload main windows
-		func()
+		screen_lib.unloadMainWin()
 		package.loaded[scrlib_Path]=nil
 		_G[scrlib_Path]=nil
 		screen_lib = nil
@@ -344,8 +345,7 @@ local function loop()
 			globVar.appValues[2] = 0
 		end	
 		
-		local func = screen_lib[2] --
-		func() -- execute specific screen library
+		screen_lib.loop()
 		
     --***********************************************************---
 	--*******add your own main loop functionalities here*********---
@@ -359,8 +359,7 @@ local function loop()
 				screen_lib = require(scrlib_Path)
 			end
 			if(screen_lib ~=nil)then
-				local func = screen_lib[1]  --init() 
-				func(globVar) -- execute specific initializer of screen library
+				screen_lib.init(globVar)
 			end
     collectgarbage('collect')
 	globVar.debugmem = math.modf(collectgarbage('count'))
@@ -393,5 +392,10 @@ local function loop()
 end
 
 --------------------------------------------------------------------
-local AppTemplate_Main = {init,loop}
-return AppTemplate_Main
+return {
+
+	init = init,
+	loop = loop
+	
+}	
+

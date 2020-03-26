@@ -60,8 +60,9 @@ local function init(code)
 		end	
 
 		if(main_lib ~= nil) then
-			local func = main_lib[1]
-			func(0,globVar) --init(0)
+			main_lib.init(0,globVar)
+			--local func = main_lib[1]
+			--func(0,globVar) --init(0)
 		end
 	end	
 end
@@ -113,8 +114,7 @@ local function loop()
 			end	
 		end	
 	else
-		local func = main_lib[2] --loop()
-		func() -- execute main loop
+		main_lib.loop()
 	end	
 	globVar.debugmem = math.modf(collectgarbage('count'))
 	if (globVar.mem < globVar.debugmem) then

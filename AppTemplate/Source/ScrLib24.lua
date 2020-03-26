@@ -602,6 +602,13 @@ local function loop()
 	end	
 end
 --------------------------------------------------------------------
-local ScreenLib = {init,loop,unloadMainWin}
-return ScreenLib
+
+return {
+
+	init = init,
+	loop = loop,
+	unloadMainWin = unloadMainWin
+
+}	
+
 
